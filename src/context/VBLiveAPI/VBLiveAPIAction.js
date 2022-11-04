@@ -13,15 +13,9 @@ export const getSessions = async (appName, serverName) => {
 
   vbliveapi.defaults.withCredentials = true
 
-  const url = 'sessionSummariesForAppInServer/' + appName + '/' + serverName
-  console.log('Action appName, serverName, url', appName, serverName, url)
-
-  const response = await Promise.all([        
-      vbliveapi.get(url),
-  ])
-  var ss = response[0].data
-  // console.log('ss', ss)
-  return {sessions: ss, appName: appName}
+  const response = await vbliveapi.get(`Session/GetSessionInfoInServerForApp?${params}`)
+  var sessionData = { sessions:response.data, appName: appName }
+  return sessionData
 }
 
 export const getSession = async (sessionId) => {
@@ -32,14 +26,8 @@ export const getSession = async (sessionId) => {
 
   vbliveapi.defaults.withCredentials = true
 
-  const url = 'session/' + sessionId
-
-  const response = await Promise.all([        
-      vbliveapi.get(url),
-  ])
-  var ss = response[0].data
-  // console.log('ss[0]', ss[0])
-  return ss[0]
+  const response = await vbliveapi.get(`Session/GetSessionsById?${params}`)
+  return response.data[0]
 }
 
 export const getLatestStats = async (sessionId, lastTime) => {
@@ -51,11 +39,6 @@ export const getLatestStats = async (sessionId, lastTime) => {
 
   vbliveapi.defaults.withCredentials = true
 
-  const url = 'sessionGetLatestStats/' + sessionId + "/" + lastTime;
-
-  const response = await Promise.all([        
-      vbliveapi.get(url),
-  ])
-  var ss = response[0].data
-  return ss
+  const response = await vbliveapi.get(`Session/GetLatestStats?${params}`)
+  return response.data
 }
