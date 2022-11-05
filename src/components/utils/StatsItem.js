@@ -474,7 +474,7 @@ export function calculateSideoutStats(m) {
         var game = m.sets[nd]
         game.teamAStatsItems[0].BreakPoints = game.teamBStatsItems[0].SideOutFails
         game.teamAStatsItems[0].pointPercent = (game.teamBStatsItems[0].ServeTotal == 0) ? 0 : (game.teamAStatsItems[0].BreakPoints[0] * 100) / game.teamAStatsItems[0].ServeTotal;
-        game.teamBStatsItems[0].BreakPoints = m.teamA.statsItems[0].SideOutFails
+        game.teamBStatsItems[0].BreakPoints = game.teamAStatsItems[0].SideOutFails
         game.teamBStatsItems[0].pointPercent = (game.teamBStatsItems[0].ServeTotal == 0) ? 0 : (game.teamBStatsItems[0].BreakPoints[0] * 100) / game.teamBStatsItems[0].ServeTotal;
     }
     return m
@@ -625,7 +625,7 @@ export function calculateSideoutStatsForTeam(m, tm) {
             siGame.SideOutFirstBalls[nr] = setFBSideOut[nr]
             siGame.SideOutFirstBallPercent[nr] = setAllPasses[nr] > 0 ? (setFBSideOut[nr] * 100) / setAllPasses[nr] : 0
             siGame.SideOutPercent[nr] = setAllPasses[nr] > 0 ? (setSideOut[nr] * 100) / setAllPasses[nr] : 0
-            siGame.SideOutFailsPercent[nr] = setAllPasses[nr] > 0 ? 100 - siGame.SideOutPercent[nr] : 0
+            siGame.SideOutFailsPercent[nr] = 100 - siGame.SideOutPercent[nr]
             
             siGame.SideOutFirstBallKills[nr] = setFBKillSideOut[nr]
             siGame.SideOutFirstBallKillPercent[nr] = setAllPasses[nr] > 0 ? (setFBKillSideOut[nr] * 100) / setAllPasses[nr] : 0
@@ -685,7 +685,7 @@ export function calculateSideoutStatsForTeam(m, tm) {
         siMatch.SideOutFirstBalls[nr] = rotFBSideOut[nr]
         siMatch.SideOutFirstBallPercent[nr] = rotAllPasses[nr] > 0 ? (rotFBSideOut[nr] * 100) / rotAllPasses[nr] : 0
         siMatch.SideOutPercent[nr] = rotAllPasses[nr] > 0 ? (rotSideOut[nr] * 100) / rotAllPasses[nr] : 0
-        siMatch.SideOutFailsPercent[nr] = rotAllPasses[nr] > 0 ? 100 - siGame.SideOutPercent[nr] : 0
+        siMatch.SideOutFailsPercent[nr] = rotAllPasses[nr] > 0 ? 100 - siMatch.SideOutPercent[nr] : 0
 
         siMatch.SideOutFirstBallKills[nr] = rotFBKillSideOut[nr]
         siMatch.SideOutFirstBallKillPercent[nr] = rotAllPasses[nr] > 0 ? (rotFBKillSideOut[nr] * 100) / rotAllPasses[nr] : 0
