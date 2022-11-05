@@ -410,7 +410,7 @@ export function calculateAllStats(si) {
 
     si.ServeAverageSpeed = si.ServeTotal != 0 ? si.ServeTotalSpeed / si.ServeTotal : 0;
 
-    si.SpikeEfficiencyString = (si.SpikeEfficiency * 100).toFixed(0);
+    si.SpikeEfficiencyString = si.SpikeEfficiency === -3 ? '' : (si.SpikeEfficiency * 100).toFixed(0) + '%';
 
     si.SpikeKillPercentageString = (si.SpikeKillPercentage * 100).toFixed(2);
 
@@ -437,7 +437,8 @@ export function calculateAllStats(si) {
     si.plus = (si.Serve3 + si.Spike3 + si.Blck3);
     si.minus = (si.Serve0 + si.Pass0 + si.Spike0 + si.Blck0 + si.Dig0);
     si.GoodDigs = (si.Dig1 + si.Dig2 + si.Dig3);
-    si.GoodServePercent = (si.ServeTotal == 0) ? 0 : (((si.Serve3 + si.Serve4) * 100) / si.ServeTotal);
+    si.GoodServe = (si.Serve3 + si.Serve4)
+    si.GoodServePercent = (si.ServeTotal == 0) ? 0 : ((si.GoodServe * 100) / si.ServeTotal);
 
     si.LiftUnknown = si.Lift - (si.LiftServe + si.LiftBlock + si.LiftAttack)
 

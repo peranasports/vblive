@@ -58,7 +58,7 @@ var currentGame = null
 
 export function initWithDVWCompressedBuffer(buf) {
     var buffer = unzipBuffer(buf)
-    // console.log(buffer)
+    console.log(buffer)
     return generateMatch(buffer)
 }
 
@@ -142,8 +142,7 @@ export function generateMatch(str) {
                         match.HomeScore = 0
                         match.AwayScore = 0
                         match.TrainingDate = tryParseDateFromString(matchdate + " " + matchtime.replace('.', ':'), "mdy")
-                        if (match.TrainingDate === undefined)
-                        {
+                        if (match.TrainingDate === undefined) {
                             match.TrainingDate = tryParseDateFromString(matchdate + " " + matchtime.replace('.', ':'), "ymd")
                         }
                         match.tournamentName = sm[3]
@@ -192,48 +191,50 @@ export function generateMatch(str) {
                     var sm = s.split(";");
                     if (sm.length >= 7) {
                         var token1 = sm[1];
-                        if (token1.length > 0) {
-                            var setScore = sm[4];
-                            var duration = parseInt(sm[5])
-                            if (setScore.length > 0) {
-                                var d = {};
-                                d.match = match
-                                d.events = []
-                                d.players = []
-                                d.oppositionPlayers = []
-                                for (var np = 0; np < match.players.length; np++) {
-                                    var pl = match.players[np]
-                                    d.players.push(pl);
-                                }
-                                for (var np = 0; np < match.oppositionPlayers.length; np++) {
-                                    var pl = match.oppositionPlayers[np]
-                                    d.oppositionPlayers.push(pl);
-                                }
-                                d.GameNumber = gamenumber
-                                if (match.drills.filter(obj => obj.GameNumber === gamenumber).length === 0) {
-                                    match.drills.push(d)
-                                }
-                                d.trainingSession = match;
-                                d.drillDuration = duration;
-                                var scs = sm[4].split("-");
-                                var xhomescore = parseInt(scs[0]);
-                                var xawayscore = parseInt(scs[1]);
-                                d.HomeScore = xhomescore;
-                                d.AwayScore = xawayscore;
-                                var mhs = parseInt(match.HomeScore);
-                                var mas = parseInt(match.AwayScore);
+                        var d = {};
+                        d.match = match
+                        d.events = []
+                        d.players = []
+                        d.oppositionPlayers = []
+                        for (var np = 0; np < match.players.length; np++) {
+                            var pl = match.players[np]
+                            d.players.push(pl);
+                        }
+                        for (var np = 0; np < match.oppositionPlayers.length; np++) {
+                            var pl = match.oppositionPlayers[np]
+                            d.oppositionPlayers.push(pl);
+                        }
+                        d.GameNumber = gamenumber
+                        if (match.drills.filter(obj => obj.GameNumber === gamenumber).length === 0) {
+                            match.drills.push(d)
+                        }
+                        d.trainingSession = match;
+                        d.drillDuration = duration;
+
+                        var setScore = sm[4];
+                        var duration = parseInt(sm[5])
+                        if (setScore.length > 0) {
+                            var scs = setScore.split("-");
+                            var xhomescore = parseInt(scs[0]);
+                            var xawayscore = parseInt(scs[1]);
+                            d.HomeScore = xhomescore;
+                            d.AwayScore = xawayscore;
+                            var mhs = parseInt(match.HomeScore);
+                            var mas = parseInt(match.AwayScore);
+                            var winningscore = gamenumber > 4 ? 15 : 25
+                            if (xhomescore >= winningscore || xhomescore >= winningscore)
+                            {
                                 if (xhomescore > xawayscore + 1) {
                                     mhs++;
                                 }
-                                else {
+                                else if (xawayscore > xhomescore + 1) {
                                     mas++;
                                 }
-                                match.HomeScore = mhs;
-                                match.AwayScore = mas;
-                                gamenumber++;
                             }
+                            match.HomeScore = mhs;
+                            match.AwayScore = mas;
                         }
-
+                        gamenumber++;
                     }
                 }
                 break
@@ -251,8 +252,7 @@ export function generateMatch(str) {
                             if (spos.length > 0) {
                                 var posname = ["", "Libero", "Pass/Hitter", "Opposite", "Middle", "Setter"];
                                 var npos = parseInt(spos);
-                                if (pl.Positions.filter(obj => obj === npos).length === 0)
-                                {
+                                if (pl.Positions.filter(obj => obj === npos).length === 0) {
                                     pl.Positions.push(npos)
                                 }
                                 if (npos == 1) {
@@ -288,8 +288,7 @@ export function generateMatch(str) {
                             if (spos.length > 0) {
                                 var posname = ["", "Libero", "Pass/Hitter", "Opposite", "Middle", "Setter"];
                                 var npos = parseInt(spos);
-                                if (pl.Positions.filter(obj => obj === npos).length === 0)
-                                {
+                                if (pl.Positions.filter(obj => obj === npos).length === 0) {
                                     pl.Positions.push(npos)
                                 }
                                 if (npos == 1) {
@@ -349,43 +348,38 @@ export function generateMatch(str) {
 
     // convert to cones
     var evs = match.events
-    for (var ne=0; ne<evs.length; ne++)
-    {
+    for (var ne = 0; ne < evs.length; ne++) {
         var e = evs[ne]
-        if (e.EventType !== kSkillSpike)
-        {
+        if (e.EventType !== kSkillSpike) {
             continue;
         }
 
         var coneno = e.endZone;
-        if (match.isZone)
-        {
+        if (match.isZone) {
             var endPoint = stringToPoint(e.BallEndString);
-            if (endPoint === null)
-            {
+            if (endPoint === null) {
                 continue
             }
-            endPoint = {x: 100 - endPoint.x, y: 100 - endPoint.y};
+            endPoint = { x: 100 - endPoint.x, y: 100 - endPoint.y };
 
             var ac = fetchAttackComboByCode(e.attackCombo);
-
+            if (ac !== null)
+            {
             // const canvas = document.getElementById("canvas");
             // const ctx = canvas.getContext("2d");
 
             var startzone = e.startZone;
-            if (realTargetHitter(ac) === "F")
-            {
+            if (realTargetHitter(ac) === "F") {
                 var cones = [
-                    {x: 100, y:0}, {x: 100, y:100}, {x: 88, y:100}, {x: 87, y:0}, {x: 88, y:0},
-                    {x: 88, y:0}, {x: 88, y:100}, {x: 70, y:100}, {x: 87, y:0}, {x: 88, y:0},
-                    {x: 88, y:0}, {x: 70, y:100}, {x: 56, y:100}, {x: 87, y:0}, {x: 88, y:0},
-                    {x: 88, y:0}, {x: 56, y:100}, {x: 22, y:100}, {x: 87, y:0}, {x: 88, y:0},
-                    {x: 88, y:0}, {x: 22, y:100}, {x: 0, y:100}, {x: 0, y:70}, {x: 88, y:0},
-                    {x: 88, y:0}, {x: 0, y:70}, {x: 0, y:40}, {x: 87, y:0}, {x: 88, y:0},
-                    {x: 88, y:0}, {x: 0, y:40}, {x: 0, y:0}, {x: 87, y:0}, {x: 88, y:0}
+                    { x: 100, y: 0 }, { x: 100, y: 100 }, { x: 88, y: 100 }, { x: 87, y: 0 }, { x: 88, y: 0 },
+                    { x: 88, y: 0 }, { x: 88, y: 100 }, { x: 70, y: 100 }, { x: 87, y: 0 }, { x: 88, y: 0 },
+                    { x: 88, y: 0 }, { x: 70, y: 100 }, { x: 56, y: 100 }, { x: 87, y: 0 }, { x: 88, y: 0 },
+                    { x: 88, y: 0 }, { x: 56, y: 100 }, { x: 22, y: 100 }, { x: 87, y: 0 }, { x: 88, y: 0 },
+                    { x: 88, y: 0 }, { x: 22, y: 100 }, { x: 0, y: 100 }, { x: 0, y: 70 }, { x: 88, y: 0 },
+                    { x: 88, y: 0 }, { x: 0, y: 70 }, { x: 0, y: 40 }, { x: 87, y: 0 }, { x: 88, y: 0 },
+                    { x: 88, y: 0 }, { x: 0, y: 40 }, { x: 0, y: 0 }, { x: 87, y: 0 }, { x: 88, y: 0 }
                 ];
-                for (var nn=0; nn<7; nn++)
-                {
+                for (var nn = 0; nn < 7; nn++) {
                     // ctx.beginPath()
                     // ctx.moveTo(cones[nn * 5 + 0].x, cones[nn * 5 + 0].y)
                     var polygon = []
@@ -393,8 +387,7 @@ export function generateMatch(str) {
                     pt.push(cones[nn * 5 + 0].x)
                     pt.push(cones[nn * 5 + 0].y)
                     polygon.push(pt)
-                    for (var mm=1; mm<5; mm++)
-                    {
+                    for (var mm = 1; mm < 5; mm++) {
                         // ctx.lineTo(cones[nn * 5 + mm].x, cones[nn * 5 + mm].y)
                         var pt = []
                         pt.push(cones[nn * 5 + mm].x)
@@ -402,81 +395,73 @@ export function generateMatch(str) {
                         polygon.push(pt)
                     }
                     // if (ctx.isPointInPath(endPoint.x, endPoint.y))
-                    if (inside([endPoint.x, endPoint.y], polygon))
-                    {
+                    if (inside([endPoint.x, endPoint.y], polygon)) {
                         coneno = nn + 1;
                         break;
                     }
                 }
             }
-            else if (realTargetHitter(ac) === "B")
-            {
+            else if (realTargetHitter(ac) === "B") {
                 var cones =
-                    [ {x: 0, y:0}, {x: 0, y:100}, {x: 12, y:100}, {x: 11, y:0}, {x: 12, y:0} ,
-                     {x: 12, y:0}, {x: 28, y:100}, {x: 12, y:100}, {x: 11, y:0}, {x: 12, y:0} ,
-                     {x: 12, y:0}, {x: 44, y:100}, {x: 28, y:100}, {x: 11, y:0}, {x: 12, y:0} ,
-                     {x: 12, y:0}, {x: 80, y:100}, {x: 44, y:100}, {x: 11, y:0}, {x: 12, y:0} ,
-                     {x: 12, y:0}, {x: 100, y: 80}, {x: 100, y:100}, {x: 80, y:100}, {x: 12, y:0} ,
-                     {x: 12, y:0}, {x: 100, y: 44}, {x: 100, y: 80}, {x: 11, y:0}, {x: 12, y:0} ,
-                     {x: 12, y:0}, {x: 100, y:0}, {x: 100, y: 44}, {x: 11, y:0}, {x: 12, y:0} ]
-                
-                for (var nn=0; nn<7; nn++)
-                {
+                    [{ x: 0, y: 0 }, { x: 0, y: 100 }, { x: 12, y: 100 }, { x: 11, y: 0 }, { x: 12, y: 0 },
+                    { x: 12, y: 0 }, { x: 28, y: 100 }, { x: 12, y: 100 }, { x: 11, y: 0 }, { x: 12, y: 0 },
+                    { x: 12, y: 0 }, { x: 44, y: 100 }, { x: 28, y: 100 }, { x: 11, y: 0 }, { x: 12, y: 0 },
+                    { x: 12, y: 0 }, { x: 80, y: 100 }, { x: 44, y: 100 }, { x: 11, y: 0 }, { x: 12, y: 0 },
+                    { x: 12, y: 0 }, { x: 100, y: 80 }, { x: 100, y: 100 }, { x: 80, y: 100 }, { x: 12, y: 0 },
+                    { x: 12, y: 0 }, { x: 100, y: 44 }, { x: 100, y: 80 }, { x: 11, y: 0 }, { x: 12, y: 0 },
+                    { x: 12, y: 0 }, { x: 100, y: 0 }, { x: 100, y: 44 }, { x: 11, y: 0 }, { x: 12, y: 0 }]
+
+                for (var nn = 0; nn < 7; nn++) {
                     var polygon = []
                     var pt = []
                     pt.push(cones[nn * 5 + 0].x)
                     pt.push(cones[nn * 5 + 0].y)
                     polygon.push(pt)
-                    for (var mm=1; mm<5; mm++)
-                    {
+                    for (var mm = 1; mm < 5; mm++) {
                         var pt = []
                         pt.push(cones[nn * 5 + mm].x)
                         pt.push(cones[nn * 5 + mm].y)
                         polygon.push(pt)
                     }
-                    if (inside([endPoint.x, endPoint.y], polygon))
-                    {
+                    if (inside([endPoint.x, endPoint.y], polygon)) {
                         coneno = nn + 1;
                         break;
                     }
                 }
-                if (startzone == 2)
-                {
+                if (startzone == 2) {
                     // DLog("startzone=%d cone=%d %@-%@ %", startzone, coneno, e.BallStartString, e.BallEndString, e.dvString);
                 }
             }
             else //if (ac.realTargetHitter isEqualToString:"Q"])
             {
                 var cones = [
-                     {x: 50, y:0}, {x: 100, y:0}, {x: 100, y: 54}, {x: 60, y: 54} ,
-                     {x: 100, y: 54}, {x: 100, y:100}, {x: 80, y:100}, {x: 80, y: 54} ,
-                     {x: 80, y: 54}, {x: 80, y:100}, {x: 60, y:100}, {x: 60, y: 54} ,
-                     {x: 60, y: 54}, {x: 60, y:100}, {x: 40, y:100}, {x: 40, y: 54} ,
-                     {x: 40, y: 54}, {x: 40, y:100}, {x: 20, y:100}, {x: 20, y: 54} ,
-                     {x: 20, y: 54}, {x: 20, y:100}, {x: 0, y:100}, {x: 0, y: 54} ,
-                     {x: 50, y:0}, {x: 40, y: 54}, {x: 0, y: 54}, {x: 0, y:0} ,
-                     {x: 50, y:0}, {x: 60, y: 54}, {x: 40, y: 54}, {x: 50, y:0} 
+                    { x: 50, y: 0 }, { x: 100, y: 0 }, { x: 100, y: 54 }, { x: 60, y: 54 },
+                    { x: 100, y: 54 }, { x: 100, y: 100 }, { x: 80, y: 100 }, { x: 80, y: 54 },
+                    { x: 80, y: 54 }, { x: 80, y: 100 }, { x: 60, y: 100 }, { x: 60, y: 54 },
+                    { x: 60, y: 54 }, { x: 60, y: 100 }, { x: 40, y: 100 }, { x: 40, y: 54 },
+                    { x: 40, y: 54 }, { x: 40, y: 100 }, { x: 20, y: 100 }, { x: 20, y: 54 },
+                    { x: 20, y: 54 }, { x: 20, y: 100 }, { x: 0, y: 100 }, { x: 0, y: 54 },
+                    { x: 50, y: 0 }, { x: 40, y: 54 }, { x: 0, y: 54 }, { x: 0, y: 0 },
+                    { x: 50, y: 0 }, { x: 60, y: 54 }, { x: 40, y: 54 }, { x: 50, y: 0 }
                 ];
-                for (var nn=0; nn<8; nn++)
-                {
+                for (var nn = 0; nn < 8; nn++) {
                     var polygon = []
                     var pt = []
                     pt.push(cones[nn * 4 + 0].x)
                     pt.push(cones[nn * 4 + 0].y)
                     polygon.push(pt)
-                    for (var mm=1; mm<4; mm++)
-                    {
+                    for (var mm = 1; mm < 4; mm++) {
                         var pt = []
                         pt.push(cones[nn * 4 + mm].x)
                         pt.push(cones[nn * 4 + mm].y)
                         polygon.push(pt)
                     }
-                    if (inside([endPoint.x, endPoint.y], polygon))
-                    {
+                    if (inside([endPoint.x, endPoint.y], polygon)) {
                         coneno = nn + 1;
                         break;
                     }
                 }
+            }
             }
         }
         e.coneNumber = coneno;
@@ -596,8 +581,7 @@ var keyvp = 0
 var dateAtVideoPositionZero = null
 var videoposoffset = 0
 
-function processScoutLine(s) 
-{
+function processScoutLine(s) {
     var shouldUpdate = false
     var sm = s.split(";");
     if (sm.length < 9) {
@@ -612,8 +596,7 @@ function processScoutLine(s)
         }
     }
     var g = match.drills[thisgame - 1]
-    if (g === undefined || g === null)
-    {
+    if (g === undefined || g === null) {
         return false;
     }
 
@@ -735,8 +718,7 @@ function processScoutLine(s)
             var xnet = ets.indexOf(et)
             if (xnet != -1) {
                 var svp = sm[12];
-                if (svp.length > 0)
-                {
+                if (svp.length > 0) {
                     vp = parseInt(svp)
                     // for occasions when match was coded from segmented videos
                     if (vp < lastvp && ((lastvp - (vp + keyvp)) > 1000)) {
@@ -744,15 +726,14 @@ function processScoutLine(s)
                     }
                     vp += keyvp;
                     lastvp = vp;
-                    }
+                }
             }
         }
         var ts2 = null;
         if (tt.length > 0) {
-            var ttt =  matchdate + " " + tt.replace('.', ':')
+            var ttt = matchdate + " " + tt.replace('.', ':')
             ts2 = tryParseDateFromString(ttt, "mdy")
-            if (ts2 === undefined)
-            {
+            if (ts2 === undefined) {
                 ts2 = tryParseDateFromString(ttt, "ymd")
             }
             if (dateAtVideoPositionZero === null || dateAtVideoPositionZero === undefined) {
@@ -828,12 +809,10 @@ function processScoutLine(s)
                 else {
                     if (atc != null) {
                         var apt = atc.hittingPoint;
-                        if (apt.x === undefined && apt.y === undefined)
-                        {
+                        if (apt.x === undefined && apt.y === undefined) {
                             bs = (xs[startzone] + rxs).toString() + "," + ysa[startzone].toString();
                         }
-                        else
-                        {
+                        else {
                             bs = apt.x.toString() + "," + (100 + (50 - apt.y) * 2).toString();
                         }
                     }
@@ -1059,14 +1038,11 @@ function processScoutLine(s)
         }
     }
 
-    if ((sn == 0 || isNaN(sn)) && !eventCreated)
-    {
-        if (code.substring(1,2) === "p")
-        {
-            var sscores = code.substring(2, code.length );
+    if ((sn == 0 || isNaN(sn)) && !eventCreated) {
+        if (code.substring(1, 2) === "p") {
+            var sscores = code.substring(2, code.length);
             var sss = sscores.split(":");
-            if (sss.length == 2)
-            {
+            if (sss.length == 2) {
                 homescore = parseInt(sss[0]);
                 awayscore = parseInt(sss[1]);
                 g.AwayScore = awayscore;
@@ -1075,48 +1051,38 @@ function processScoutLine(s)
                 shouldUpdate = true;
             }
         }
-        else if (code.substring(1,2) === "c")
-        {
-            if (code.length < 7)
-            {
+        else if (code.substring(1, 2) === "c") {
+            if (code.length < 7) {
 
             }
-            else
-            {
+            else {
                 var outpl = parseInt(code.substring(2, 4));
                 var inpl = parseInt(code.substring(5, 7));
                 vp = 0;
-                if (sm.length > 12)
-                {
+                if (sm.length > 12) {
                     var svp = sm[12];
-                    if (svp.length > 0)
-                    {
+                    if (svp.length > 0) {
                         vp = parseInt(svp);
                         if (vp > lastvp + (60 * 10))    // if vp is more than 10 minutes different then something wrong
                         {
                             vp = lastvp;
                         }
                         lastvp = vp;
-                        }
+                    }
                 }
                 var ts2;
-                if (tt.length > 0)
-                {
+                if (tt.length > 0) {
                     ts2 = new Date(matchdate + " " + tt.replace('.', ':'))
-                    if (dateAtVideoPositionZero == null)
-                    {
+                    if (dateAtVideoPositionZero == null) {
                         dateAtVideoPositionZero = ts2;
                     }
                 }
-                if (vp != 0)
-                {
-                    if (videoposoffset == 0)
-                    {
+                if (vp != 0) {
+                    if (videoposoffset == 0) {
                         videoposoffset = vp;
                         dateAtVideoPositionZero = new Date(ts2.toTimeString() - vp * 1000);
                     }
-                    if (dateAtVideoPositionZero == null || dateAtVideoPositionZero === undefined)
-                    {
+                    if (dateAtVideoPositionZero == null || dateAtVideoPositionZero === undefined) {
                         dateAtVideoPositionZero = match.TrainingDate;
                     }
                     ts2 = new Date(dateAtVideoPositionZero.getTime() + vp * 1000);
@@ -1138,16 +1104,14 @@ function processScoutLine(s)
                 }
             }
         }
-        else if (code.length > 6 && code.substring(0,7) === "**Drill")
-        {
+        else if (code.length > 6 && code.substring(0, 7) === "**Drill") {
             match.isTraining = true;
             isPractice = true;
             var lastg = match.drills[currentGame - 1];
             lastg.IsLocked = true;
             currentGame++;
         }
-        else if ((code.substring(0,2) === "**") && (code.substring(3,6) === "set"))
-        {
+        else if ((code.substring(0, 2) === "**") && (code.substring(3, 6) === "set")) {
             homescore = 0;
             awayscore = 0;
             var ssno = parseInt(code.substring(2, 3));
@@ -1155,8 +1119,7 @@ function processScoutLine(s)
             lastg.IsLocked = true;
             currentGame = parseInt(sm[8]);
         }
-        else if (code.substring(1,2) === "z")
-        {
+        else if (code.substring(1, 2) === "z") {
             var r = 0;
             if (code.substring(0, 1) === "*")    // home setter pos
             {
@@ -1166,8 +1129,7 @@ function processScoutLine(s)
                 var xx = parseInt(sm[9]) + 13;
                 homeSetter = parseInt(sm[xx]);
                 g.PrimarySetter = fetchPlayerInMatch(match.players, homeSetter);
-                if (g.PrimarySetter.Positions.filter(obj => obj === 5).length === 0)
-                {
+                if (g.PrimarySetter.Positions.filter(obj => obj === 5).length === 0) {
                     g.PrimarySetter.Positions.push(5)
                 }
             }
@@ -1180,16 +1142,14 @@ function processScoutLine(s)
                 var xx = parseInt(sm[10]) + 19;
                 awaySetter = parseInt(sm[xx]);
                 g.oppPrimarySetter = fetchPlayerInMatch(match.oppositionPlayers, awaySetter);
-                if (g.oppPrimarySetter.Positions.filter(obj => obj === 5).length === 0)
-                {
+                if (g.oppPrimarySetter.Positions.filter(obj => obj === 5).length === 0) {
                     g.oppPrimarySetter.Positions.push(5)
                 }
             }
         }
     }
 
-    if (match.videoStartTime == null && dateAtVideoPositionZero != null)
-    {
+    if (match.videoStartTime == null && dateAtVideoPositionZero != null) {
         match.videoStartTime = dateAtVideoPositionZero;
     }
     return shouldUpdate;
@@ -1225,15 +1185,15 @@ function createEvent(eindex, pl, g, ts2, et, se, se2, grade, err, bs, be, xhomes
     ev.setter = setter
     ev.dvString = dvs
 
-    ev.AdvanceCode1 = AdvanceCode(6,8,ev)
-    ev.AdvanceCode2 = AdvanceCode(8,9,ev)
-    ev.AdvanceCode3 = AdvanceCode(9,10,ev)
-    ev.AdvanceCode4 = AdvanceCode(10,11,ev)
-    ev.AdvanceCode5 = AdvanceCode(11,12,ev)
-    ev.ExtraCode1 = AdvanceCode(12,13,ev)
-    ev.ExtraCode2 = AdvanceCode(13,14,ev)
-    ev.ExtraCode3 = AdvanceCode(14,15,ev)
-    ev.DVGrade = AdvanceCode(5, 6,ev)
+    ev.AdvanceCode1 = AdvanceCode(6, 8, ev)
+    ev.AdvanceCode2 = AdvanceCode(8, 9, ev)
+    ev.AdvanceCode3 = AdvanceCode(9, 10, ev)
+    ev.AdvanceCode4 = AdvanceCode(10, 11, ev)
+    ev.AdvanceCode5 = AdvanceCode(11, 12, ev)
+    ev.ExtraCode1 = AdvanceCode(12, 13, ev)
+    ev.ExtraCode2 = AdvanceCode(13, 14, ev)
+    ev.ExtraCode3 = AdvanceCode(14, 15, ev)
+    ev.DVGrade = AdvanceCode(5, 6, ev)
 
     g.events.push(ev)
     match.events.push(ev)
@@ -1241,68 +1201,54 @@ function createEvent(eindex, pl, g, ts2, et, se, se2, grade, err, bs, be, xhomes
     return ev
 }
 
-function AdvanceCode(start, end, ev)
-{
+function AdvanceCode(start, end, ev) {
     var tokens = ev.dvString.split(";");
-    if (tokens.length == 0)
-    {
+    if (tokens.length == 0) {
         return "";
     }
     var s = tokens[0];
-    if (s.length >= end)
-    {
+    if (s.length >= end) {
         return s.substring(start, end);
     }
     return "";
 }
 
-function realTargetHitter(ac)
-{
-    if (ac.targetHitter.length == 1 && ac.targetHitter !== "-")
-    {
+function realTargetHitter(ac) {
+    if (ac.targetHitter.length == 1 && ac.targetHitter !== "-") {
         return (ac.targetHitter);
     }
 
     var startZone = ac.startZone;
 
-    if (ac.ballType === "Q")
-    {
+    if (ac.ballType === "Q") {
         return "C";
     }
-    else if (ac.ballType === "O" && startZone == 3)
-    {
+    else if (ac.ballType === "O" && startZone == 3) {
         return "S";
     }
 
-    if (startZone == 2 || startZone == 1 || startZone == 9)
-    {
+    if (startZone == 2 || startZone == 1 || startZone == 9) {
         return "B";
     }
-    else if (startZone == 4 || startZone == 5 || startZone == 7)
-    {
+    else if (startZone == 4 || startZone == 5 || startZone == 7) {
         return "F";
     }
-    else
-    {
-        if (ac.isBackcourt)
-        {
+    else {
+        if (ac.isBackcourt) {
             return "P";
         }
         var pt = ac.hittingPoint;
-        if (pt.x < 50)
-        {
+        if (pt.x < 50) {
             return "F";
         }
-        else
-        {
+        else {
             return "B";
         }
     }
     return "";
 }
 
-export function parseLatestDVWStats(latest, m)
-{
+export function parseLatestDVWStats(latest, m) {
     if (latest === null || latest.length <= 0) {
         return m
     }
@@ -1334,8 +1280,7 @@ function getPlayerStatsItem(pl, gm) {
     return si
 }
 
-export function calculateDVWStats(m)
-{
+export function calculateDVWStats(m) {
     if (m == null || m.drills === undefined) {
         return null
     }
@@ -1345,7 +1290,7 @@ export function calculateDVWStats(m)
         game.teamAStatsItems = []
         var sia = createStatsItem(null, game)
         game.teamAStatsItems.push(sia)
-    
+
         game.teamBStatsItems = []
         var sib = createStatsItem(null, game)
         game.teamBStatsItems.push(sib)
@@ -1367,15 +1312,13 @@ export function calculateDVWStats(m)
             var siteam = createStatsItem(null, game)
             for (var en = 0; en < game.events.length; en++) {
                 var ev = game.events[en]
-                if (ev.Player === null)
-                {
+                if (ev.Player === null) {
                     continue;
                 }
                 if (ev.Player.Guid === pl.Guid) {
                     si = doEvent(ev, si)
                 }
-                if (m.teamA.players.filter(obj => obj.Guid === ev.Player.Guid).length > 0)
-                {
+                if (m.teamA.players.filter(obj => obj.Guid === ev.Player.Guid).length > 0) {
                     siteam = doEvent(ev, siteam)
                 }
             }
@@ -1420,15 +1363,13 @@ export function calculateDVWStats(m)
             var siteam = createStatsItem(null, game)
             for (var en = 0; en < game.events.length; en++) {
                 var ev = game.events[en]
-                if (ev.Player === null)
-                {
+                if (ev.Player === null) {
                     continue;
                 }
                 if (ev.Player.Guid === pl.Guid) {
                     si = doEvent(ev, si)
                 }
-                if (m.teamB.players.filter(obj => obj.Guid === ev.Player.Guid).length > 0)
-                {
+                if (m.teamB.players.filter(obj => obj.Guid === ev.Player.Guid).length > 0) {
                     siteam = doEvent(ev, siteam)
                 }
             }

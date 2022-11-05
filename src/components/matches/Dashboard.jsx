@@ -72,7 +72,7 @@ export default function Dashboard({ match, selectedGame, selectedTeam }) {
       player.id = si.player.Guid
       player.name = si.player.FirstName.substr(0, 1) + '. ' + si.player.LastName
       player.imageData = si.player.thumbnailData
-      player.stats = si.BlockPoints
+      player.stats = si.BlockPoints === 0 ? '' : si.BlockPoints.toString()
       blockers.players.push(player)
     }
     catleaders.push(blockers)
@@ -91,7 +91,7 @@ export default function Dashboard({ match, selectedGame, selectedTeam }) {
       player.id = si.player.Guid
       player.name = si.player.FirstName.substr(0, 1) + '. ' + si.player.LastName
       player.imageData = si.player.thumbnailData
-      player.stats = si.GoodServePercent
+      player.stats = si.GoodServe === 0 ? '' : si.GoodServePercent
       servers.players.push(player)
     }
     catleaders.push(servers)
@@ -140,7 +140,7 @@ export default function Dashboard({ match, selectedGame, selectedTeam }) {
           <div className="stat-title">Passing Average</div>
           <div className="stat-value text-lime-500">{categoryLeaders[0].teamStats.PassAverageString}</div>
           <ul>
-            {categoryLeaders[0].players.slice(0, 2).map((player) => (
+            {categoryLeaders[0].players.slice(0, 2).filter(obj => obj.stats !== '').map((player) => (
               <li className="flex stat-desc text-slate-100 justify-between" key={player.id}>
                 <div>
                   {player.name}
@@ -160,8 +160,8 @@ export default function Dashboard({ match, selectedGame, selectedTeam }) {
             </svg>
           </div>
           <div className="stat-title">Block Kills</div>
-          <div className="stat-value text-fucshia-600">{categoryLeaders[2].teamStats.BlockPoints}</div>
-          {categoryLeaders[2].players.slice(0, 2).map((player) => (
+          <div className="stat-value text-fuchsia-600">{categoryLeaders[2].teamStats.BlockPoints}</div>
+          {categoryLeaders[2].players.slice(0, 2).filter(obj => obj.stats !== '').map((player) => (
             <li className="flex stat-desc text-slate-100 justify-between" key={player.id}>
               <div>
                 {player.name}
@@ -201,15 +201,15 @@ export default function Dashboard({ match, selectedGame, selectedTeam }) {
             </svg>
           </div>
           <div className="stat-title">Hitting Efficiency</div>
-          <div className="stat-value text-secondary">{categoryLeaders[1].teamStats.SpikeEfficiencyString}%</div>
+          <div className="stat-value text-secondary">{categoryLeaders[1].teamStats.SpikeEfficiencyString}</div>
           <ul>
-            {categoryLeaders[1].players.slice(0, 2).map((player) => (
+            {categoryLeaders[1].players.slice(0, 2).filter(obj => obj.stats !== '').map((player) => (
               <li className="flex stat-desc text-slate-100 justify-between" key={player.id}>
                 <div>
                   {player.name}
                 </div>
                 <div>
-                  {player.stats}%
+                  {player.stats}
                 </div>
               </li>
             ))}
@@ -225,7 +225,7 @@ export default function Dashboard({ match, selectedGame, selectedTeam }) {
           <div className="stat-title">Good Serve</div>
           <div className="stat-value text-teal-400">{categoryLeaders[3].teamStats.GoodServePercent.toFixed(0)}%</div>
           <ul>
-            {categoryLeaders[3].players.slice(0, 2).map((player) => (
+            {categoryLeaders[3].players.slice(0, 2).filter(obj => obj.stats !== '').map((player) => (
               <li className="flex stat-desc text-slate-100 justify-between" key={player.id}>
                 <div>
                   {player.name}
