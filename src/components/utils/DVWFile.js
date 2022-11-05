@@ -190,49 +190,53 @@ export function generateMatch(str) {
                 {
                     var sm = s.split(";");
                     if (sm.length >= 7) {
-                        var token1 = sm[1];
-                        var d = {};
-                        d.match = match
-                        d.events = []
-                        d.players = []
-                        d.oppositionPlayers = []
-                        for (var np = 0; np < match.players.length; np++) {
-                            var pl = match.players[np]
-                            d.players.push(pl);
-                        }
-                        for (var np = 0; np < match.oppositionPlayers.length; np++) {
-                            var pl = match.oppositionPlayers[np]
-                            d.oppositionPlayers.push(pl);
-                        }
-                        d.GameNumber = gamenumber
-                        if (match.drills.filter(obj => obj.GameNumber === gamenumber).length === 0) {
-                            match.drills.push(d)
-                        }
-                        d.trainingSession = match;
-                        d.drillDuration = duration;
-
                         var setScore = sm[4];
-                        var duration = parseInt(sm[5])
-                        if (setScore.length > 0) {
-                            var scs = setScore.split("-");
-                            var xhomescore = parseInt(scs[0]);
-                            var xawayscore = parseInt(scs[1]);
-                            d.HomeScore = xhomescore;
-                            d.AwayScore = xawayscore;
-                            var mhs = parseInt(match.HomeScore);
-                            var mas = parseInt(match.AwayScore);
-                            var winningscore = gamenumber > 4 ? 15 : 25
-                            if (xhomescore >= winningscore || xhomescore >= winningscore)
-                            {
-                                if (xhomescore > xawayscore + 1) {
-                                    mhs++;
-                                }
-                                else if (xawayscore > xhomescore + 1) {
-                                    mas++;
-                                }
+                        if (setScore.length !== 0)
+                        {
+                            var token1 = sm[1];
+                            var d = {};
+                            d.match = match
+                            d.events = []
+                            d.players = []
+                            d.oppositionPlayers = []
+                            for (var np = 0; np < match.players.length; np++) {
+                                var pl = match.players[np]
+                                d.players.push(pl);
                             }
-                            match.HomeScore = mhs;
-                            match.AwayScore = mas;
+                            for (var np = 0; np < match.oppositionPlayers.length; np++) {
+                                var pl = match.oppositionPlayers[np]
+                                d.oppositionPlayers.push(pl);
+                            }
+                            d.GameNumber = gamenumber
+                            if (match.drills.filter(obj => obj.GameNumber === gamenumber).length === 0) {
+                                match.drills.push(d)
+                            }
+                            d.trainingSession = match;
+                            d.drillDuration = duration;
+    
+                            var setScore = sm[4];
+                            var duration = parseInt(sm[5])
+                            if (setScore.length > 0) {
+                                var scs = setScore.split("-");
+                                var xhomescore = parseInt(scs[0]);
+                                var xawayscore = parseInt(scs[1]);
+                                d.HomeScore = xhomescore;
+                                d.AwayScore = xawayscore;
+                                var mhs = parseInt(match.HomeScore);
+                                var mas = parseInt(match.AwayScore);
+                                var winningscore = gamenumber > 4 ? 15 : 25
+                                if (xhomescore >= winningscore || xhomescore >= winningscore)
+                                {
+                                    if (xhomescore > xawayscore + 1) {
+                                        mhs++;
+                                    }
+                                    else if (xawayscore > xhomescore + 1) {
+                                        mas++;
+                                    }
+                                }
+                                match.HomeScore = mhs;
+                                match.AwayScore = mas;
+                            }    
                         }
                         gamenumber++;
                     }

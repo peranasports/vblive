@@ -2,7 +2,7 @@ import React from 'react'
 import { useState, useContext } from 'react'
 import AlertContext from '../../context/Alert/AlertContext'
 import VBLiveAPIContext from '../../context/VBLiveAPI/VBLiveAPIContext'
-import { getSessions } from '../../context/VBLiveAPI/VBLiveAPIAction'
+import { getSessionInfoForServer } from '../../context/VBLiveAPI/VBLiveAPIAction'
 
 function SessionSearch() {
   const [text, setText] = useState('')
@@ -19,10 +19,10 @@ function SessionSearch() {
       setAlert('Please enter server name to search', 'error')
     } else {
       dispatch({ type: 'SET_LOADING' })
-      var appname = app === 0 ? 'VBStats' : 'DVMate'
-      const sessionsData = await getSessions(appname, text)
-      dispatch({ type: 'GET_SESSIONS', payload: sessionsData })
-      setText('')
+      // var appname = app === 0 ? 'VBStats' : 'DVMate'
+      const sessionsData = await getSessionInfoForServer(text)
+      dispatch({ type: 'GET_SESSION_INFO_FOR_SERVER', payload: sessionsData })
+      // setText('')
     }
   }
 
@@ -30,17 +30,12 @@ function SessionSearch() {
     <div className='grid grid-cols-1 xl:grid-cols-2 lg:grid-cols-2 md:grid-cols-2 mb-8 gap-8'>
       <div>
         <form onSubmit={handleSubmit}>
-
-          <div className="tabs tabs-boxed">
-            <a className={app === 0 ? "tab tab-active" : "tab"} onClick={() => setApp(0)} >VBStats</a>
-            <a className={app === 1 ? "tab tab-active" : "tab"} onClick={() => setApp(1)} >Data Volley</a>
-          </div>
           <div className='form-control pt-6'>
             <div className='relative'>
               <input
                 type='text'
                 className='w-full pr-40 bg-gray-200 input input-lg text-black'
-                placeholder='Search'
+                placeholder='Enter Server Name'
                 value={text}
                 onChange={handleChange}
               />

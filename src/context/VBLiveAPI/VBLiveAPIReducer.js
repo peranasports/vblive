@@ -7,7 +7,13 @@ const VBLiveAPIReducer = (state, action) => {
                 appName: action.payload.appName,
                 loading: false,
             }
-        case 'GET_SESSION':
+            case 'GET_SESSION_INFO_FOR_SERVER':
+                return {
+                    ...state,
+                    sessions: action.payload.sessions,
+                    loading: false,
+                }
+            case 'GET_SESSION':
             return {
                 ...state,
                 session: action.payload,

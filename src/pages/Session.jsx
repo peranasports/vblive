@@ -29,14 +29,14 @@ function Session() {
 
         const sessionData = await getSession(params.sessionId)
         dispatch({ type: 'GET_SESSION', payload: sessionData })
-        console.log('appName', appName)
-        var m = appName === 'VBStats' ? initWithPSVBCompressedBuffer(sessionData.stats) : initWithDVWCompressedBuffer(sessionData.stats)
+        console.log('appName', sessionData.appName)
+        var m = sessionData.appName === 'VBStats' ? initWithPSVBCompressedBuffer(sessionData.stats) : initWithDVWCompressedBuffer(sessionData.stats)
 
         const latestData = await getLatestStats(params.sessionId, 0)
         dispatch({ type: 'GET_LATEST', payload: latestData })
         setLatest(latestData)
-        var mx = appName === 'VBStats' ? parseLatestPSVBStats(latestData, m) : parseLatestDVWStats(latestData, m)
-        mx = appName === 'VBStats' ? calculatePSVBStats(mx) : calculateDVWStats(mx)
+        var mx = sessionData.appName === 'VBStats' ? parseLatestPSVBStats(latestData, m) : parseLatestDVWStats(latestData, m)
+        mx = sessionData.appName === 'VBStats' ? calculatePSVBStats(mx) : calculateDVWStats(mx)
         mx = calculateSideoutStats(mx)
         console.log('sessionId, match=', params.sessionId, mx)
         setMatch(mx)

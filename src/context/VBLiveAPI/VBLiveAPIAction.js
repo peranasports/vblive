@@ -18,6 +18,18 @@ export const getSessions = async (appName, serverName) => {
   return sessionData
 }
 
+export const getSessionInfoForServer = async (serverName) => {
+  const params = new URLSearchParams({
+      serverName: serverName,
+  })
+
+  vbliveapi.defaults.withCredentials = true
+
+  const response = await vbliveapi.get(`Session/GetSessionInfoForServer?${params}`)
+  var sessionData = { sessions:response.data }
+  return sessionData
+}
+
 export const getSession = async (sessionId) => {
   const params = new URLSearchParams({
       sessionId: sessionId,
