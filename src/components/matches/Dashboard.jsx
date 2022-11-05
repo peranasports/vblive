@@ -141,7 +141,7 @@ export default function Dashboard({ match, selectedGame, selectedTeam }) {
           <div className="stat-value text-lime-500">{categoryLeaders[0].teamStats.PassAverageString}</div>
           <ul>
             {categoryLeaders[0].players.slice(0, 2).filter(obj => obj.stats !== '').map((player) => (
-              <li className="flex stat-desc text-slate-100 justify-between" key={player.id}>
+              <li className="flex stat-desc text-current justify-between" key={player.id}>
                 <div>
                   {player.name}
                 </div>
@@ -162,7 +162,7 @@ export default function Dashboard({ match, selectedGame, selectedTeam }) {
           <div className="stat-title">Block Kills</div>
           <div className="stat-value text-fuchsia-600">{categoryLeaders[2].teamStats.BlockPoints}</div>
           {categoryLeaders[2].players.slice(0, 2).filter(obj => obj.stats !== '').map((player) => (
-            <li className="flex stat-desc text-slate-100 justify-between" key={player.id}>
+            <li className="flex stat-desc text-current justify-between" key={player.id}>
               <div>
                 {player.name}
               </div>
@@ -182,9 +182,9 @@ export default function Dashboard({ match, selectedGame, selectedTeam }) {
           </div>
           <div className="stat-title">Side Out Percentage</div>
           <div className="stat-value text-orange-600">{categoryLeaders[0].teamStats.SideOutPercent[0].toFixed(0)}%</div>
-          <div className="stat-desc text-slate-100">All First Ball {categoryLeaders[0].teamStats.SideOutFirstBallPercent
+          <div className="stat-desc text-current">All First Ball {categoryLeaders[0].teamStats.SideOutFirstBallPercent
           [0].toFixed(0)}%</div>
-          <div className="stat-desc text-slate-100">First Ball Kills {categoryLeaders[0].teamStats.SideOutFirstBallKillPercent
+          <div className="stat-desc text-current">First Ball Kills {categoryLeaders[0].teamStats.SideOutFirstBallKillPercent
           [0].toFixed(0)}%</div>
         </div>
 
@@ -204,7 +204,7 @@ export default function Dashboard({ match, selectedGame, selectedTeam }) {
           <div className="stat-value text-secondary">{categoryLeaders[1].teamStats.SpikeEfficiencyString}</div>
           <ul>
             {categoryLeaders[1].players.slice(0, 2).filter(obj => obj.stats !== '').map((player) => (
-              <li className="flex stat-desc text-slate-100 justify-between" key={player.id}>
+              <li className="flex stat-desc text-current justify-between" key={player.id}>
                 <div>
                   {player.name}
                 </div>
@@ -226,7 +226,7 @@ export default function Dashboard({ match, selectedGame, selectedTeam }) {
           <div className="stat-value text-teal-400">{categoryLeaders[3].teamStats.GoodServePercent.toFixed(0)}%</div>
           <ul>
             {categoryLeaders[3].players.slice(0, 2).filter(obj => obj.stats !== '').map((player) => (
-              <li className="flex stat-desc text-slate-100 justify-between" key={player.id}>
+              <li className="flex stat-desc text-current justify-between" key={player.id}>
                 <div>
                   {player.name}
                 </div>
@@ -248,12 +248,12 @@ export default function Dashboard({ match, selectedGame, selectedTeam }) {
           <div className="stat-value text-amber-400">{categoryLeaders[0].teamStats.pointPercent.toFixed(0)}%</div>
           <ul>
             {categoryLeaders[4].players.slice(0, 2).map((player) => (
-              <li className="flex stat-desc text-slate-100 justify-between" key={player.id}>
+              <li className="flex stat-desc text-current justify-between" key={player.id}>
                 <div>
                   .{/* {player.name} */}
                 </div>
                 <div>
-                  .{/* {player.stats}% */}
+                  {/* {player.stats}% */}
                 </div>
               </li>
             ))}
