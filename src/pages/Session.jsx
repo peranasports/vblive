@@ -13,6 +13,7 @@ import { calculateSideoutStats } from '../components/utils/StatsItem'
 import SideoutReport from '../components/matches/SideoutReport'
 import AttackZones from '../components/matches/AttackZones'
 import HittingChartReport from '../components/matches/HittingChartReport'
+import ServeReceive from '../components/matches/ServeReceive'
 
 function Session() {
     const { session, appName, loading, dispatch } = useContext(VBLiveAPIContext)
@@ -86,9 +87,12 @@ function Session() {
             // return <Sideout match={match} selectedGame={selectedGame} selectedTeam={selectedTeam} />
         }
         else if (currentReport === 3) {
-            return <AttackZones match={match} selectedGame={selectedGame} selectedTeam={selectedTeam}/>
+            return <ServeReceive match={match} selectedGame={selectedGame} selectedTeam={selectedTeam}/>
         }
         else if (currentReport === 4) {
+            return <AttackZones match={match} selectedGame={selectedGame} selectedTeam={selectedTeam}/>
+        }
+        else if (currentReport === 5) {
             return <HittingChartReport match={match} selectedGame={selectedGame} selectedTeam={selectedTeam}/>
         }
     }
@@ -130,10 +134,15 @@ function Session() {
                         onClick={() => {
                             setCurrentReport(3)
                         }}
-                    >Attack Zones</a>
+                    >Serve Receives</a>
                     <a className={currentReport == 4 ? "tab tab-bordered tab-active" : "tab tab-bordered"}
                         onClick={() => {
                             setCurrentReport(4)
+                        }}
+                    >Attack Zones</a>
+                    <a className={currentReport == 5 ? "tab tab-bordered tab-active" : "tab tab-bordered"}
+                        onClick={() => {
+                            setCurrentReport(5)
                         }}
                     >Hitting Chart</a>
                 </div>
