@@ -30,43 +30,31 @@ function Session() {
 
         const sessionData = await getSession(params.sessionId)
         dispatch({ type: 'GET_SESSION', payload: sessionData })
-        console.log('appName', sessionData.appName)
+        // console.log('appName', sessionData.appName)
         var m = sessionData.appName === 'VBStats' ? initWithPSVBCompressedBuffer(sessionData.stats) : initWithDVWCompressedBuffer(sessionData.stats)
 
-        const latestData = await getLatestStats(params.sessionId, 0)
-        dispatch({ type: 'GET_LATEST', payload: latestData })
-        setLatest(latestData)
-        var mx = sessionData.appName === 'VBStats' ? parseLatestPSVBStats(latestData, m) : parseLatestDVWStats(latestData, m)
-        mx = sessionData.appName === 'VBStats' ? calculatePSVBStats(mx) : calculateDVWStats(mx)
-        mx = calculateSideoutStats(mx)
-        console.log('sessionId, match=', params.sessionId, mx)
+        var mx = null
+        if (sessionData.appName === 'VBStats')
+        {
+            const latestData = await getLatestStats(params.sessionId, 0)
+            dispatch({ type: 'GET_LATEST', payload: latestData })
+            setLatest(latestData)
+            mx = sessionData.appName === 'VBStats' ? parseLatestPSVBStats(latestData, m) : parseLatestDVWStats(latestData, m)
+            mx = calculatePSVBStats(mx)
+        }
+        else
+        {
+            mx = calculateDVWStats(m)
+        }
+        mx = calculateSideoutStats(mx, sessionData.appName)
+        // console.log('sessionId, match=', params.sessionId, mx)
         setMatch(mx)
 
     }, [params.sessionId, selectedTeam])
 
     useEffect(() => {
-        // dispatch({ type: 'SET_LOADING' })
-
-        // const getLatestStatsData = async (m) => {
-        //     const latestData = await getLatestStats(params.sessionId, 0)
-        //     dispatch({ type: 'GET_LATEST', payload: latestData })
-        //     setLatest(latestData)
-        //     var mx = parseLatestStats(latestData, m)
-        //     mx = calculateStats(mx)
-        //     console.log('sessionId, match=', params.sessionId, mx)
-        //     setMatch(mx)
-        // }
-
-        // const getSessionData = async () => {
-        //     const sessionData = await getSession(params.sessionId)
-        //     dispatch({ type: 'GET_SESSION', payload: sessionData })
-        //     var m = initWithCompressedBuffer(sessionData.stats)
-        //     getLatestStatsData(m)
-        // }
-
-        // getSessionData()
         getLatest()
-        setTimeout(() => setCounter(!counter), 30000)
+        // setTimeout(() => setCounter(!counter), 30000)
     }, [getLatest, counter, selectedGame])
 
     // }, [dispatch, params.sessionId], selectedGame, counter)
@@ -97,7 +85,7 @@ function Session() {
         }
     }
 
-    return match && latest && (
+    return match && (
         <>
             <div>
                 <div className='container mx-auto'>
