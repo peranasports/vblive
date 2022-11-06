@@ -249,6 +249,19 @@ export function generateMatch(str) {
     return match;
 };
 
+function getVBStatsPlayerByGuid(guid, m)
+{
+    var pls = m.teamA.players.filter(obj => obj.Guid === guid)
+    if (pls.length > 0) {
+        return pls[0]
+    }
+    pls = m.teamB.players.filter(obj => obj.Guid === guid)
+    if (pls.length > 0) {
+        return pls[0]
+    }
+    return null
+}
+
 export function psvbParseLatestStats(str, match) {
     var lines = str.split(/\r?\n/)
     if (lines.length == 0) {
@@ -365,7 +378,25 @@ export function psvbParseLatestStats(str, match) {
                         currentGame.events = []
                     }
                     var ev = JSON.parse(json[1])
+                    // console.log(ev.TeamScore, ev.OppositionScore)
+                    var pls = match.teamA.players.filter(obj => obj.Guid === ev.PlayerGuid)
+                    if (pls.length > 0) {
+                        ev.Player = pls[0]
+                    }
+                    else
+                    {
+                        pls = match.teamB.players.filter(obj => obj.Guid === ev.PlayerGuid)
+                        if (pls.length > 0) {
+                            ev.Player = pls[0]
+                        }
+                        else
+                        {
+                            ev.Player = null
+                        }
+                    }
+                    ev.TimeStamp = new Date(ev.TimeStamp)
                     currentGame.events.push(ev)
+
                 } catch (error) {
                     console.log('psvbParseLatestStats E', error)
                 }
@@ -395,3 +426,4 @@ export function psvbParseLatestStats(str, match) {
     }
     return match
 }
+

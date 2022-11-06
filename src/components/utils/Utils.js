@@ -192,6 +192,30 @@ export function colourForEfficiency(eff)
 export function LightenDarkenColor(col, amt) {
     col = parseInt(col.substring(1, 7), 16);
     return (((col & 0x0000FF) + amt) | ((((col >> 8) & 0x00FF) + amt) << 8) | (((col >> 16) + amt) << 16)).toString(16);
-  }
-  
+}
+
+export function replaceItemInArray(a, oldItem, newItem)
+{
+    var idx = a.indexOf(oldItem)
+    if (idx === -1)
+    {
+        return a
+    }
+    else
+    {
+        var newa = []
+        for (var n=0; n<a.length; n++)
+        {
+            if (n === idx)
+            {
+                newa.push(newItem)
+            }
+            else
+            {
+                newa.push(a[n])
+            }
+        }
+        return newa
+    }
+}
   

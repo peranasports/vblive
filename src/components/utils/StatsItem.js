@@ -1,4 +1,4 @@
-import { pad } from './Utils'
+import { pad, replaceItemInArray } from './Utils'
 
 const kSkillServe = 1
 const kSkillPass = 2
@@ -96,6 +96,7 @@ export function doEvent(e, si) {
             break;
         case kSkillPass:
             {
+                si.PassTotalPoints += e.passingGrade
                 si.PassTotal++;
                 switch (eg) {
                     case 0:
@@ -245,6 +246,7 @@ export function createStatsItem(player, set) {
     si.Pass2 = 0
     si.Pass3 = 0
     si.PassTotal = 0
+    si.PassTotalPoints = 0
     si.Serve0 = 0
     si.Serve1 = 0
     si.Serve2 = 0
@@ -295,6 +297,7 @@ export function addStatsItem(ssSource, ssDestination) {
     ssDestination.Pass2 += ssSource.Pass2;
     ssDestination.Pass3 += ssSource.Pass3;
     ssDestination.PassTotal += ssSource.PassTotal;
+    ssDestination.PassTotalPoints += ssSource.PassTotalPoints;
     ssDestination.Serve0 += ssSource.Serve0;
     ssDestination.Serve1 += ssSource.Serve1;
     ssDestination.Serve2 += ssSource.Serve2;
@@ -356,7 +359,14 @@ export function calculateAllStats(si) {
 
     var t = si.Pass0 + si.Pass1 + si.Pass2 + si.Pass3;
     var tt = (si.Pass1) + (si.Pass2 * 2) + (si.Pass3 * 3);
-    si.PassAverage = (t != 0) ? tt / t : -1;
+    if (si.PassTotalPoints === undefined || isNaN(si.PassTotalPoints))
+    {
+        si.PassAverage = (t != 0) ? tt / t : -1;
+    }
+    else
+    {
+        si.PassAverage = si.PassTotal != 0 ? si.PassTotalPoints / si.PassTotal : -1;
+    }
     si.PassAverageString = si.PassAverage != -1 ? si.PassAverage.toFixed(2) : ''
 
     var t = si.Serve0 + si.Serve1 + si.Serve2 + si.Serve3;
@@ -445,6 +455,19 @@ export function calculateAllStats(si) {
     return si
 }
 
+function getPlayerByGuid(guid, m)
+{
+    var pls = m.teamA.players.filter(obj => obj.Guid === guid)
+    if (pls.length > 0) {
+        return pls[0]
+    }
+    pls = m.teamB.players.filter(obj => obj.Guid === guid)
+    if (pls.length > 0) {
+        return pls[0]
+    }
+    return null
+}
+
 function isPlayerInTeam(pl, tm, match) {
     if (pl == null) {
         return false;
@@ -462,9 +485,9 @@ function isPlayerInTeam(pl, tm, match) {
     return false;
 }
 
-export function calculateSideoutStats(m) {
-    m = calculateSideoutStatsForTeam(m, m.teamA)
-    m = calculateSideoutStatsForTeam(m, m.teamB)
+export function calculateSideoutStats(m, appName) {
+    m = calculateSideoutStatsForTeam(m, m.teamA, appName)
+    m = calculateSideoutStatsForTeam(m, m.teamB, appName)
     m.teamA.statsItems[0].BreakPoints = m.teamB.statsItems[0].SideOutFails
     m.teamA.statsItems[0].pointPercent = (m.teamA.statsItems[0].ServeTotal == 0) ? 0 : (m.teamA.statsItems[0].BreakPoints[0] * 100) / m.teamA.statsItems[0].ServeTotal;
     m.teamB.statsItems[0].BreakPoints = m.teamA.statsItems[0].SideOutFails
@@ -482,7 +505,7 @@ export function calculateSideoutStats(m) {
 
 var selset = 0
 
-export function calculateSideoutStatsForTeam(m, tm) {
+export function calculateSideoutStatsForTeam(m, tm, appName) {
     var sideouts = 0
     var allpasses = 0;
     var fbsideouts = 0;
@@ -518,10 +541,19 @@ export function calculateSideoutStatsForTeam(m, tm) {
         var siGame = isHome ? game.teamAStatsItems[0] : game.teamBStatsItems[0]
         var nset = game.GameNumber - 1;
         var xselset = nd; //selSet - 10;
-        var rallies = getRalliesInGameForTeam(game, tm)
+        var rallies
+        if (appName === 'VBStats')
+        {
+            rallies = getVBStatsRalliesInGameForTeam(game, tm)
+        }
+        else
+        {
+            rallies = getDVRalliesInGameForTeam(game, tm)
+        }
         for (var nr = 0; nr < rallies.length; nr++) {
             var mr = rallies[nr]
-            var row = mr.passrow;
+            var rrow = (appName === 'VBStats') ? mr.row : mr.passrow
+            var row = rrow;
             if (row >= 0 && nset >= 0) {
                 var sot = mr.sideoutType;
                 if (sot > -1) {
@@ -563,7 +595,7 @@ export function calculateSideoutStatsForTeam(m, tm) {
                             }
                             if (sot == kFBOppErrors)
                             {
-                                rotOppErrorSideOut[row]++
+                                rotFBOppErrorSideOut[row]++
                             }
                         }
                     }
@@ -714,7 +746,43 @@ export function calculateSideoutStatsForTeam(m, tm) {
     return m
 }
 
-export function getRalliesInGameForTeam(g, tm) {
+function lineupString(pls)
+{
+    var s = ''
+    for (var n=0; n<pls.lenth; n++)
+    {
+        if (s.length > 0) s += ','
+        s += pls[n].Guid
+    }
+    return s
+}
+
+function getLineup(slineup, m)
+{
+    if (slineup === undefined)
+    {
+        return []
+    }
+    var pls = []
+    var guids = slineup.split(',')
+    for (var ng=0; ng<guids.length; ng++)
+    {
+        var guid = guids[ng]
+        var pl = getPlayerByGuid(guid, m)
+        if (pl !== null)
+        {
+            pls.push(pl)
+        }
+    }
+    return pls
+}
+
+export function getDVRalliesInGameForTeam(g, tm) {
+    if (g.events === undefined)
+    {
+        return []
+    }
+
     var match = g.match
     var isHome = match.teamA === tm;
     var hs1 = -1;
@@ -819,15 +887,15 @@ export function getRalliesInGameForTeam(g, tm) {
                 if (r.startTime == null) {
                     var leadtime = ev.videoLeadTime === 0 || ev.videoLeadTime === undefined ? 2 : ev.videoLeadTime;
                     try {
-                        r.startTime = ev.TimeStamp !== null ? new Date(ev.TimeStamp.getTime() - leadtime * 1000) : null;
+                        r.startTime = ev.TimeStamp !== null && ev.TimeStamp !== undefined ? new Date(ev.TimeStamp.getTime() - leadtime * 1000) : null;
 
                     } catch (error) {
-
+                        console.log(error)
                     }
                 }
                 var lagtime = ev.videoLagTime === 0 || ev.videoLagTime === undefined ? 3 : ev.videoLagTime;
                 try {
-                    r.endTime = ev.TimeStamp !== null ? new Date(ev.TimeStamp.getTime() + lagtime * 1000) : null;
+                    r.endTime = ev.TimeStamp !== null && ev.TimeStamp !== undefined ? new Date(ev.TimeStamp.getTime() + lagtime * 1000) : null;
                 } catch (error) {
                     console.log(error)
                 }
@@ -1076,4 +1144,480 @@ function eventOutcome(e) {
     return 0;
 }
 
+function findSetter(pls)
+{
+    for (var n=0; n<pls.length; n++)
+    {
+        var pl = pls[n]
+        if (pl.includes('Setter'))
+        {
+            return pl;
+        }
+    }
+    return null;
+}
+
+
+export function getVBStatsRalliesInGameForTeam(g, tm)
+{
+    if (g.events === undefined)
+    {
+        return []
+    }
+    var hs1 = -1;
+    var as1 = -1;
+    var hs2 = -1;
+    var as2 = -1;
+    var r = null;
+    var evs = [];
+    var a = [];
+    var events = g.events
+    
+    var row;
+    var opprow;
+    
+    // find first row for each team
+    for (var ne = 0; ne < events.length; ne++) {
+        var e = events[ne]
+        if (e.EventType === kSkillServe) {
+            if (isPlayerInTeam(e.Player, tm, g.match)) {
+                row = opprow == 0 ? e.Row : e.Row - 1;
+                if (row == -1) {
+                    row = 6;
+                }
+            }
+            else {
+                opprow = row == 0 ? e.Row : e.Row - 1;
+                if (opprow == -1) {
+                    opprow = 6;
+                }
+            }
+            if (row != 0 && opprow != 0) {
+                break;
+            }
+        }
+    }
+    
+    var currentSetter = getPlayerByGuid(g.PrimarySetterGuid, g.match);
+    var currentOppositionSetter = getPlayerByGuid(g.oppPrimarySetterGuid, g.match);
+    
+    var players = getLineup(g.StartingLineup, g.match);
+    var oppplayers = getLineup(g.oppStartingLineup, g.match);
+    
+    for (var en = 0; en < events.length; en++)
+    {
+        var e = events[en];
+        hs1 = e.TeamScore;
+        as1 = e.OppositionScore;
+        
+        if (e.EventType == kSubstitution)
+        {
+            var pl = getPlayerByGuid(e.UserDefined01, g.match);
+            if (pl != null)
+            {
+                var idx = players.indexOf(e.Player);
+                if (idx !== -1)
+                {
+                    players = replaceItemInArray(players, e.Player, pl)
+                }
+                else
+                {
+                    var idx = oppplayers.indexOf(e.Player);
+                    if (idx !== -1)
+                    {
+                        oppplayers = replaceItemInArray(oppplayers, e.Player, pl)
+                    }
+                }
+                if (e.Player == currentSetter)
+                {
+                    if (pl.PositionString.includes('Setter'))
+                    {
+                        currentSetter = pl;
+                    }
+                    else
+                    {
+                        currentSetter = findSetter(players);
+                        if (currentSetter != null)
+                        {
+                            var rowOnPos =  [1, 6, 5, 4, 3, 2];
+                            var idx = players.indexOf(currentSetter);
+                            if (idx != -1 && idx < 6)
+                            {
+                                row = rowOnPos[idx];
+                            }
+                        }
+                    }
+                }
+                else if (e.Player == currentOppositionSetter)
+                {
+                    if (pl.PositionString.includes('Setter'))
+                    {
+                        currentOppositionSetter = pl;
+                    }
+                    else
+                    {
+                        currentOppositionSetter = findSetter(oppplayers);
+                        if (currentOppositionSetter != null)
+                        {
+                            var rowOnPos =  [1, 6, 5, 4, 3, 2];
+                            var idx = oppplayers.indexOf(currentOppositionSetter);
+                            if (idx != -1 && idx < 6)
+                            {
+                                opprow = rowOnPos[idx];
+                            }
+                        }
+                    }
+                }
+                else if (g.match.teamA.players.filter(obj => obj.Guid === e.Player.Guid).length > 0)
+                {
+                    if (currentSetter == null && pl.PositionString.includes('Setter'))
+                    {
+                        currentSetter = pl;
+                        var rowOnPos =  [1, 6, 5, 4, 3, 2];
+                        var idx = players.indexOf(currentSetter);
+                        if (idx != -1 && idx < 6)
+                        {
+                            row = rowOnPos[idx];
+                        }
+                    }
+                }
+                else if (g.match.teamB.players.filter(obj => obj.Guid === e.Player.Guid).length > 0)
+                {
+                    if (currentOppositionSetter == null && pl.PositionString.includes('Setter'))
+                    {
+                        currentOppositionSetter = pl;
+                        var rowOnPos =  [1, 6, 5, 4, 3, 2];
+                        var idx = oppplayers.indexOf(currentSetter);
+                        if (idx != -1 && idx < 6)
+                        {
+                            opprow = rowOnPos[idx];
+                        }
+                    }
+                }
+            }
+        }
+        evs.push(e);
+        
+        var ne = en < (events.length - 1) ? events[en + 1] : null;
+        if (ne != null)
+        {
+            hs2 = ne.TeamScore;
+            as2 = ne.OppositionScore;
+        }
+        else
+        {
+            if (e.outcome > 0)
+            {
+                hs2 = hs1 + 1;
+            }
+            else
+            {
+                as2 = as2 + 1;
+            }
+        }
+        
+        if (hs1 != hs2 || as1 != as2)
+        {
+            r = {};
+            r.setNumber = g.GameNumber;
+            r.blockEvents = [];
+            r.spikeEvents = [];
+            r.defenseEvents = [];
+            r.oppEvents = [];
+            r.homeScore = e.TeamScore;
+            r.awayScore = e.OppositionScore;
+            r.lineup = lineupString(players);
+            r.opplineup = lineupString(oppplayers);
+            r.sideout = false;
+            r.sideoutType = -1;
+            
+            for (var xen = en + 1; xen < events.length; xen++)
+            {
+                var xe = events[xen];
+                if (xe.TeamScore == hs1 && xe.OppositionScore == as1)
+                {
+                    evs.push(xe);
+                }
+                else
+                {
+                    en = xen - 1;
+                    break;
+                }
+            }
+            
+            r.events = evs;
+            for (var ne=0; ne<evs.length; ne++)
+            {
+                var ev = evs[ne]
+                var isHomeEvent = e.Player && g.match.teamA.players.filter(obj => obj.Guid === e.Player.Guid).length > 0
+                var isAwayEvent = e.Player && g.match.teamB.players.filter(obj => obj.Guid === e.Player.Guid).length > 0
+                
+                var skill = ev.EventType;
+                var grade = ev.EventGrade;
+                if (skill == kSkillServe)
+                {
+                    r.serveEvent = ev;
+                }
+                else if (skill == kSkillSpike)
+                {
+                    r.spikeEvents.push(ev);
+                }
+                else if (skill == kSkillBlock)
+                {
+                    r.blockEvents.push(ev);
+                }
+                
+                if (skill == kSkillSet)
+                {
+                    if (grade != 0)
+                    {
+                        continue;
+                    }
+                }
+                if (skill == kSkillPass && isHomeEvent)
+                {
+                    r.passing = true;
+                    r.passEvent = ev;
+                    if (grade == 0)
+                    {
+                        r.outcome = 0;
+                        r.sideoutType = kUnsuccessful;
+                    }
+                }
+                else if (skill == kSkillServe && isHomeEvent)
+                {
+                    r.serveEvent = ev;
+                    r.passing = false;
+                    if (grade == 0)
+                    {
+                        r.outcome = 0;
+                    }
+                    else if (grade == 3)
+                    {
+                        r.outcome = 1;
+                    }
+                }
+                else if (skill == kSkillSpike && isHomeEvent)
+                {
+                    if (r.passing)
+                    {
+                        if (grade == 3)
+                        {
+                            r.outcome = 1;
+                            r.sideout = true;
+                            r.sideoutType = kKills;
+                            if (r.spikeEvents.length == 1)
+                            {
+                                r.sideoutFirstBall = true;
+                                r.sideoutType = kFBKills;
+                            }
+                        }
+                        else if (grade == 0)
+                        {
+                            r.outcome = 0;
+                            r.sideoutType = kUnsuccessful;
+                        }
+                    }
+                    else
+                    {
+                        if (grade == 3)
+                        {
+                            r.outcome = 1;
+                        }
+                        else if (grade == 0)
+                        {
+                            r.outcome = 0;
+                        }
+                    }
+                }
+                else if (skill == kSkillBlock && isHomeEvent)
+                {
+                    if (r.passing)
+                    {
+                        if (grade >= 2)
+                        {
+                            r.outcome = 1;
+                            r.sideout = true;
+                            r.sideoutType = kKills;
+                        }
+                        else if (grade == 0)
+                        {
+                            r.outcome = 0;
+                            r.sideoutType = kUnsuccessful;
+                        }
+                    }
+                    else
+                    {
+                        if (grade >= 2)
+                        {
+                            r.outcome = 1;
+                        }
+                        else if (grade == 0)
+                        {
+                            r.outcome = 0;
+                        }
+                    }
+                }
+                else if (skill == kSkillSet && isHomeEvent)
+                {
+                    if (grade == 0)
+                    {
+                        r.outcome = 0;
+                        if (r.passing)
+                        {
+                            r.sideoutType = kUnsuccessful;
+                        }
+                    }
+                }
+                else if (skill == kSkillDefense && isHomeEvent)
+                {
+                    if (grade == 0)
+                    {
+                        r.outcome = 0;
+                        if (r.passing)
+                        {
+                            r.sideoutType = kUnsuccessful;
+                        }
+                    }
+                    r.defenseEvents.push(ev);
+                }
+                else if (skill == kOppositionServeAce || (skill == kSkillServe && isAwayEvent && grade == 3))
+                {
+                    r.passing = true;
+                    r.outcome = 0;
+                    r.sideoutType = kUnsuccessful;
+                }
+                else if (skill == kOppositionServeError || (skill == kSkillServe && isAwayEvent && grade == 0))
+                {
+                    r.passing = true;
+                    r.outcome = 1;
+                    r.sideout = true;
+                    r.sideoutFirstBall = true;
+                    r.sideoutType = kFBOppServeErrors;
+                }
+                else if (skill == kOppositionHitKill || (skill == kSkillSpike && isAwayEvent && grade == 3))
+                {
+                    r.outcome = 0;
+                    if (r.passing)
+                    {
+                        r.sideoutType = kUnsuccessful;
+                    }
+                }
+                else if (skill == kOppositionHitError || (skill == kSkillSpike && isAwayEvent && grade == 0))
+                {
+                    r.outcome = 1;
+                    if (r.passing)
+                    {
+                        r.sideout = true;
+                        r.sideoutType = kOppErrors;
+                        if (r.spikeEvents.length <= 1)
+                        {
+                            r.sideoutFirstBall = true;
+                            r.sideoutType = kFBOppErrors;
+                        }
+                    }
+                }
+                else if (skill == kOppositionError || (isAwayEvent && grade == 0))
+                {
+                    r.outcome = 1;
+                    if (r.passing)
+                    {
+                        r.sideout = true;
+                        r.sideoutType = kOppErrors;
+                    }
+                    if (r.spikeEvents.length <= 1)
+                    {
+                        r.sideoutFirstBall = true;
+                        r.sideoutType = kFBOppErrors;
+                    }
+                }
+                else if (skill == kOppositionScore || (isAwayEvent && grade == 3))
+                {
+                    r.outcome = 0;
+                    if (r.passing)
+                    {
+                        r.sideoutType = kUnsuccessful;
+                    }
+                }
+            }
+            if (r.outcome == 0)
+            {
+                r.opprow = opprow;
+                r.row = row;
+                if (r.passing == false)
+                {
+                    opprow++;
+                    if (opprow > 6)
+                    {
+                        opprow = 1;
+                    }
+                    if (oppplayers.length > 0)
+                    {
+                        oppplayers = rotateLineup(oppplayers);
+                        r.opplineup = lineupString(oppplayers);
+                    }
+                }
+//                opprow = [e.Row intValue];
+            }
+            else if (r.outcome == 1)
+            {
+                r.row = row;
+                r.opprow = opprow;
+                if (r.passing)
+                {
+                    row++;
+                    if (row > 6)
+                    {
+                        row = 1;
+                    }
+                    players = rotateLineup(players);
+                    r.lineup = lineupString(players);
+                }
+//                row = [e.Row intValue];
+            }
+            for (var ne=0; ne<r.events.length; ne++)
+            {
+                var e = r.events[ne]
+                if (e.Player && g.match.teamA.players.filter(obj => obj.Guid === e.Player.Guid).length > 0)
+                {
+                    e.Row = r.row;
+                }
+                else if (e.Player && g.match.teamB.players.filter(obj => obj.Guid === e.Player.Guid).length > 0)
+                {
+                    e.Row = r.opprow;
+                }
+            }
+//            r.row = [e.Row intValue];
+            
+            a.push(r);
+            evs = [];
+        }
+    }
+
+    console.log('Game Number ', g.GameNumber)
+    for (var nr=0; nr<a.length; nr++)
+    {
+        var r = a[nr]
+        console.log(r.homeScore, r.awayScore, r.passing, r.sideoutType, r.passEvent)
+    }
+    
+    return a;
+
+}
+
+function rotateLineup(pls)
+{
+    if (pls.length < 6)
+    {
+        return null;
+    }
+    var pl1 = pls[0];
+    var pl2 = pls[1];
+    var pl3 = pls[2];
+    var pl4 = pls[3];
+    var pl5 = pls[4];
+    var pl6 = pls[5];
+    
+    return [pl2, pl3, pl4, pl5, pl6, pl1];
+}
 

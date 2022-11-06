@@ -58,7 +58,7 @@ var currentGame = null
 
 export function initWithDVWCompressedBuffer(buf) {
     var buffer = unzipBuffer(buf)
-    console.log(buffer)
+    // console.log(buffer)
     return generateMatch(buffer)
 }
 
@@ -740,6 +740,9 @@ function processScoutLine(s) {
             if (ts2 === undefined) {
                 ts2 = tryParseDateFromString(ttt, "ymd")
             }
+            if (ts2 === undefined) {
+                ts2 = tryParseDateFromString(ttt, "dmy")
+            }
             if (dateAtVideoPositionZero === null || dateAtVideoPositionZero === undefined) {
                 dateAtVideoPositionZero = ts2;
             }
@@ -1096,15 +1099,21 @@ function processScoutLine(s) {
                 {
                     var ipl = fetchPlayerInMatch(match.players, inpl);
                     var opl = fetchPlayerInMatch(match.players, outpl);
-                    createEvent(index, opl, g, ts2, kSubstitution, 0, 0, 0, 0, "", "", homescore, awayscore, homerow, null, null, ipl.Guid, homeSetter, s, vp);
-                    index++;
+                    if (ipl !== null && opl !== null)
+                    {
+                        createEvent(index, opl, g, ts2, kSubstitution, 0, 0, 0, 0, "", "", homescore, awayscore, homerow, null, null, ipl.Guid, homeSetter, s, vp);
+                        index++;
+                    }
                 }
                 else if (code.substring(0, 1) === "a")    // away
                 {
                     var ipl = fetchPlayerInMatch(match.oppositionPlayers, inpl);
                     var opl = fetchPlayerInMatch(match.oppositionPlayers, outpl);
-                    createEvent(index, opl, g, ts2, kSubstitution, 0, 0, 0, 0, "", "", homescore, awayscore, awayrow, null, null, ipl.Guid, awaySetter, s, vp);
-                    index++;
+                    if (ipl !== null && opl !== null)
+                    {
+                        createEvent(index, opl, g, ts2, kSubstitution, 0, 0, 0, 0, "", "", homescore, awayscore, awayrow, null, null, ipl.Guid, awaySetter, s, vp);
+                        index++;
+                    }
                 }
             }
         }
@@ -1198,6 +1207,18 @@ function createEvent(eindex, pl, g, ts2, et, se, se2, grade, err, bs, be, xhomes
     ev.ExtraCode2 = AdvanceCode(13, 14, ev)
     ev.ExtraCode3 = AdvanceCode(14, 15, ev)
     ev.DVGrade = AdvanceCode(5, 6, ev)
+
+    var gr = 0
+    if (et === kSkillPass)
+    {
+        if (ev.DVGrade === "=") gr = 0;
+        else if (ev.DVGrade === "/") gr = 0.5
+        else if (ev.DVGrade === "-") gr = 1;
+        else if (ev.DVGrade === "!") gr = 1.5;
+        else if (ev.DVGrade === "+") gr = 2.5;
+        else if (ev.DVGrade === "#") gr = 3;
+    }
+    ev.passingGrade = gr
 
     g.events.push(ev)
     match.events.push(ev)

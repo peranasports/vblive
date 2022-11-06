@@ -32,7 +32,7 @@ function AllFiltersPanel({ allOptions, match, events, selectedTeam, handleFilter
     return (
         <>
             {allOptions.map((filter) => (
-                <div tabIndex={0} className="collapse collapse-arrow rounded-sm">
+                <div key={filter.name} tabIndex={0} className="collapse collapse-arrow rounded-sm">
                     <input type="checkbox" className="peer" />
                     <div className="collapse-title pt-2 bg-base-300 text-lg font-medium  peer-checked:bg-base-100 peer-checked:text-base-700">
                         {filter.title.toUpperCase()}

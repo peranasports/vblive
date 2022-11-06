@@ -46,6 +46,49 @@ function AttackZoneChart({match, events, row}) {
 
         writeText({ctx: ctx, text: 'ROW ' + row, x: x, y: 30}, {textAlign: 'left', fontSize: fontsize * 2 });
 
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2
+        ctx.strokeRect(xmargin, topmargin, w, h)
+        var x = xmargin
+        var y = topmargin
+        y += h3
+        ctx.beginPath()
+        ctx.moveTo(x - 10, y)
+        ctx.lineTo(x + w + 10, y)
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 3
+        ctx.stroke()
+
+        y += h3
+        ctx.moveTo(x, y)
+        ctx.lineTo(x + w, y)
+        ctx.lineWidth = 0.5
+        ctx.strokeStyle = '#bdc3c7';
+        ctx.stroke()
+        y = topmargin
+        x += w3
+        ctx.moveTo(x, y)
+        ctx.lineTo(x, y + h)
+        ctx.lineWidth = 0.5
+        ctx.strokeStyle = '#bdc3c7';
+        ctx.stroke()
+        x += w3
+        ctx.moveTo(x, y)
+        ctx.lineTo(x, y + h)
+        ctx.lineWidth = 0.5
+        ctx.strokeStyle = '#bdc3c7';
+        ctx.stroke()
+    
+        //net 
+        ctx.beginPath()
+        ctx.moveTo(xmargin/2, topmargin)
+        ctx.lineTo(w + xmargin * 1.5, topmargin)
+        ctx.lineWidth = 3
+        ctx.strokeStyle = '#000000';
+        ctx.stroke()        
+
+        var x = xmargin
+        var y = topmargin
         for (var z=0; z<9; z++)
         {          
             var a = events[row - 1][zoneorders[z] - 1];
@@ -85,7 +128,7 @@ function AttackZoneChart({match, events, row}) {
                 {
                     var color = colourForEfficiency(eff)
                     ctx.fillStyle = color
-                    ctx.fillRect(x, y, w3, h3)
+                    ctx.fillRect(x + 1, y + 1, w3 - 2, h3 - 2)
                 }
 
                 writeText({ctx: ctx, text: total.toString(), x: tx + 4, y: ty, width:w3}, {textAlign: 'left', fontSize: fontsize });
@@ -130,46 +173,46 @@ function AttackZoneChart({match, events, row}) {
             }
         }
     
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 2
-        ctx.strokeRect(xmargin, topmargin, w, h)
-        var x = xmargin
-        var y = topmargin
-        y += h3
-        ctx.beginPath()
-        ctx.moveTo(x - 10, y)
-        ctx.lineTo(x + w + 10, y)
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 3
-        ctx.stroke()
+        // ctx.strokeStyle = '#ffffff';
+        // ctx.lineWidth = 2
+        // ctx.strokeRect(xmargin, topmargin, w, h)
+        // var x = xmargin
+        // var y = topmargin
+        // y += h3
+        // ctx.beginPath()
+        // ctx.moveTo(x - 10, y)
+        // ctx.lineTo(x + w + 10, y)
+        // ctx.strokeStyle = '#ffffff';
+        // ctx.lineWidth = 3
+        // ctx.stroke()
 
-        y += h3
-        ctx.moveTo(x, y)
-        ctx.lineTo(x + w, y)
-        ctx.lineWidth = 0.5
-        ctx.strokeStyle = '#bdc3c7';
-        ctx.stroke()
-        y = topmargin
-        x += w3
-        ctx.moveTo(x, y)
-        ctx.lineTo(x, y + h)
-        ctx.lineWidth = 0.5
-        ctx.strokeStyle = '#bdc3c7';
-        ctx.stroke()
-        x += w3
-        ctx.moveTo(x, y)
-        ctx.lineTo(x, y + h)
-        ctx.lineWidth = 0.5
-        ctx.strokeStyle = '#bdc3c7';
-        ctx.stroke()
+        // y += h3
+        // ctx.moveTo(x, y)
+        // ctx.lineTo(x + w, y)
+        // ctx.lineWidth = 0.5
+        // ctx.strokeStyle = '#bdc3c7';
+        // ctx.stroke()
+        // y = topmargin
+        // x += w3
+        // ctx.moveTo(x, y)
+        // ctx.lineTo(x, y + h)
+        // ctx.lineWidth = 0.5
+        // ctx.strokeStyle = '#bdc3c7';
+        // ctx.stroke()
+        // x += w3
+        // ctx.moveTo(x, y)
+        // ctx.lineTo(x, y + h)
+        // ctx.lineWidth = 0.5
+        // ctx.strokeStyle = '#bdc3c7';
+        // ctx.stroke()
     
-        //net 
-        ctx.beginPath()
-        ctx.moveTo(xmargin/2, topmargin)
-        ctx.lineTo(w + xmargin * 1.5, topmargin)
-        ctx.lineWidth = 3
-        ctx.strokeStyle = '#000000';
-        ctx.stroke()        
+        // //net 
+        // ctx.beginPath()
+        // ctx.moveTo(xmargin/2, topmargin)
+        // ctx.lineTo(w + xmargin * 1.5, topmargin)
+        // ctx.lineWidth = 3
+        // ctx.strokeStyle = '#000000';
+        // ctx.stroke()        
     }
 
     useEffect(() => {      
