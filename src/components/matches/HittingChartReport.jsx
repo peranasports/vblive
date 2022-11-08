@@ -8,12 +8,14 @@ import { allFilters } from "./AllFilters";
 const kSkillSpike = 4
 
 function HittingChartReport({ match, selectedGame, selectedTeam }) {
+    const [drawMode, setDrawMode] = useState(0)
     const [events, setEvents] = useState(null)
     const [allOptions, setAllOptions] = useState(allFilters)
-
     const [, forceUpdate] = useState(0);
+
     const doUpdate = () => {
         forceUpdate(n => !n)
+        setDrawMode(checkFilter('Display', 'Cone') ? 1 : 0)
         var xevents = calculateZones()
     }
 
@@ -245,7 +247,7 @@ function HittingChartReport({ match, selectedGame, selectedTeam }) {
                 <input id="my-drawer-5" type="checkbox" className="drawer-toggle" />
                 <div className="drawer-content">
                     <div className="w-100 h-full">
-                        <HittingChart match={match} events={events} rows={selectedRows()} />
+                        <HittingChart match={match} events={events} rows={selectedRows()} drawMode={drawMode} />
                     </div>
                 </div>
                 <div className="drawer-side w-80">

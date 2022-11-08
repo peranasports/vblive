@@ -13,7 +13,7 @@ import { calculateSideoutStats } from '../components/utils/StatsItem'
 import SideoutReport from '../components/matches/SideoutReport'
 import AttackZones from '../components/matches/AttackZones'
 import HittingChartReport from '../components/matches/HittingChartReport'
-import ServeReceive from '../components/matches/ServeReceive'
+import ServeReceiveReport from '../components/matches/ServeReceiveReport'
 
 function Session() {
     const { session, appName, loading, dispatch } = useContext(VBLiveAPIContext)
@@ -75,7 +75,7 @@ function Session() {
             // return <Sideout match={match} selectedGame={selectedGame} selectedTeam={selectedTeam} />
         }
         else if (currentReport === 3) {
-            return <ServeReceive match={match} selectedGame={selectedGame} selectedTeam={selectedTeam}/>
+            return <ServeReceiveReport match={match} selectedGame={selectedGame} selectedTeam={selectedTeam}/>
         }
         else if (currentReport === 4) {
             return <AttackZones match={match} selectedGame={selectedGame} selectedTeam={selectedTeam}/>

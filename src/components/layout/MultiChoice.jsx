@@ -66,19 +66,34 @@ function MultiChoice({ filter, handleOptionChanged }) {
     }
 
     const toggleOptionSelect = (item) => {
-        item.selected = !item.selected
-        // console.log('Item, Option', item, filter)
-        filter.selectedValues = []
-        var checked = 0
-        for (var i = 0; i < filter.items.length; i++) {
-            var item = filter.items[i]
-            checked += item.selected ? 1 : 0
-            if (item.selected)
-            {
-                filter.selectedValues.push(item.name)
+        if (filter.singleSelection)
+        {
+            item.selected = true
+            filter.selectedValues = [item.name]
+            for (var i = 0; i < filter.items.length; i++) {
+                var xitem = filter.items[i]
+                if (xitem !== item)
+                {
+                    xitem.selected = false
+                }
             }
         }
-        filter.allselected = (checked === filter.items.length)
+        else
+        {
+            item.selected = !item.selected
+            // console.log('Item, Option', item, filter)
+            filter.selectedValues = []
+            var checked = 0
+            for (var i = 0; i < filter.items.length; i++) {
+                var item = filter.items[i]
+                checked += item.selected ? 1 : 0
+                if (item.selected)
+                {
+                    filter.selectedValues.push(item.name)
+                }
+            }
+            filter.allselected = (checked === filter.items.length)
+        }
         handleOptionChanged(filter, item)
     }
 
@@ -86,19 +101,9 @@ function MultiChoice({ filter, handleOptionChanged }) {
     return (
         <div>
             <div className="options-list-item pb-1 pl-1">
-                {/* <div className="left-section">
-                    <input
-                        key={Math.random()}
-                        type="checkbox"
-                        id={`custom-checkbox-${1000}`}
-                        name={filter.title}
-                        value={filter.title}
-                        defaultChecked={filter.allselected}
-                        onChange={() => toggleAllOptionsSelect()}
-                    />
-                    <label className='font-semibold text-center text-base-700'>{filter.title.toUpperCase()}</label>
-                </div> */}
-                <div className="flex flex-col">
+                {
+                    filter.singleSelection === false ?
+                    <div className="flex flex-col">
                     <div className="flex space-x-4">
                         <button className="flex btn btn-sm" onClick={() => selectAll()}>Select All</button>
                         <button className="flex btn btn-sm" onClick={() => selectNone()}>Select None</button>
@@ -110,7 +115,9 @@ function MultiChoice({ filter, handleOptionChanged }) {
                                 <button className="flex btn btn-sm" onClick={() => selectReturns()}>All Returns</button>
                             </div> : null
                     }
-                </div>
+                    </div> :
+                    <div></div>
+                }
             </div>
             <ul className="px-2">
                 {filter.items.map((item, index) => {

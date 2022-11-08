@@ -1594,12 +1594,12 @@ export function getVBStatsRalliesInGameForTeam(g, tm)
         }
     }
 
-    console.log('Game Number ', g.GameNumber)
-    for (var nr=0; nr<a.length; nr++)
-    {
-        var r = a[nr]
-        console.log(r.homeScore, r.awayScore, r.passing, r.sideoutType, r.passEvent)
-    }
+    // console.log('Game Number ', g.GameNumber)
+    // for (var nr=0; nr<a.length; nr++)
+    // {
+    //     var r = a[nr]
+    //     console.log(r.homeScore, r.awayScore, r.passing, r.sideoutType, r.passEvent)
+    // }
     
     return a;
 

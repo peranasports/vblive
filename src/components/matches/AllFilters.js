@@ -2,6 +2,7 @@ export const allFilters = [
     {
         title: "Rotations",
         allselected: true,
+        singleSelection: false,
         items: [
             {
                 name: "1",
@@ -38,10 +39,12 @@ export const allFilters = [
     {
         title: "Attack Combos",
         allselected: true,
+        singleSelection: false,
     },
     {
         title: "Stages",
         allselected: true,
+        singleSelection: false,
         items: [
             {
                 name: "Side Out",
@@ -58,14 +61,15 @@ export const allFilters = [
     {
         title: "Display",
         allselected: false,
+        singleSelection: true,
         items: [
             {
-                name: "Cone",
+                name: "Ball Path",
                 selected: true,
                 amount: 0
             },
             {
-                name: "Ball Path",
+                name: "Cone",
                 selected: false,
                 amount: 0
             },
@@ -74,6 +78,7 @@ export const allFilters = [
     {
         title: "Setters",
         allselected: true,
+        singleSelection: false,
     },
     {
         title: "Attackers",
@@ -82,6 +87,7 @@ export const allFilters = [
     {
         title: "Results",
         allselected: true,
+        singleSelection: false,
         items: [
             {
                 name: "Errors",
@@ -103,6 +109,7 @@ export const allFilters = [
     {
         title: "Source",
         allselected: true,
+        singleSelection: false,
         items: [
             {
                 name: "Front",
@@ -124,6 +131,7 @@ export const allFilters = [
     {
         title: "Cones",
         allselected: true,
+        singleSelection: false,
         items: [
             {
                 name: "1",

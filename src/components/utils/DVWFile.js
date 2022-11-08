@@ -779,8 +779,10 @@ function processScoutLine(s) {
                 var rxs = 0; //(rand() % 20) - 10;
                 var rys = 0; //rand() % 5;
 
-                var rxe = 0; //(rand() % 10) - 5;
-                var rye = 0; //(rand() % 10) - 5;
+                const min = -4;
+                const max = 4;
+                var rxe = Math.random() * (max - min); //0; //(rand() % 10) - 5;
+                var rye = Math.random() * (max - min); //(rand() % 10) - 5;
 
                 var xendx = parseInt(xe[endzone]);
                 var xendy = parseInt(ye[endzone]);

@@ -169,7 +169,8 @@ export function generateMatch(str) {
     line++;
     var json = a[line].split('~')
     var match = JSON.parse(json[1])
-
+    match.events = []
+    
     line++;
     json = a[line].split('~')
     if (json[1] != '(null)') {
@@ -396,6 +397,7 @@ export function psvbParseLatestStats(str, match) {
                     }
                     ev.TimeStamp = new Date(ev.TimeStamp)
                     currentGame.events.push(ev)
+                    match.events.push(ev)
 
                 } catch (error) {
                     console.log('psvbParseLatestStats E', error)

@@ -1,272 +1,357 @@
-import { useState, useEffect } from 'react'
-import { sortBy } from 'lodash'
-import { getDVRalliesInGameForTeam } from '../utils/StatsItem';
+import { useEffect, useRef } from 'react'
+import { writeText, stringToPoint, colourForEfficiency } from '../utils/Utils'
+import { zoneFromString } from '../utils/Utils'
 
-const kFBKills = 0
-const kFBOppServeErrors = 1
-const kFBOppErrors = 2
-const kKills = 3
-const kOppErrors = 4
-const kUnsuccessful = 5
+function ServeReceive({match, stats, showPasses, showAttacks}) {
+    const canvasRef = useRef(null)
+    const ref = useRef(null)
 
-function ServeReceive({ match, selectedGame, selectedTeam }) {
-    const [passingStats, setPassingStats] = useState(null)
+    const getAttackComboOfEvent = (code) => {
+        if (code == undefined)
+        {
+            return null
+        }
+        var acs = match.attackCombos.filter(ac => { return ac.code === code })
+        if (acs.length > 0) {
+            return acs[0]
+        }
+        return null
+    }
 
-    const calculatePassingStats = () => {
-        var tm = selectedTeam === 0 ? match.teamA : match.teamB
-        var players = tm.players
-        var stats = []
-        var matchstats = []
-        stats.push(matchstats)
-        var mrcount = 0
-        for (var nd = 0; nd < match.sets.length; nd++) {
-            var setstats = []
-            stats.push(setstats)
-            var game = match.sets[nd]
-            var rallies = getDVRalliesInGameForTeam(game, tm)
-            var rcount = 0
-            for (var nr = 0; nr < rallies.length; nr++) {
-                var mr = rallies[nr]
-                var row = mr.passrow;
-                if (mr.passEvent === undefined || mr.passEvent.Player === undefined) {
-                    continue
-                }
-                rcount++
-                mrcount++
-                if (players.filter(obj => obj.Guid === mr.passEvent.Player.Guid).length > 0) {
-                    var plstat
-                    var ps = setstats.filter(obj => obj.Player.Guid === mr.passEvent.Player.Guid)
-                    if (ps.length === 0) {
-                        plstat = {}
-                        setstats.push(plstat)
-                        plstat.events = []
-                        plstat.Player = mr.passEvent.Player
-                        plstat.playerName = mr.passEvent.Player.shirtNumber + ". " + mr.passEvent.Player.NickName
-                        plstat.soFail = 0
-                        plstat.soKills = 0
-                        plstat.soFBKills = 0
-                        plstat.soOppErrors = 0
-                        plstat.soFBOppErrors = 0
-                        plstat.totalPoints = 0
-                        plstat.perfectPass = 0
-                        plstat.positivePass = 0
-                        plstat.numberOfPasses = 0
-                        plstat.passHits = 0
-                        plstat.passHitKills = 0
-                        plstat.passHitErrors = 0
+    const calculateZoneStats = (xevs) => {
+        var events = [
+            [[], [], [], [], [], [], [], [], []],
+            [[], [], [], [], [], [], [], [], []],
+            [[], [], [], [], [], [], [], [], []],
+            [[], [], [], [], [], [], [], [], []],
+            [[], [], [], [], [], [], [], [], []],
+            [[], [], [], [], [], [], [], [], []],
+            [[], [], [], [], [], [], [], [], []],
+        ]
+
+        var evs = xevs
+
+        if (evs.length === 0)
+        {
+            return events
+        }
+
+        for (var ne = 0; ne < evs.length; ne++) {
+            var e = evs[ne]
+            var nacs = match.attackCombos === undefined ? 0 : match.attackCombos.length;
+            var ac = getAttackComboOfEvent(e.attackCombo)
+            if ((nacs > 0 && ac != null && ac.targetHitter !== "-") ||
+                (nacs == 0)) {
+                var row = e.Row - 1;
+                var startZone = 0;
+                if (nacs > 0) {
+                    if (ac.isBackcourt) {
+                        if (ac.targetHitter === "B") {
+                            startZone = 9;
+                        }
+                        else if (ac.targetHitter === "F") {
+                            startZone = 7;
+                        }
+                        else {
+                            startZone = 8;
+                        }
                     }
                     else {
-                        plstat = ps[0]
-                    }
-                    plstat.events.push(mr.passEvent)
-                    plstat.numberOfPasses++
-                    if (mr.sideoutType === kUnsuccessful) {
-                        plstat.soFail++
-                    }
-                    else if (mr.sideoutType === kFBKills) {
-                        plstat.soFBKills++
-                    }
-                    else if (mr.sideoutType === kKills) {
-                        plstat.soKills++
-                    }
-                    else if (mr.sideoutType === kOppErrors) {
-                        plstat.soOppErrors++
-                    }
-                    else if (mr.sideoutType === kFBOppErrors) {
-                        plstat.soFBOppErrors++
-                    }
-                    else if (mr.sideoutType === kKills) {
-                        plstat.soKills++
-                    }
-                    plstat.totalPoints += mr.passEvent.passingGrade
-                    if (mr.passEvent.DVGrade === '+') {
-                        plstat.positivePass++;
-                    }
-                    else if (mr.passEvent.DVGrade === '+' || mr.passEvent.DVGrade === '#') {
-                        plstat.positivePass++;
-                        plstat.perfectPass++;
-                    }
-                    if (mr.events.length > 0) {
-                        var passed = false
-                        var transition = false
-                        for (var ne = 0; ne <mr.events.length; ne++) {
-                            var sev = mr.events[ne]
-                            if (sev.Player === null || sev.Player === undefined)
-                            {
-                                continue
-                            }
-                            if (sev.EventType === mr.passEvent.EventType) {
-                                passed = true;
-                            }
-                            if (passed && players.filter(obj => obj.Guid === sev.Player.Guid).length === 0) {
-                                transition = true;
-                                break
-                            }
-                            if (sev.EventType === 4 && sev.Player.Guid === mr.passEvent.Player.Guid) {
-                                plstat.passHits++
-                                if (sev.EventGrade === 3) {
-                                    plstat.passHitKills++
-                                }
-                                else if (sev.EventGrade === 0) {
-                                    plstat.passHitErrors++
-                                }
-                                break
-                            }
+                        if (ac.targetHitter === "B") {
+                            startZone = 2;
+                        }
+                        else if (ac.targetHitter === "F") {
+                            startZone = 4;
+                        }
+                        else {
+                            startZone = 3;
                         }
                     }
                 }
-                for (var npl = 0; npl < setstats.length; npl++) {
-                    var plstat = setstats[npl]
-                    plstat.frequency = plstat.events.length / rcount
+                else {
+                    startZone = zoneFromString(e.BallStartString);
                 }
-            }
-        }
-        for (var nd = 0; nd < match.sets.length; nd++) {
-            var setstats = stats[nd + 1]
-            for (var np = 0; np < setstats.length; np++) {
-                var plstat = setstats[np]
-                var ps = matchstats.filter(obj => obj.Player.Guid === plstat.Player.Guid)
-                var mplstat
-                if (ps.length === 0) {
-                    mplstat = {}
-                    matchstats.push(mplstat)
-                    mplstat.events = []
-                    mplstat.Player = plstat.Player
-                    mplstat.playerName = plstat.Player.shirtNumber + ". " + plstat.Player.NickName
-                    mplstat.soFail = 0
-                    mplstat.soKills = 0
-                    mplstat.soFBKills = 0
-                    mplstat.soOppErrors = 0
-                    mplstat.soFBOppErrors = 0
-                    mplstat.totalPoints = 0
-                    mplstat.perfectPass = 0
-                    mplstat.positivePass = 0
-                    mplstat.numberOfPasses = 0;
-                    mplstat.passHits = 0
-                    mplstat.passHitKills = 0
-                    mplstat.passHitErrors = 0
+                if (startZone > 0 && e.Row !== undefined && isNaN(e.Row) === false) {
+                    events[e.Row - 1][startZone - 1].push(e);
                 }
                 else {
-                    mplstat = ps[0]
+                    // DLog(@"%@ %@", e.attackCombo, e.Player.LastName);
                 }
-                for (var ne = 0; ne < plstat.events.length; ne++) {
-                    mplstat.events.push(plstat.events[ne])
-                }
-                mplstat.numberOfPasses += plstat.numberOfPasses
-                mplstat.soFail += plstat.soFail
-                mplstat.soKills += plstat.soKills
-                mplstat.soFBKills += plstat.soFBKills
-                mplstat.soOppErrors += plstat.soOppErrors
-                mplstat.soFBOppErrors += plstat.soFBOppErrors
-                mplstat.totalPoints += plstat.totalPoints
-                mplstat.perfectPass += plstat.perfectPass
-                mplstat.positivePass += plstat.positivePass
-                mplstat.passHits += plstat.passHits
-                mplstat.passHitKills += plstat.passHitKills
-                mplstat.passHitErrors += plstat.passHitErrors
-
-                plstat.passingAverage = plstat.numberOfPasses > 0 ? plstat.totalPoints / plstat.numberOfPasses : 0
-                plstat.perfectPassPC = plstat.numberOfPasses > 0 ? (plstat.perfectPass * 100) / plstat.numberOfPasses : 0
-                plstat.positivePassPC = plstat.numberOfPasses > 0 ? (plstat.positivePass * 100) / plstat.numberOfPasses : 0
-                plstat.sideOuts = plstat.numberOfPasses - plstat.soFail
-                plstat.FBSideOuts = plstat.soFBKills + plstat.soFBOppErrors
-                plstat.sideOutPC = plstat.numberOfPasses > 0 ? (plstat.sideOuts * 100) / plstat.numberOfPasses : 0
-                plstat.FBsideOutPC = plstat.numberOfPasses > 0 ? (plstat.sideOuts * 100) / plstat.numberOfPasses : 0
-                plstat.passHitsPC = plstat.numberOfPasses > 0 ? (plstat.passHits * 100) / plstat.numberOfPasses : 0
-                plstat.passHitKillsPC = plstat.numberOfPasses > 0 ? (plstat.passHitKills * 100) / plstat.numberOfPasses : 0
-                plstat.passHitsErrorPC = plstat.numberOfPasses > 0 ? (plstat.passHitErrors * 100) / plstat.numberOfPasses : 0
+            }
+            else {
+                // DLog(@"%@ %@", e.attackCombo, e.Player.LastName);
             }
         }
-        for (var n = 0; n < matchstats.length; n++) {
-            var setstats = matchstats[n]
-            setstats.passingAverage = setstats.numberOfPasses > 0 ? setstats.totalPoints / setstats.numberOfPasses : 0
-            setstats.perfectPassPC = setstats.numberOfPasses > 0 ? (setstats.perfectPass * 100) / setstats.numberOfPasses : 0
-            setstats.positivePassPC = setstats.numberOfPasses > 0 ? (setstats.positivePass * 100) / setstats.numberOfPasses : 0
-            setstats.sideOuts = setstats.numberOfPasses - setstats.soFail
-            setstats.FBSideOuts = setstats.soFBKills + setstats.soFBOppErrors
-            setstats.sideOutPC = setstats.numberOfPasses > 0 ? (setstats.sideOuts * 100) / setstats.numberOfPasses : 0
-            setstats.FBsideOutPC = setstats.numberOfPasses > 0 ? (setstats.sideOuts * 100) / setstats.numberOfPasses : 0
-            setstats.passHitsPC = setstats.numberOfPasses > 0 ? (setstats.passHits * 100) / setstats.numberOfPasses : 0
-            setstats.passHitKillsPC = setstats.numberOfPasses > 0 ? (setstats.passHitKills * 100) / setstats.numberOfPasses : 0
-            setstats.passHitsErrorPC = setstats.numberOfPasses > 0 ? (setstats.passHitErrors * 100) / setstats.numberOfPasses : 0
-            setstats.frequency = setstats.events.length / mrcount
+        for (var n=0; n<6; n++)
+        {
+            for (var m=0; m<9; m++)
+            {
+                for (var k=0; k<events[n][m].length; k++)
+                {
+                    events[6][m].push(events[n][m][k])
+                }
+            }
         }
-        setPassingStats(stats)
+        return events
     }
 
-    const currentStats = () => {
-        return passingStats[selectedGame]
+    const draw = ctx => {
+        var xmargin = 20
+        var topmargin = 40
+        const canvas = canvasRef.current
+        canvas.width = window.innerWidth
+        canvas.height = window.innerHeight * 0.82
+        // console.log('canvas width, height', canvas.width, canvas.height)
+        canvas.style.width = `${window.innerWidth}px`
+        canvas.style.height = `${window.innerHeight * 0.78}px`
+        var w = 270
+        var w3 = w / 3
+        var h = 270
+        var h3 = h / 3
+
+        var xscale = w / (100.0);
+        var yscale = h / (100.0);
+
+        var fontsize = 10
+        var zzw = w3 - 4;
+        var zw1 = (zzw * 3) / 4;
+        var zw2 = zzw - zw1;
+    
+        ctx.fillStyle = '#3498db';
+        ctx.fillRect(0, 0, w + xmargin * 2, h + topmargin * 2)        
+
+        var y = topmargin
+        ctx.fillStyle = '#f39c12';
+        ctx.fillRect(xmargin, y, w, h)
+        ctx.fillStyle = '#e67e22';
+        ctx.fillRect(xmargin, y, w, h3)
+        
+        x = xmargin
+        y = topmargin
+
+
+        var events = calculateZoneStats(stats.spikeEvents)
+
+        writeText({ctx: ctx, text: stats.Player.NickName.toUpperCase() + ' RECEIVES', x: x, y: 10}, {textAlign: 'left', fontSize: fontsize * 1.5 });
+
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2
+        ctx.strokeRect(xmargin, topmargin, w, h)
+        var x = xmargin
+        var y = topmargin
+        y += h3
+        ctx.beginPath()
+        ctx.moveTo(x - 10, y)
+        ctx.lineTo(x + w + 10, y)
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 3
+        ctx.stroke()
+
+        y += h3
+        ctx.moveTo(x, y)
+        ctx.lineTo(x + w, y)
+        ctx.lineWidth = 0.5
+        ctx.strokeStyle = '#bdc3c7';
+        ctx.stroke()
+        y = topmargin
+        x += w3
+        ctx.moveTo(x, y)
+        ctx.lineTo(x, y + h)
+        ctx.lineWidth = 0.5
+        ctx.strokeStyle = '#bdc3c7';
+        ctx.stroke()
+        x += w3
+        ctx.moveTo(x, y)
+        ctx.lineTo(x, y + h)
+        ctx.lineWidth = 0.5
+        ctx.strokeStyle = '#bdc3c7';
+        ctx.stroke()
+    
+        //net 
+        ctx.beginPath()
+        ctx.moveTo(xmargin/2, topmargin)
+        ctx.lineTo(w + xmargin * 1.5, topmargin)
+        ctx.lineWidth = 3
+        ctx.strokeStyle = '#000000';
+        ctx.stroke()        
+
+        var rallies = stats.rallies
+
+        if (showAttacks)
+        {
+            var zoneorders = [4, 3, 2, 7, 8, 9, 5, 6, 1];
+            var grandtotal = 0;
+            for (var z=0; z<9; z++)
+            {
+                var a = events[6][z];
+                grandtotal += a.length;
+            }
+
+            var x = xmargin
+            var y = topmargin
+            for (var z=0; z<9; z++)
+            {          
+                var a = events[6][zoneorders[z] - 1];
+                var total = a.length;
+                if (total > 0)
+                {
+                    var pc = (total * 100) / grandtotal;
+                    var tx = x;
+                    var ty = y + 4;
+                    var tw = 30;
+                    var th = 16;
+                    
+                    var pls = [];
+                    var bps = 0;
+                    var bes = 0;
+                    
+                    for (var ne=0; ne<a.length; ne++)
+                    {
+                        var e = a[ne]
+                        if (e.UserDefined01.length > 0 && e.DVGrade === "#")
+                        {
+                            bps++;
+                        }
+                        else if (e.UserDefined01.length > 0 && (e.DVGrade === "=" || e.DVGrade === "/"))
+                        {
+                            bes++;
+                        }
+                        if (pls.filter(obj => obj.Guid === e.Player.Guid).length === 0)
+                        {
+                            pls.push(e.Player);
+                        }
+                    }
+                    var pck = (bps * 100) / total;
+                    var eff = ((bps - bes) * 100) / total;
+                    
+                    // if (bps != 0)
+                    {
+                        var color = colourForEfficiency(eff)
+                        ctx.fillStyle = color
+                        ctx.fillRect(x + 1, y + 1, w3 - 2, h3 - 2)
+                    }
+
+                    writeText({ctx: ctx, text: total.toString(), x: tx + 4, y: ty, width:w3}, {textAlign: 'left', fontSize: fontsize });
+                    writeText({ctx: ctx, text: pc.toFixed(0) + "%", x: tx + w3 - 4, y: ty, width:w3 - 4}, {textAlign: 'right', fontSize: fontsize });
+                    ty += th;
+                    
+                    if (bps > 0)
+                    {
+                        var ss = bps.toString() + ' ' + pck.toFixed(0) + '% ' + eff.toFixed(0) + '%'
+                        writeText({ctx: ctx, text: ss, x: tx + w3 - 4, y: ty, width:w3 - 8}, {textAlign: 'right', fontSize: fontsize });
+                    }
+                    else
+                    {
+                        writeText({ctx: ctx, text: bps.toString(), x: tx + w3 - 4, y: ty, width:tw}, {textAlign: 'right', fontSize: fontsize });
+                    }
+                    ty += th;
+        
+                    for (var np=0; np<pls.length; np++)
+                    {
+                        var pl = pls[np]
+                        var count = 0;
+                        for (var ne=0; ne<a.length; ne++)
+                        {
+                            var e = a[ne]
+                            if (e.Player === pl)
+                            {
+                                count++;
+                            }
+                        }
+                        tx = x;
+                        writeText({ctx: ctx, text: pl.NickName.toUpperCase(), x: tx + 2, y: ty, width:w3 - tw}, {textAlign: 'left', fontSize: fontsize, fontFamily: 'Inter var' });
+                        writeText({ctx: ctx, text: count.toString(), x: tx + w3 - 4, y: ty, width:w3 - 4}, {textAlign: 'right', fontSize: fontsize });
+                        ty += th;
+                    }
+                }
+                
+                x += w3;
+                if (x >= (w - 1))
+                {
+                    x = xmargin;
+                    y += h3;
+                }
+            }
+        }
+
+        if (showPasses)
+        {
+            var x = xmargin
+            var y = topmargin
+    
+            for (var ne=0; ne<rallies.length; ne++)
+            {
+                var mr = rallies[ne]
+                var e = mr.passEvent
+                if (e.BallStartString === '')
+                {
+                    continue
+                }
+                var pt = stringToPoint(e.BallStartString)
+                // if (pt.y < 50)
+                {
+                    pt.y = 100 - pt.y
+                    pt.x = 100 - pt.x
+                }
+                console.log(e.BallStartString, pt)
+    
+                var epx = x + pt.x * xscale;
+                var epy = y + pt.y * yscale;
+    
+                ctx.fillStyle = '#7f8c8d'
+                if (e.DVGrade === '=')
+                {
+                    ctx.fillStyle = '#ff0000'
+                }
+                else if (e.DVGrade === '-')
+                {
+                    ctx.fillStyle = '#9b59b6'
+                }
+                else if (e.DVGrade === '+')
+                {
+                    ctx.fillStyle = '#16a085'
+                }
+                else if (e.DVGrade === '#')
+                {
+                    ctx.fillStyle = '#00ff00'
+                }
+                
+                // ctx.fillRect(epx -3, epy-3, 6, 6)
+                var rad = 2
+                ctx.beginPath();
+                ctx.arc(epx - rad, epy - rad, rad * 2, 0, 2 * Math.PI);
+                ctx.closePath()
+                ctx.fill()
+                if (mr.sideout)
+                {
+                    var rad = 2
+                    ctx.beginPath();
+                    ctx.arc(epx - rad, epy - rad, rad * 2, 0, 2 * Math.PI);
+                    ctx.closePath()
+                    ctx.lineWidth = 1
+                    ctx.stroke()
+                }
+            }
+    
+        }
     }
 
-    useEffect(() => {
-        calculatePassingStats()
-    }, [selectedGame])
 
-    if (passingStats === null) {
-        return <></>
-    }
-
-    return (
-        <div>
-            <div className="shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-                <table className="min-w-full divide-y divide-gray-300">
-                    <thead className="bg-gray-50">
-                        <tr>
-                            <th scope="col" className="py-2 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
-                                Receiver
-                            </th>
-                            <th scope="col" className="px-3 py-2 text-left text-sm font-semibold text-gray-900">
-                                # Passes
-                            </th>
-                            <th scope="col" className="px-3 py-2 text-left text-sm font-semibold text-gray-900">
-                                Passing Average
-                            </th>
-                            <th scope="col" className="px-3 py-2 text-left text-sm font-semibold text-gray-900">
-                                Perfect %
-                            </th>
-                            <th scope="col" className="px-3 py-2 text-left text-sm font-semibold text-gray-900">
-                                Positive %
-                            </th>
-                            <th scope="col" className="px-3 py-2 text-left text-sm font-semibold text-gray-900">
-                                Sideout %
-                            </th>
-                            <th scope="col" className="px-3 py-2 text-left text-sm font-semibold text-gray-900">
-                                FB Sideout %
-                            </th>
-                            <th scope="col" className="px-3 py-2 text-left text-sm font-semibold text-gray-900">
-                                Pass Hits
-                            </th>
-                            <th scope="col" className="px-3 py-2 text-left text-sm font-semibold text-gray-900">
-                                Pass Hit Kills
-                            </th>
-                            <th scope="col" className="px-3 py-2 text-left text-sm font-semibold text-gray-900">
-                                Pass Hit Errors
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody className="bg-white">
-                        {sortBy(currentStats(), 'sideOutPC').filter(obj => obj.frequency > 0.1).map((statsItem, i) => (
-                            <tr key={statsItem.Player.Guid} className={i % 2 === 0 ? undefined : 'bg-gray-100'}>
-                                <td className="whitespace-nowrap py-2.5 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                                    {statsItem.Player.shirtNumber + ". " + statsItem.Player.NickName}
-                                </td>
-                                <td className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">{statsItem.numberOfPasses}</td>
-                                <td className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">{statsItem.passingAverage.toFixed(2)}</td>
-                                <td className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">{statsItem.perfectPassPC.toFixed(0)}</td>
-                                <td className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">{statsItem.positivePassPC.toFixed(0)}</td>
-                                <td className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">{statsItem.sideOutPC.toFixed(0)}</td>
-                                <td className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">{statsItem.FBsideOutPC.toFixed(0)}</td>
-                                <td className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">{statsItem.passHits.toFixed(0)}</td>
-                                <td className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">{statsItem.passHitKills.toFixed(0)}</td>
-                                <td className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">{statsItem.passHitErrors.toFixed(0)}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-
-        </div>
-    )
+    useEffect(() => {      
+        const canvas = canvasRef.current
+        const context = canvas.getContext('2d')
+        canvas.style.width = "50%";
+        canvas.style.height = "50%";
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+        draw(context)
+      }, [draw])
+    
+  return (
+    <div ref={ref}>
+      <canvas id="canvas" ref={canvasRef} />
+    </div>
+  )
 }
 
 export default ServeReceive

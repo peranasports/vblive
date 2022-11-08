@@ -3,7 +3,7 @@ import { writeText, colourForEfficiency, stringToPoint } from '../utils/Utils'
 import { orderBy } from 'lodash'
 import { CartesianAxis } from 'recharts'
 
-function HittingChart({ match, events, rows }) {
+function HittingChart({ match, events, rows, drawMode }) {
     const canvasRef = useRef(null)
     const ref = useRef(null)
 
@@ -13,6 +13,53 @@ function HittingChart({ match, events, rows }) {
             return acs[0]
         }
         return null
+    }
+
+    const drawBallPath = (ctx, acobject, xscale, yscale) => {
+        // if (coneno == 0 || coneno > 8) {
+        //     return;
+        // }
+
+        var xgap = 40;
+        var tgap = 60;
+    
+        var x = xgap;
+        var y = tgap;
+        var fontsize = 10
+        
+        var evs = acobject.events
+        var pc = evs.length > 0 ? (acobject.kills * 100) / evs.length : 0
+
+        for (var ne = 0; ne < evs.length; ne++) {
+            var e = evs[ne]
+            if (e.BallStartString === '' || e.BallEndString === '')
+            {
+                continue
+            }
+
+            var ptStart = stringToPoint(e.BallStartString)
+            var ptEnd = stringToPoint(e.BallEndString)
+            // if (ptEnd.y > 50)
+            // {
+            //     ptEnd.y = 50 - ptEnd.y
+            //     ptEnd.x = 100 - ptEnd.x
+            //     ptStart.y = 50 - ptStart.y
+            //     ptStart.x = 100 - ptStart.x
+            // }
+
+            var spx = x + ptStart.x * xscale;
+            var spy = y + ptStart.y * yscale;
+            var epx = x + ptEnd.x * xscale;
+            var epy = y + ptEnd.y * yscale;
+
+            ctx.lineWidth = 1
+            ctx.strokeStyle = '#000000'
+            ctx.moveTo(spx, spy)
+            ctx.lineTo(epx, epy)
+            ctx.stroke()
+            ctx.fillStyle = '#000000'
+            ctx.fillRect(spx - 3, spy - 3, 6, 6)
+        }
     }
 
     const drawHittingCone = (ctx, acobject, xscale, yscale) => {
@@ -32,7 +79,7 @@ function HittingChart({ match, events, rows }) {
 
         for (var ne = 0; ne < evs.length; ne++) {
             var e = evs[ne]
-            if (e.codeNumber === undefined)
+            if (e.coneNumber === undefined)
             {
                 continue
             }
@@ -419,7 +466,14 @@ function HittingChart({ match, events, rows }) {
 
         for (var nac=0; nac<acobjects.length; nac++)
         {
-            drawHittingCone(ctx, acobjects[nac], xscale, yscale)
+            if (drawMode === 0)
+            {
+                drawBallPath(ctx, acobjects[nac], xscale, yscale)
+            }
+            else if (drawMode === 1)
+            {
+                drawHittingCone(ctx, acobjects[nac], xscale, yscale)
+            }
         }
     }
 

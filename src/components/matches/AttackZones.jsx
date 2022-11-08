@@ -8,6 +8,10 @@ function AttackZones({ match, selectedGame, selectedTeam }) {
     const [events, setEvents] = useState(null)
 
     const getAttackComboOfEvent = (code) => {
+        if (code == undefined)
+        {
+            return null
+        }
         var acs = match.attackCombos.filter(ac => { return ac.code === code })
         if (acs.length > 0) {
             return acs[0]
@@ -39,7 +43,7 @@ function AttackZones({ match, selectedGame, selectedTeam }) {
 
         for (var ne = 0; ne < evs.length; ne++) {
             var e = evs[ne]
-            var nacs = match.attackCombos.length;
+            var nacs = match.attackCombos === undefined ? 0 : match.attackCombos.length;
             var ac = getAttackComboOfEvent(e.attackCombo)
             if ((nacs > 0 && ac != null && ac.targetHitter !== "-") ||
                 (nacs == 0)) {
@@ -72,8 +76,8 @@ function AttackZones({ match, selectedGame, selectedTeam }) {
                 else {
                     startZone = zoneFromString(e.BallStartString);
                 }
-                if (startZone > 0) {
-                    events[row][startZone - 1].push(e);
+                if (startZone > 0 && e.Row !== undefined && isNaN(e.Row) === false) {
+                    events[e.Row - 1][startZone - 1].push(e);
                 }
                 else {
                     // DLog(@"%@ %@", e.attackCombo, e.Player.LastName);
