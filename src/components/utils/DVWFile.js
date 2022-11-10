@@ -160,6 +160,7 @@ export function generateMatch(str) {
                         if (homeTeam === null) {
                             homeTeam = {}
                             homeTeam.Name = name
+                            homeTeam.Code = sm[0]
                             match.Team = homeTeam
                             match.teamA = homeTeam
                             match.teamA.players = []
@@ -167,6 +168,7 @@ export function generateMatch(str) {
                         else {
                             awayTeam = {}
                             awayTeam.Name = name
+                            awayTeam.Code = sm[0]
                             match.Opposition = awayTeam
                             match.teamB = awayTeam
                             match.teamB.players = []
@@ -472,6 +474,8 @@ export function generateMatch(str) {
     }
 
     match.sets = match.drills
+    var dd = matchdate.split('/')
+    match.code = dd[0] + '.' + dd[1] + '.' +dd[2] + '~' + match.teamA.Code + 'vs' + match.teamB.Code
     console.log('match = ', match)
     return match
 }

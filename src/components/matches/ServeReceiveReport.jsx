@@ -273,7 +273,7 @@ function ServeReceiveReport({ match, selectedGame, selectedTeam }) {
                         </tr>
                     </thead>
                     <tbody className="bg-white">
-                        {sortBy(currentStats(), 'sideOutPC').filter(obj => obj.frequency > 0.1).map((statsItem, i) => (
+                        {sortBy(currentStats(), 'FBsideOutPC').filter(obj => obj.frequency > 0.1).map((statsItem, i) => (
                             <tr key={statsItem.Player.Guid} className={i % 2 === 0 ? undefined : 'bg-gray-100'}>
                                 <td className="whitespace-nowrap py-2.5 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
                                     {statsItem.Player.shirtNumber + ". " + statsItem.Player.NickName}
@@ -314,7 +314,7 @@ function ServeReceiveReport({ match, selectedGame, selectedTeam }) {
 
             </div>
             <div className="carousel w-full">
-                {sortBy(currentStats(), 'sideOutPC').filter(obj => obj.frequency > 0.1).map((statsItem, i) => (
+                {sortBy(currentStats(), 'FBsideOutPC').filter(obj => obj.frequency > 0.1).map((statsItem, i) => (
 
                     <div className="carousel-item w-80 h-80 my-2" key={statsItem.Player.Guid}>
                         {/* <img src="https://placeimg.com/400/300/arch" alt="Burger" /> */}

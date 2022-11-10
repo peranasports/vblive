@@ -6,33 +6,35 @@ import Footer from './components/layout/Footer'
 import Home from './pages/Home'
 import Session from './pages/Session'
 import NotFound from './pages/NotFound'
-import MatchSummary from './components/matches/MatchSummary'
+import { CookiesProvider } from 'react-cookie';
 
 function App() {
   return (
-    <VBLiveAPIProvider>
-      <AlertProvider>
-        <Router>
-          <div className='flex flex-col h-screen'>
-            <Navbar />
-            <main className='container mx-auto px-3 pb-12'>
-              <Routes>
-                <Route path='/' element={<Home />} />
-                <Route path='/session/:sessionId' element={<Session />} />
-                {/* <Route path='/about' element={<About />} />
+    <CookiesProvider>
+      <VBLiveAPIProvider>
+        <AlertProvider>
+          <Router>
+            <div className='flex flex-col h-screen'>
+              <Navbar />
+              <main className='container mx-auto px-3 pb-12'>
+                <Routes>
+                  <Route path='/' element={<Home />} />
+                  <Route path='/session/:sessionId' element={<Session />} />
+                  {/* <Route path='/about' element={<About />} />
             <Route path='/player/:playerId' element={<Player />} />
             <Route path='/filtersanalysis/:matchIds/:playerId' element={<FiltersAnalysis />} />
             <Route path='/playlist/:playerId' element={<Playlist />} />
             <Route path='/filtersvideo' element={<FiltersVideo />} />
             <Route path='/notfound' element={<NotFound />} /> */}
-                <Route path='/*' element={<NotFound />} />
-              </Routes>
-            </main>
-            <Footer />
-          </div>
-        </Router>
-      </AlertProvider>
-    </VBLiveAPIProvider>
+                  <Route path='/*' element={<NotFound />} />
+                </Routes>
+              </main>
+              <Footer />
+            </div>
+          </Router>
+        </AlertProvider>
+      </VBLiveAPIProvider>
+    </CookiesProvider>
   );
 }
 

@@ -14,6 +14,7 @@ import SideoutReport from '../components/matches/SideoutReport'
 import AttackZones from '../components/matches/AttackZones'
 import HittingChartReport from '../components/matches/HittingChartReport'
 import ServeReceiveReport from '../components/matches/ServeReceiveReport'
+import VideoAnalysis from '../components/matches/VideoAnalysis'
 
 function Session() {
     const { session, appName, loading, dispatch } = useContext(VBLiveAPIContext)
@@ -54,7 +55,7 @@ function Session() {
 
     useEffect(() => {
         getLatest()
-        setTimeout(() => setCounter(!counter), 30000)
+        // setTimeout(() => setCounter(!counter), 30000)
     }, [getLatest, counter, selectedGame])
 
     // }, [dispatch, params.sessionId], selectedGame, counter)
@@ -82,6 +83,9 @@ function Session() {
         }
         else if (currentReport === 5) {
             return <HittingChartReport match={match} selectedGame={selectedGame} selectedTeam={selectedTeam}/>
+        }
+        else if (currentReport === 6) {
+            return <VideoAnalysis match={match}/>
         }
     }
 
@@ -133,6 +137,11 @@ function Session() {
                             setCurrentReport(5)
                         }}
                     >Hitting Chart</a>
+                    <a className={currentReport == 6 ? "tab tab-bordered tab-active" : "tab tab-bordered"}
+                        onClick={() => {
+                            setCurrentReport(6)
+                        }}
+                    >Video Analysis</a>
                 </div>
                 <div>
                     {
