@@ -55,7 +55,7 @@ function Session() {
 
     useEffect(() => {
         getLatest()
-        // setTimeout(() => setCounter(!counter), 30000)
+        setTimeout(() => setCounter(!counter), 30000)
     }, [getLatest, counter, selectedGame])
 
     // }, [dispatch, params.sessionId], selectedGame, counter)

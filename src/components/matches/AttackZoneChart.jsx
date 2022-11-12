@@ -137,7 +137,7 @@ function AttackZoneChart({match, events, row}) {
                 
                 if (bps > 0)
                 {
-                    var ss = bps.toString() + ' ' + pck.toFixed(0) + '% ' + eff.toFixed(0) + '%'
+                    var ss = bps.toString() + 'K ' + pck.toFixed(0) + '% ' + eff.toFixed(0) + '%'
                     writeText({ctx: ctx, text: ss, x: tx + w3 - 4, y: ty, width:w3 - 8}, {textAlign: 'right', fontSize: fontsize });
                 }
                 else
