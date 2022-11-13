@@ -71,6 +71,10 @@ function ServeReceiveReport({ match, selectedGame, selectedTeam }) {
                     if (idx != -1) {
                         for (var ne = idx + 1; ne < mr.events.length; ne++) {
                             var e = mr.events[ne]
+                            if (e.Player === undefined)
+                            {
+                                continue
+                            }
                             var isTeamPlayer = players.filter(obj => obj.Guid === e.Player.Guid).length > 0
                             if (isTeamPlayer) {
                                 if (e.EventType === kSkillSpike) {
