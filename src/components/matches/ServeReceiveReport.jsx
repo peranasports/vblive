@@ -71,7 +71,7 @@ function ServeReceiveReport({ match, selectedGame, selectedTeam }) {
                     if (idx != -1) {
                         for (var ne = idx + 1; ne < mr.events.length; ne++) {
                             var e = mr.events[ne]
-                            if (e.Player === undefined)
+                            if (e.Player === undefined || e.Player === null)
                             {
                                 continue
                             }

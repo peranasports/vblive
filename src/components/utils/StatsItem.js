@@ -1149,7 +1149,7 @@ function findSetter(pls)
     for (var n=0; n<pls.length; n++)
     {
         var pl = pls[n]
-        if (pl.includes('Setter'))
+        if (pl.PositionString !== undefined && pl.PositionString.includes('Setter'))
         {
             return pl;
         }
@@ -1230,7 +1230,7 @@ export function getVBStatsRalliesInGameForTeam(g, tm)
                 }
                 if (e.Player == currentSetter)
                 {
-                    if (pl.PositionString.includes('Setter'))
+                    if (pl.PositionString !== undefined && pl.PositionString.includes('Setter'))
                     {
                         currentSetter = pl;
                     }
@@ -1250,7 +1250,7 @@ export function getVBStatsRalliesInGameForTeam(g, tm)
                 }
                 else if (e.Player == currentOppositionSetter)
                 {
-                    if (pl.PositionString.includes('Setter'))
+                    if (pl.PositionString !== undefined && pl.PositionString.includes('Setter'))
                     {
                         currentOppositionSetter = pl;
                     }
@@ -1270,7 +1270,7 @@ export function getVBStatsRalliesInGameForTeam(g, tm)
                 }
                 else if (g.match.teamA.players.filter(obj => obj.Guid === e.Player.Guid).length > 0)
                 {
-                    if (currentSetter == null && pl.PositionString.includes('Setter'))
+                    if (currentSetter == null && pl.PositionString !== undefined && pl.PositionString.includes('Setter'))
                     {
                         currentSetter = pl;
                         var rowOnPos =  [1, 6, 5, 4, 3, 2];
@@ -1283,7 +1283,7 @@ export function getVBStatsRalliesInGameForTeam(g, tm)
                 }
                 else if (g.match.teamB.players.filter(obj => obj.Guid === e.Player.Guid).length > 0)
                 {
-                    if (currentOppositionSetter == null && pl.PositionString.includes('Setter'))
+                    if (currentOppositionSetter == null && pl.PositionString !== undefined && pl.PositionString.includes('Setter'))
                     {
                         currentOppositionSetter = pl;
                         var rowOnPos =  [1, 6, 5, 4, 3, 2];
