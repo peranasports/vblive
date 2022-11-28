@@ -72,7 +72,11 @@ function ServeReceive({match, stats, showPasses, showAttacks}) {
                     startZone = zoneFromString(e.BallStartString);
                 }
                 if (startZone > 0 && e.Row !== undefined && isNaN(e.Row) === false) {
-                    events[e.Row - 1][startZone - 1].push(e);
+                    try {
+                        events[e.Row - 1][startZone - 1].push(e);
+                    } catch (error) {
+                        console.log(e)                        
+                    }
                 }
                 else {
                     // DLog(@"%@ %@", e.attackCombo, e.Player.LastName);
@@ -208,13 +212,27 @@ function ServeReceive({match, stats, showPasses, showAttacks}) {
                     for (var ne=0; ne<a.length; ne++)
                     {
                         var e = a[ne]
-                        if (e.UserDefined01.length > 0 && e.DVGrade === "#")
+                        if (match.app === 'VBStats')
                         {
-                            bps++;
+                            if (e.EventGrade === 3)
+                            {
+                                bps++;
+                            }
+                            else if (e.EventGrade === 0)
+                            {
+                                bes++;
+                            }        
                         }
-                        else if (e.UserDefined01.length > 0 && (e.DVGrade === "=" || e.DVGrade === "/"))
+                        else
                         {
-                            bes++;
+                            if (e.UserDefined01.length > 0 && e.DVGrade === "#")
+                            {
+                                bps++;
+                            }
+                            else if (e.UserDefined01.length > 0 && (e.DVGrade === "=" || e.DVGrade === "/"))
+                            {
+                                bes++;
+                            }
                         }
                         if (pls.filter(obj => obj.Guid === e.Player.Guid).length === 0)
                         {
@@ -237,7 +255,7 @@ function ServeReceive({match, stats, showPasses, showAttacks}) {
                     
                     if (bps > 0)
                     {
-                        var ss = bps.toString() + ' ' + pck.toFixed(0) + '% ' + eff.toFixed(0) + '%'
+                        var ss = bps.toString() + ' ' + pck.toFixed(0) + 'K% ' + eff.toFixed(0) + 'Eff'
                         writeText({ctx: ctx, text: ss, x: tx + w3 - 4, y: ty, width:w3 - 8}, {textAlign: 'right', fontSize: fontsize });
                     }
                     else
@@ -283,11 +301,15 @@ function ServeReceive({match, stats, showPasses, showAttacks}) {
             {
                 var mr = rallies[ne]
                 var e = mr.passEvent
-                if (e.BallStartString === '')
+                if (e.BallStartString === undefined || e.BallStartString === '' || e.BallStartString === '0,0')
                 {
                     continue
                 }
                 var pt = stringToPoint(e.BallStartString)
+                if (pt.y < 0)
+                {
+                    continue
+                }
                 // if (pt.y < 50)
                 {
                     pt.y = 100 - pt.y

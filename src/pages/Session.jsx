@@ -47,6 +47,7 @@ function Session() {
         {
             mx = calculateDVWStats(m)
         }
+        mx.app = sessionData.appName
         mx = calculateSideoutStats(mx, sessionData.appName)
         // console.log('sessionId, match=', params.sessionId, mx)
         setMatch(mx)
@@ -55,7 +56,7 @@ function Session() {
 
     useEffect(() => {
         getLatest()
-        setTimeout(() => setCounter(!counter), 30000)
+        // setTimeout(() => setCounter(!counter), 30000)
     }, [getLatest, counter, selectedGame])
 
     // }, [dispatch, params.sessionId], selectedGame, counter)

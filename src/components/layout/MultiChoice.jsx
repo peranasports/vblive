@@ -97,6 +97,11 @@ function MultiChoice({ filter, handleOptionChanged }) {
         handleOptionChanged(filter, item)
     }
 
+    if (filter.items === undefined)
+    {
+        return <></>
+    }
+
     // console.log('MultiChoice', filter)
     return (
         <div>

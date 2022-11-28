@@ -1220,8 +1220,8 @@ function createEvent(eindex, pl, g, ts2, et, se, se2, grade, err, bs, be, xhomes
         if (ev.DVGrade === "=") gr = 0;
         else if (ev.DVGrade === "/") gr = 0.5
         else if (ev.DVGrade === "-") gr = 1;
-        else if (ev.DVGrade === "!") gr = 1.5;
-        else if (ev.DVGrade === "+") gr = 2.5;
+        else if (ev.DVGrade === "!") gr = 2;
+        else if (ev.DVGrade === "+") gr = 3;
         else if (ev.DVGrade === "#") gr = 3;
     }
     ev.passingGrade = gr

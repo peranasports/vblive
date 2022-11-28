@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { writeText, colourForEfficiency, stringToPoint } from '../utils/Utils'
+import { writeText, colourForEfficiency, stringToPoint, zoneFromString } from '../utils/Utils'
 import { orderBy } from 'lodash'
 import { CartesianAxis } from 'recharts'
 
@@ -15,6 +15,49 @@ function HittingChart({ match, events, rows, drawMode }) {
         return null
     }
 
+    const drawVBStatsBallPath = (ctx, e, xscale, yscale) => {
+        var xgap = 40;
+        var tgap = 60;
+
+        var x = xgap;
+        var y = tgap;
+        var fontsize = 10
+
+        if (e.BallStartString === undefined || e.BallEndString === undefined || e.BallStartString === '' || e.BallEndString === '') {
+            return
+        }
+
+        var ptStart = stringToPoint(e.BallStartString)
+        var ptEnd = stringToPoint(e.BallEndString)
+
+        var spx = x + ptStart.x * xscale;
+        var spy = y + ptStart.y * yscale;
+        var epx = x + ptEnd.x * xscale;
+        var epy = y + ptEnd.y * yscale;
+
+        ctx.save()
+        ctx.strokeStyle = '#7f8c8d'
+        ctx.fillStyle = '#7f8c8d'
+        if (e.EventGrade === 0) {
+            ctx.fillStyle = '#ff0000'
+            ctx.strokeStyle = '#ff0000'
+        }
+        else if (e.EventGrade === 3) {
+            ctx.fillStyle = '#00ff00'
+            ctx.strokeStyle = '#00ff00'
+        }
+
+        ctx.lineWidth = 0.5
+        ctx.beginPath()
+        ctx.moveTo(spx, spy)
+        ctx.lineTo(epx, epy)
+        ctx.stroke()
+        // ctx.fillStyle = '#000000'
+        // ctx.fillRect(spx - 3, spy - 3, 6, 6)
+        ctx.restore()
+    }
+
+
     const drawBallPath = (ctx, acobject, xscale, yscale) => {
         // if (coneno == 0 || coneno > 8) {
         //     return;
@@ -22,18 +65,17 @@ function HittingChart({ match, events, rows, drawMode }) {
 
         var xgap = 40;
         var tgap = 60;
-    
+
         var x = xgap;
         var y = tgap;
         var fontsize = 10
-        
+
         var evs = acobject.events
         var pc = evs.length > 0 ? (acobject.kills * 100) / evs.length : 0
 
         for (var ne = 0; ne < evs.length; ne++) {
             var e = evs[ne]
-            if (e.BallStartString === '' || e.BallEndString === '')
-            {
+            if (e.BallStartString === '' || e.BallEndString === '') {
                 continue
             }
 
@@ -69,28 +111,26 @@ function HittingChart({ match, events, rows, drawMode }) {
 
         var xgap = 40;
         var tgap = 60;
-    
+
         var x = xgap;
         var y = tgap;
         var fontsize = 10
-        
+
         var evs = acobject.events
         var pc = evs.length > 0 ? (acobject.kills * 100) / evs.length : 0
 
         for (var ne = 0; ne < evs.length; ne++) {
             var e = evs[ne]
-            if (e.coneNumber === undefined)
-            {
+            if (e.coneNumber === undefined) {
                 continue
             }
             var coneno = parseInt(e.coneNumber)
-            if (coneno === 0 || coneno > 8)
-            {
+            if (coneno === 0 || coneno > 8) {
                 continue
             }
             var ac = getAttackCombo(e.attackCombo)
             if (ac != null) {
-//                drawAttackCombo(ctx, ac);
+                //                drawAttackCombo(ctx, ac);
                 var ptStart = ac.hittingPoint;
                 if (ptStart.x === undefined && ptStart.y === undefined) {
                     ptStart = stringToPoint(e.ballStart)
@@ -211,9 +251,9 @@ function HittingChart({ match, events, rows, drawMode }) {
                                 var px = x + xx * xscale;
                                 var py = y + yy * yscale;
                                 ctx.lineTo(px, py);
-                            } 
+                            }
                             catch (error) {
-                                console.log(error)    
+                                console.log(error)
                             }
                         }
                         ctx.lineTo(spx, spy);
@@ -294,21 +334,19 @@ function HittingChart({ match, events, rows, drawMode }) {
                 var a = events[row - 1][z];
                 for (var ne = 0; ne < a.length; ne++) {
                     zoneevents.push(a[ne])
-
-                    var acs = acobjects.length > 0 ? acobjects.filter(obj => obj.attackCombo.code === a[ne].attackCombo) : null
-                    if (acs === null || acs.length === 0)
-                    {
-                        var ac = getAttackCombo(a[ne].attackCombo)
-                        if (ac !== null)
-                        {
-                            acobjects.push({attackCombo: ac, events:[a[ne]], kills:a[ne].DVGrade === '#' ? 1 : 0})
+                    if (match.app !== 'VBStats') {
+                        var acs = acobjects.length > 0 ? acobjects.filter(obj => obj.attackCombo.code === a[ne].attackCombo) : null
+                        if (acs === null || acs.length === 0) {
+                            var ac = getAttackCombo(a[ne].attackCombo)
+                            if (ac !== null) {
+                                acobjects.push({ attackCombo: ac, events: [a[ne]], kills: a[ne].DVGrade === '#' ? 1 : 0 })
+                            }
                         }
-                    }
-                    else
-                    {
-                        var acobject = acs[0]
-                        acobject.events.push(a[ne])
-                        acobject.kills += a[ne].DVGrade === '#' ? 1 : 0
+                        else {
+                            var acobject = acs[0]
+                            acobject.events.push(a[ne])
+                            acobject.kills += a[ne].DVGrade === '#' ? 1 : 0
+                        }
                     }
                 }
                 grandtotal += a.length;
@@ -343,16 +381,34 @@ function HittingChart({ match, events, rows, drawMode }) {
                 var bps = 0;
                 var bes = 0;
 
-                for (var ne = 0; ne < a.length; ne++) {
-                    var e = a[ne]
-                    if (e.UserDefined01.length > 0 && e.DVGrade === "#") {
-                        bps++;
+                if (match.app === 'VBStats') {
+                    for (var ne = 0; ne < a.length; ne++) {
+                        var e = a[ne]
+                        if (e.EventGrade === 3)
+                        {
+                            bps++;
+                        }
+                        else if (e.EventGrade === 0)
+                        {
+                            bes++;
+                        }    
+                        if (pls.filter(obj => obj.Guid === e.Player.Guid).length === 0) {
+                            pls.push(e.Player);
+                        }
                     }
-                    else if (e.UserDefined01.length > 0 && (e.DVGrade === "=" || e.DVGrade === "/")) {
-                        bes++;
-                    }
-                    if (pls.filter(obj => obj.Guid === e.Player.Guid).length === 0) {
-                        pls.push(e.Player);
+                }
+                else {
+                    for (var ne = 0; ne < a.length; ne++) {
+                        var e = a[ne]
+                        if (e.UserDefined01.length > 0 && e.DVGrade === "#") {
+                            bps++;
+                        }
+                        else if (e.UserDefined01.length > 0 && (e.DVGrade === "=" || e.DVGrade === "/")) {
+                            bes++;
+                        }
+                        if (pls.filter(obj => obj.Guid === e.Player.Guid).length === 0) {
+                            pls.push(e.Player);
+                        }
                     }
                 }
                 var pck = (bps * 100) / total;
@@ -370,7 +426,7 @@ function HittingChart({ match, events, rows, drawMode }) {
                 ty += th;
 
                 if (bps > 0) {
-                    var ss = bps.toString() + ' ' + pck.toFixed(0) + '% ' + eff.toFixed(0) + '%'
+                    var ss = bps.toString() + 'K ' + pck.toFixed(0) + 'K% ' + eff.toFixed(0) + 'Eff'
                     writeText({ ctx: ctx, text: ss, x: tx + w3 - 4, y: ty, width: w3 - 8 }, { textAlign: 'right', fontSize: fontsize });
                 }
                 else {
@@ -464,15 +520,29 @@ function HittingChart({ match, events, rows, drawMode }) {
         ctx.strokeStyle = '#000000';
         ctx.stroke()
 
-        for (var nac=0; nac<acobjects.length; nac++)
-        {
-            if (drawMode === 0)
-            {
-                drawBallPath(ctx, acobjects[nac], xscale, yscale)
+        if (match.app === 'VBStats') {
+            for (var r = 0; r < 6; r++) {
+                if (rows.filter(obj => obj === (r + 1).toString()).length === 0)
+                {
+                    continue
+                }
+                for (var z = 0; z < 9; z++) {
+                    var a = events[r][z]
+                    for (var ne = 0; ne < a.length; ne++) {
+                        var e = a[ne]
+                        drawVBStatsBallPath(ctx, e, xscale, yscale)
+                    }
+                }
             }
-            else if (drawMode === 1)
-            {
-                drawHittingCone(ctx, acobjects[nac], xscale, yscale)
+        }
+        else {
+            for (var nac = 0; nac < acobjects.length; nac++) {
+                if (drawMode === 0) {
+                    drawBallPath(ctx, acobjects[nac], xscale, yscale)
+                }
+                else if (drawMode === 1) {
+                    drawHittingCone(ctx, acobjects[nac], xscale, yscale)
+                }
             }
         }
     }

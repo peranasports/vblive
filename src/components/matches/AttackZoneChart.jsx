@@ -108,13 +108,27 @@ function AttackZoneChart({match, events, row}) {
                 for (var ne=0; ne<a.length; ne++)
                 {
                     var e = a[ne]
-                    if (e.UserDefined01.length > 0 && e.DVGrade === "#")
+                    if (match.app === 'VBStats')
                     {
-                        bps++;
+                        if (e.EventGrade === 3)
+                        {
+                            bps++;
+                        }
+                        else if (e.EventGrade === 0)
+                        {
+                            bes++;
+                        }    
                     }
-                    else if (e.UserDefined01.length > 0 && (e.DVGrade === "=" || e.DVGrade === "/"))
+                    else
                     {
-                        bes++;
+                        if (e.UserDefined01.length > 0 && e.DVGrade === "#")
+                        {
+                            bps++;
+                        }
+                        else if (e.UserDefined01.length > 0 && (e.DVGrade === "=" || e.DVGrade === "/"))
+                        {
+                            bes++;
+                        }    
                     }
                     if (pls.filter(obj => obj.Guid === e.Player.Guid).length === 0)
                     {
@@ -137,7 +151,7 @@ function AttackZoneChart({match, events, row}) {
                 
                 if (bps > 0)
                 {
-                    var ss = bps.toString() + 'K ' + pck.toFixed(0) + '% ' + eff.toFixed(0) + '%'
+                    var ss = bps.toString() + 'K ' + pck.toFixed(0) + 'K% ' + eff.toFixed(0) + 'Eff'
                     writeText({ctx: ctx, text: ss, x: tx + w3 - 4, y: ty, width:w3 - 8}, {textAlign: 'right', fontSize: fontsize });
                 }
                 else

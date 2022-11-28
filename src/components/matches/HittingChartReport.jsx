@@ -70,59 +70,72 @@ function HittingChartReport({ match, selectedGame, selectedTeam }) {
             }
         }
 
-        for (var ne = 0; ne < evs.length; ne++) {
-            var e = evs[ne]
-            var nacs = match.attackCombos.length;
-            var ac = getAttackComboOfEvent(e.attackCombo)
-            if (ac === null || ac.code === undefined)
-            {
-                continue
+        if (match.app === 'VBStats')
+        {
+            for (var ne = 0; ne < evs.length; ne++) {
+                var e = evs[ne]
+                var startZone = zoneFromString(e.BallStartString)
+                if (startZone > 0 && e.Row !== undefined && isNaN(e.Row) === false) {
+                    xevents[e.Row - 1][startZone - 1].push(e);
+                }
             }
-            if (checkFilter("Attack Combos", ac.code) === false) {
-                continue
-            }
-            if ((nacs > 0 && ac != null && ac.targetHitter !== "-") ||
-                (nacs == 0)) {
-                var row = e.Row - 1;
-                var startZone = 0;
-                if (nacs > 0) {
-                    if (ac.isBackcourt) {
-                        if (ac.targetHitter === "B") {
-                            startZone = 9;
-                        }
-                        else if (ac.targetHitter === "F") {
-                            startZone = 7;
+        }
+        else
+        {
+            for (var ne = 0; ne < evs.length; ne++) {
+                var e = evs[ne]
+                var nacs = match.attackCombos.length;
+                var ac = getAttackComboOfEvent(e.attackCombo)
+                if (ac === null || ac.code === undefined)
+                {
+                    continue
+                }
+                if (checkFilter("Attack Combos", ac.code) === false) {
+                    continue
+                }
+                if ((nacs > 0 && ac != null && ac.targetHitter !== "-") ||
+                    (nacs == 0)) {
+                    var row = e.Row - 1;
+                    var startZone = 0;
+                    if (nacs > 0) {
+                        if (ac.isBackcourt) {
+                            if (ac.targetHitter === "B") {
+                                startZone = 9;
+                            }
+                            else if (ac.targetHitter === "F") {
+                                startZone = 7;
+                            }
+                            else {
+                                startZone = 8;
+                            }
                         }
                         else {
-                            startZone = 8;
+                            if (ac.targetHitter === "B") {
+                                startZone = 2;
+                            }
+                            else if (ac.targetHitter === "F") {
+                                startZone = 4;
+                            }
+                            else {
+                                startZone = 3;
+                            }
                         }
                     }
                     else {
-                        if (ac.targetHitter === "B") {
-                            startZone = 2;
-                        }
-                        else if (ac.targetHitter === "F") {
-                            startZone = 4;
-                        }
-                        else {
-                            startZone = 3;
-                        }
+                        startZone = zoneFromString(e.BallStartString);
                     }
-                }
-                else {
-                    startZone = zoneFromString(e.BallStartString);
-                }
-                if (startZone > 0) {
-                    xevents[row][startZone - 1].push(e);
+                    if (startZone > 0) {
+                        xevents[row][startZone - 1].push(e);
+                    }
+                    else {
+                        // DLog(@"%@ %@", e.attackCombo, e.Player.LastName);
+                    }
                 }
                 else {
                     // DLog(@"%@ %@", e.attackCombo, e.Player.LastName);
                 }
             }
-            else {
-                // DLog(@"%@ %@", e.attackCombo, e.Player.LastName);
             }
-        }
         setEvents(xevents)
         return xevents
     }
@@ -232,8 +245,11 @@ function HittingChartReport({ match, selectedGame, selectedTeam }) {
     useEffect(() => {
         var xevents = calculateZones()
         setSpikerNames(xevents)
-        setSetterNames(xevents)
-        setAttackCombos(xevents)
+        if (match.app !== 'VBStats')
+        {
+            setSetterNames(xevents)
+            setAttackCombos(xevents)
+        }
         forceUpdate(n => !n)
     }, [selectedGame])
 

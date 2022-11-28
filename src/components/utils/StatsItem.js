@@ -1200,6 +1200,11 @@ export function getVBStatsRalliesInGameForTeam(g, tm)
     
     var currentSetter = getPlayerByGuid(g.PrimarySetterGuid, g.match);
     var currentOppositionSetter = getPlayerByGuid(g.oppPrimarySetterGuid, g.match);
+
+    if (tm === g.match.teamB && currentOppositionSetter === null)
+    {
+        return []
+    }
     
     var players = getLineup(g.StartingLineup, g.match);
     var oppplayers = getLineup(g.oppStartingLineup, g.match);

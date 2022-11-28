@@ -11,6 +11,10 @@ function AllFiltersPanel({ allOptions, match, events, selectedTeam, handleFilter
     }
 
     const selectedOptions = (filter) => {
+        if (filter.items === undefined)
+        {
+            return
+        }
         var count = 0
         var s = ""
         for (var n = 0; n < filter.items.length; n++) {
