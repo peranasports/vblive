@@ -120,7 +120,7 @@ export default function Dashboard({ match, selectedGame, selectedTeam }) {
 
   useEffect(() => {
     sortCategoryLeaders()
-  }, [])
+  }, [selectedGame, selectedTeam])
 
 
   if (categoryLeaders === null) {

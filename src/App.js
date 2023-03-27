@@ -19,7 +19,7 @@ function App() {
               <main className='container mx-auto px-3 pb-12'>
                 <Routes>
                   <Route path='/' element={<Home />} />
-                  <Route path='/session/:sessionId' element={<Session />} />
+                  <Route path='/session' element={<Session />} />
                   {/* <Route path='/about' element={<About />} />
             <Route path='/player/:playerId' element={<Player />} />
             <Route path='/filtersanalysis/:matchIds/:playerId' element={<FiltersAnalysis />} />

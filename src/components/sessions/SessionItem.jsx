@@ -1,9 +1,19 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import PropTypes from 'prop-types'
 
 function SessionItem({ session }) {
-
+  const navigate = useNavigate()
   const { id, description, sessionDateString } = session
+
+  const doSession = () =>
+  {
+    const st = {
+      sessionId: id,
+      dvwFileData: null,
+    };
+    navigate("/session", { state: st });
+  }
+
   return (
     <div className='card shadow-md compact side bg-base-100'>
       <div className='flex-row items-center space-x-4 card-body'>
@@ -15,12 +25,16 @@ function SessionItem({ session }) {
           </div>
         </div>
         <div>
-          <Link
+        <div>
+            <h2 className='card-title' onClick={() => doSession()}>{description.toUpperCase()}</h2>
+          </div>
+
+          {/* <Link
             className='text-base-content'
             to={`/session/${id}`}
           >
             <h2 className='card-title'>{description.toUpperCase()}</h2>
-          </Link>
+          </Link> */}
         </div>
       </div>
     </div>

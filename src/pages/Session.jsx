@@ -1,5 +1,5 @@
 import { useEffect, useContext, useState, useCallback } from 'react'
-import { useParams, useNavigate, Link } from 'react-router-dom'
+import { useParams, useLocation, useNavigate, Link, useLoaderData } from 'react-router-dom'
 import Spinner from '../components/layout/Spinner'
 import BoxScore from '../components/matches/BoxScore'
 import Sideout from '../components/matches/Sideout'
@@ -8,7 +8,7 @@ import MatchSummary from '../components/matches/MatchSummary'
 import VBLiveAPIContext from '../context/VBLiveAPI/VBLiveAPIContext'
 import { getSession, getLatestStats } from '../context/VBLiveAPI/VBLiveAPIAction'
 import { initWithPSVBCompressedBuffer, parseLatestPSVBStats, calculatePSVBStats } from '../components/utils/PSVBFile'
-import { initWithDVWCompressedBuffer, parseLatestDVWStats, calculateDVWStats} from '../components/utils/DVWFile'
+import { initWithDVWCompressedBuffer, parseLatestDVWStats, calculateDVWStats, generateMatch} from '../components/utils/DVWFile'
 import { calculateSideoutStats } from '../components/utils/StatsItem'
 import SideoutReport from '../components/matches/SideoutReport'
 import AttackZones from '../components/matches/AttackZones'
@@ -18,6 +18,8 @@ import VideoAnalysis from '../components/matches/VideoAnalysis'
 
 function Session() {
     const { session, appName, loading, dispatch } = useContext(VBLiveAPIContext)
+    const location = useLocation()
+    const { sessionId, dvwFileData } = location.state
     const params = useParams()
     const [match, setMatch] = useState(null)
     const [latest, setLatest] = useState(null)
@@ -25,11 +27,12 @@ function Session() {
     const [selectedTeam, setSelectedTeam] = useState(0)
     const [currentReport, setCurrentReport] = useState(0)
     const [counter, setCounter] = useState(0)
+    const [, forceUpdate] = useState(0);
 
     const getLatest = useCallback(async () => {
         dispatch({ type: 'SET_LOADING' })
 
-        const sessionData = await getSession(params.sessionId)
+        const sessionData = await getSession(sessionId)
         dispatch({ type: 'GET_SESSION', payload: sessionData })
         // console.log('appName', sessionData.appName)
         var m = sessionData.appName === 'VBStats' ? initWithPSVBCompressedBuffer(sessionData.stats) : initWithDVWCompressedBuffer(sessionData.stats)
@@ -37,7 +40,7 @@ function Session() {
         var mx = null
         if (sessionData.appName === 'VBStats')
         {
-            const latestData = await getLatestStats(params.sessionId, 0)
+            const latestData = await getLatestStats(sessionId, 0)
             dispatch({ type: 'GET_LATEST', payload: latestData })
             setLatest(latestData)
             mx = sessionData.appName === 'VBStats' ? parseLatestPSVBStats(latestData, m) : parseLatestDVWStats(latestData, m)
@@ -52,12 +55,24 @@ function Session() {
         // console.log('sessionId, match=', params.sessionId, mx)
         setMatch(mx)
 
-    }, [params.sessionId, selectedTeam])
+    }, [sessionId, selectedTeam])
 
     useEffect(() => {
-        getLatest()
-        // setTimeout(() => setCounter(!counter), 30000)
-    }, [getLatest, counter, selectedGame])
+        if (dvwFileData !== null)
+        {
+            var m = generateMatch(dvwFileData)
+            var mx = calculateDVWStats(m)
+            mx.app = 'DataVolley'
+            mx = calculateSideoutStats(mx, 'DataVolley')
+            setMatch(mx)
+            forceUpdate((n) => !n)
+        }
+        else
+        {
+            getLatest()
+            // setTimeout(() => setCounter(!counter), 30000)
+        }
+    }, [getLatest, counter, selectedGame, selectedTeam])
 
     // }, [dispatch, params.sessionId], selectedGame, counter)
 

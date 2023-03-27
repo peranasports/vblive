@@ -53,7 +53,7 @@ function SideoutReport({ match, selectedGame, onGameSelected, selectedTeam, onTe
         sodata.push({ colour: COLORS[4], name: 'Opp. Errors', value: opperrors })
         sodata.push({ colour: COLORS[5], name: 'Unsuccessful', value: fails })
         setSideoutData(sodata)
-    }, [selectedGame, selectedRows, selectedRow])
+    }, [selectedGame, selectedTeam, selectedRows, selectedRow])
 
     if (sideoutData === null) {
         return <></>

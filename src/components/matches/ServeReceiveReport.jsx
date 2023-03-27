@@ -232,7 +232,7 @@ function ServeReceiveReport({ match, selectedGame, selectedTeam }) {
 
     useEffect(() => {
         calculatePassingStats()
-    }, [selectedGame])
+    }, [selectedGame, selectedTeam])
 
     if (passingStats === null) {
         return <></>

@@ -251,7 +251,7 @@ function HittingChartReport({ match, selectedGame, selectedTeam }) {
             setAttackCombos(xevents)
         }
         forceUpdate(n => !n)
-    }, [selectedGame])
+    }, [selectedGame, selectedTeam])
 
     if (events === null) {
         return <></>

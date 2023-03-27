@@ -1,5 +1,6 @@
 import { unzipBuffer, generateUUID, pad, stringToPoint, inside, tryParseDateFromString } from './Utils'
 import { doEvent, createStatsItem, addStatsItem, calculateAllStats } from './StatsItem.js'
+import moment from 'moment'
 
 const kSkillServe = 1
 const kSkillPass = 2
@@ -589,28 +590,615 @@ var keyvp = 0
 var dateAtVideoPositionZero = null
 var videoposoffset = 0
 
+
+// function processScoutLine(s) {
+//     var shouldUpdate = false
+//     var sm = s.split(";");
+//     if (sm.length < 9) {
+//         return shouldUpdate;
+//     }
+//     var coneno = 0;
+//     var thisgame = currentGame;
+//     if (isPractice == false) {
+//         var stg = sm[8];
+//         if (stg.length > 0) {
+//             thisgame = parseInt(stg)
+//         }
+//     }
+//     var g = match.drills[thisgame - 1]
+//     if (g === undefined || g === null) {
+//         return false;
+//     }
+
+//     currentGame = thisgame;
+//     var code = sm[0];
+//     var isHome = code.substring(0, 1) === "*"
+//     var tm = isHome ? match.Team : match.Opposition;
+//     var currentHomeLineup = [];
+//     var currentAwayLineup = [];
+//     var currentRotation = "";
+//     var pos = 1;
+//     homelineup = [];
+//     currentHomeLineup = [];
+//     awaylineup = [];
+//     currentAwayLineup = [];
+//     var cc1 = code.substring(0, 2)
+//     var cc2 = code.substring(4, 8)
+//     if (code.length == 8 && cc1 === "*P" && cc2 === ">LUp") {
+//         for (var nr = 0; nr < 6; nr++) {
+//             var nh = parseInt(sm[(14 + nr)]);
+
+//             var pl = fetchPlayerInMatch(match.players, nh);
+//             if (pl != null) {
+//                 currentHomeLineup.push(pl);
+//                 if (homelineup.filter(obj => obj.Guid === pl.Guid).length === 0) {
+//                     homelineup.push(pl);
+//                 }
+//             }
+
+//             var ah = parseInt(sm[(20 + nr)]);
+//             pl = fetchPlayerInMatch(match.oppositionPlayers, ah);
+//             if (pl != null) {
+//                 currentAwayLineup.push(pl);
+//                 if (awaylineup.filter(obj => obj.Guid === pl.Guid).length === 0) {
+//                     awaylineup.push(pl);
+//                 }
+//             }
+//         }
+
+//         for (var np = 0; np < homelibs.length; np++) {
+//             var pl = homelibs[np]
+//             if (homelineup.filter(obj => obj.Guid === pl.Guid).length === 0) {
+//                 homelineup.push(pl);
+//             }
+//         }
+//         currentRotation = "";
+//         pos = 1;
+//         for (var np = 0; np < homelineup.length; np++) {
+//             var pl = homelineup[np]
+//             if (currentRotation.length > 0) {
+//                 currentRotation += ",";
+//             }
+//             currentRotation += pl.Guid;
+//             pos++;
+//         }
+//         g.StartingLineup = currentRotation;
+
+//         for (var np = 0; np < awaylibs.length; np++) {
+//             var pl = awaylibs[np]
+//             if (awaylineup.filter(obj => obj.Guid === pl.Guid).length === 0) {
+//                 awaylineup.push(pl);
+//             }
+//         }
+//         var currentOppRotation = "";
+//         pos = 1;
+//         for (var np = 0; np < awaylineup.length; np++) {
+//             var pl = awaylineup[np]
+//             if (currentOppRotation.length > 0) {
+//                 currentOppRotation += ",";
+//             }
+//             currentOppRotation += pl.Guid;
+//             pos++;
+//         }
+//         g.OppositionStartingLineup = currentOppRotation;
+//     }
+
+//     if (code.length < 3) {
+//         return shouldUpdate;
+//     }
+
+//     var eventCreated = false;
+//     var vp = 0;
+//     var tt = sm[7];
+//     var sn = parseInt(code.substring(1, 3));
+//     if (code.length >= 6 /* && tt != nil && tt.length > 0 */) {
+//         var pls = isHome ? match.players : match.oppositionPlayers
+//         var pl = fetchPlayerInMatch(pls, sn);
+//         var net = 0;
+//         var neg = 0;
+//         var et = code.substring(3, 4);
+//         var se = code.substring(4, 5);
+//         var eg = code.substring(5, 6);
+//         var homePlayer = isHome;
+//         if (et === "S") {
+//             if (homePlayer) {
+//                 homeServing = true;
+//             }
+//             else {
+//                 homeServing = false;
+//             }
+//         }
+//         else if (et === "R") {
+//             if (homePlayer) {
+//                 homeServing = false;
+//             }
+//             else {
+//                 homeServing = true;
+//             }
+//         }
+//         if (tt.length == 0) {
+//             tt = lastTime;
+//         }
+//         else {
+//             lastTime = tt;
+//         }
+
+//         vp = 0;
+//         if (sm.length > 12) {
+//             var xnet = ets.indexOf(et)
+//             if (xnet != -1) {
+//                 var svp = sm[12];
+//                 if (svp.length > 0) {
+//                     vp = parseInt(svp)
+//                     // for occasions when match was coded from segmented videos
+//                     if (vp < lastvp && ((lastvp - (vp + keyvp)) > 1000)) {
+//                         keyvp = lastvp;
+//                     }
+//                     vp += keyvp;
+//                     lastvp = vp;
+//                 }
+//             }
+//         }
+//         var ts2 = null;
+//         if (tt.length > 0) {
+//             var ttt = matchdate + " " + tt.replace('.', ':')
+//             ts2 = tryParseDateFromString(ttt, "mdy")
+//             if (ts2 === undefined) {
+//                 ts2 = tryParseDateFromString(ttt, "ymd")
+//             }
+//             if (ts2 === undefined) {
+//                 ts2 = tryParseDateFromString(ttt, "dmy")
+//             }
+//             if (dateAtVideoPositionZero === null || dateAtVideoPositionZero === undefined) {
+//                 dateAtVideoPositionZero = ts2;
+//             }
+//         }
+//         if (vp != 0) {
+//             if (videoposoffset === 0) {
+//                 videoposoffset = vp;
+//                 dateAtVideoPositionZero = new Date(ts2.getTime() - vp * 1000);
+//             }
+//             if (dateAtVideoPositionZero === null || dateAtVideoPositionZero === undefined) {
+//                 dateAtVideoPositionZero = match.TrainingDate;
+//             }
+//             ts2 = new Date(dateAtVideoPositionZero.getTime() + vp * 1000);
+//         }
+
+//         var bs = "";
+//         var be = "";
+//         coneno = 0;
+//         if ((et === "S" || et === "A") && code.length >= 11) {
+//             var accode = code.substring(6, 8);
+//             var atc = fetchAttackComboByCode(accode);
+
+//             var xs = [83, 83, 50, 17, 17, 50, 17, 50, 83];
+//             var yss = [210, 210, 210, 210, 210, 210, 210, 210, 210];
+//             var ysa = [183, 100, 100, 100, 183, 183, 150, 150, 150];
+//             var xe = [17, 17, 50, 83, 83, 50, 83, 50, 17];
+//             var ye = [17, 83, 83, 83, 17, 17, 50, 50, 50];
+
+//             var startzone = parseInt(code.substring(9, 10)) - 1;
+//             var endzone = parseInt(code.substring(10, 11)) - 1;
+//             if (startzone >= 0 && endzone >= 0) {
+//                 var subendzone = code.length > 11 ? code.substring(11, 12) : "";
+//                 // srand((int)time(NULL));
+//                 var rxs = 0; //(rand() % 20) - 10;
+//                 var rys = 0; //rand() % 5;
+
+//                 const min = -4;
+//                 const max = 4;
+//                 var rxe = Math.random() * (max - min); //0; //(rand() % 10) - 5;
+//                 var rye = Math.random() * (max - min); //(rand() % 10) - 5;
+
+//                 var xendx = parseInt(xe[endzone]);
+//                 var xendy = parseInt(ye[endzone]);
+//                 if (subendzone === "A") {
+//                     match.isZone = true;
+//                     xendx -= 8;
+//                     xendy -= 8;
+//                 }
+//                 else if (subendzone === "B") {
+//                     match.isZone = true;
+//                     xendx -= 8;
+//                     xendy += 8;
+//                 }
+//                 else if (subendzone === "C") {
+//                     match.isZone = true;
+//                     xendx += 8;
+//                     xendy += 8;
+//                 }
+//                 else if (subendzone === "D") {
+//                     match.isZone = true;
+//                     xendx += 8;
+//                     xendy -= 8;
+//                 }
+//                 else if (subendzone === "~") {
+//                     coneno = endzone + 1;
+//                     rxe = 0; //(rand() % 20) - 10;
+//                     rye = 0; //(rand() % 20) - 10;
+//                 }
+
+//                 if (et === "S") {
+//                     bs = (xs[startzone] + rxs).toString() + "," + yss[startzone].toString();
+//                 }
+//                 else {
+//                     if (atc != null) {
+//                         var apt = atc.hittingPoint;
+//                         if (apt.x === undefined && apt.y === undefined) {
+//                             bs = (xs[startzone] + rxs).toString() + "," + ysa[startzone].toString();
+//                         }
+//                         else {
+//                             bs = apt.x.toString() + "," + (100 + (50 - apt.y) * 2).toString();
+//                         }
+//                     }
+//                     else {
+//                         bs = (xs[startzone] + rxs).toString() + "," + (ysa[startzone] + rys).toString();
+//                     }
+//                 }
+//                 be = (xendx + rxe).toString() + "," + (xendy + rye).toString();
+//                 var endPoint = { x: xendx, y: xendy };
+//             }
+//         }
+//         net = ets.indexOf(et);
+//         if (net == kSkillSet - 1) {
+//             net = kSkillSettersCall - 1;
+//         }
+//         if (net != -1) {
+//             var neg = egs.indexOf(eg)
+//             if (neg >= 0) {
+//                 var ac = "";
+//                 net += 1;
+//                 var gr = neg;
+//                 var err = 0;
+//                 var netOK = true;
+//                 var breakPoint = 0;
+//                 switch (net) {
+//                     case kSkillServe:
+//                         {
+//                             if (homescore == 6 && awayscore == 3) {
+//                                 //                                NSLog(@"");
+//                             }
+//                             if (se === "H") {
+//                                 subevent = kServeH;
+//                             }
+//                             else if (se === "M") {
+//                                 subevent = kServeM;
+//                             }
+//                             else if (se === "Q") {
+//                                 subevent = kServeQ;
+//                             }
+//                             else {
+//                                 subevent = kServeO;
+//                             }
+
+//                             if (eg === "=") gr = 0;
+//                             else if (eg === "/") gr = 5;
+//                             else if (eg === "!") gr = 2;
+//                             else if (eg === "-") gr = 1;
+//                             else if (eg === "+") gr = 4;
+//                             else if (eg === "#") {
+//                                 gr = 3;
+//                                 breakPoint = 1;
+//                             }
+//                             else gr = 1;
+//                         }
+//                         break;
+//                     case kSkillPass:
+//                         {
+//                             if (se === "H") {
+//                                 subevent = kPassH;
+//                             }
+//                             else if (se === "M") {
+//                                 subevent = kPassM;
+//                             }
+//                             else if (se === "Q") {
+//                                 subevent = kPassQ;
+//                             }
+//                             else {
+//                                 subevent = kPassO;
+//                             }
+//                             passEvent = code;
+//                             if (eg === "=") gr = 0;
+//                             else if (eg === "/") { gr = 1; err = 1; }
+//                             else if (eg === "-") gr = 1;
+//                             else if (eg === "!") gr = 2;
+//                             else if (eg === "+") { gr = 3; err = 1; }
+//                             else if (eg === "#") gr = 3;
+//                             else gr = 1;
+//                         }
+//                         break;
+//                     case kSkillSet:
+//                         {
+//                             if (eg === "=") gr = 0;
+//                             else if (eg === "-") gr = 1;
+//                             else if (eg === "+") gr = 2;
+//                             else if (eg === "#") gr = 3;
+//                             else gr = 1;
+//                         }
+//                         break;
+//                     case kSkillSettersCall:
+//                         {
+//                             if (code.length > 6) {
+//                                 sc = code.substring(6, code.length);
+//                             }
+//                             if (eg === "=") gr = 0;
+//                             else if (eg === "-") gr = 1;
+//                             else if (eg === "+") gr = 2;
+//                             else if (eg === "#") gr = 3;
+//                             else gr = 1;
+//                         }
+//                         break;
+//                     case kSkillSpike:
+//                         {
+//                             if (code.length > 6) {
+//                                 ac = code.substring(6, 8);
+//                             }
+//                             if (se === "H") {
+//                                 subevent = kSpikeH;
+//                             }
+//                             else if (se === "M") {
+//                                 subevent = kSpikeM;
+//                             }
+//                             else if (se === "Q") {
+//                                 subevent = kSpikeQ;
+//                             }
+//                             else if (se === "T") {
+//                                 subevent = kSpikeT;
+//                             }
+//                             else if (se === "U") {
+//                                 subevent = kSpikeU;
+//                             }
+//                             else if (se === "F") {
+//                                 subevent = kSpikeF;
+//                             }
+//                             else {
+//                                 subevent = kSpikeO;
+//                             }
+
+//                             if (eg === "=") gr = 0;
+//                             else if (eg === "/") { gr = 0; err = 2; }
+//                             else if (eg === "-") gr = 1;
+//                             else if (eg === "!") { gr = 1; err = 2; }
+//                             else if (eg === "+") gr = 2;
+//                             else if (eg === "#") {
+//                                 gr = 3;
+//                                 if ((homePlayer && homeServing) ||
+//                                     (!homePlayer && !homeServing)) {
+//                                     breakPoint = 1;
+//                                 }
+//                             }
+//                             else gr = 1;
+//                         }
+//                         break;
+//                     case kSkillBlock:
+//                         {
+//                             if (eg === "=") gr = 0;
+//                             else if (eg === "/") { gr = 0; err = 1; }
+//                             else if (eg === "-") { gr = 1; err = 1; }
+//                             else if (eg === "+") gr = 1;
+//                             else if (eg === "#") {
+//                                 gr = 2;
+//                                 if ((homePlayer && homeServing) ||
+//                                     (!homePlayer && !homeServing)) {
+//                                     breakPoint = 1;
+//                                 }
+//                                 if (code.length > 12) {
+//                                     var bt = code.substring(12, 13);
+//                                     if (bt === "A")  //assist
+//                                     {
+//                                         gr = 3;
+//                                     }
+//                                     else if (bt === "T") //attempt
+//                                     {
+//                                     }
+//                                 }
+//                             }
+
+//                             else gr = 1;
+//                         }
+//                         break;
+//                     case kSkillDefense:
+//                         {
+//                             if (eg === "=") gr = 0;
+//                             else if (eg === "/") { gr = 0; err = 1; }//over
+//                             else if (eg === "-") { gr = 0; err = 2; }//poor
+//                             else if (eg === "#") gr = 1;
+//                             else gr = 1;
+//                         }
+//                         break;
+//                     case kSkillFreeball:
+//                         {
+//                             if (eg === "=") gr = 0;
+//                             else if (eg === "/") gr = 2; //no attack
+//                             else if (eg === "-") gr = 2; //poor
+//                             else if (eg === "+") gr = 2; //poor
+//                             else if (eg === "#") gr = 1;
+//                             else gr = 1;
+//                         }
+//                         break;
+//                     default:
+//                         {
+//                             netOK = false;
+//                         }
+//                         break;
+//                 }
+//                 if (netOK) {
+//                     eventCreated = true;
+//                     var ev = null;
+//                     if (homePlayer) {
+//                         ev = createEvent(index, pl, g, ts2, net, subevent, breakPoint, gr, err, bs, be, homescore, awayscore, homerow, ac, sc, null, homeSetter, s, vp);
+//                     }
+//                     else {
+//                         ev = createEvent(index, pl, g, ts2, net, subevent, breakPoint, gr, err, bs, be, homescore, awayscore, awayrow, ac, sc, null, awaySetter, s, vp);
+//                     }
+//                     if (net == kSkillSpike) {
+//                         ev.UserDefined01 = passEvent;
+//                         if (code.length >= 9) {
+//                             var sz = code.substring(9, 10);
+//                             ev.startZone = sz;
+//                             ev.endZone = coneno.toString();
+//                         }
+//                         sc = "";
+//                     }
+//                     if (net == kSkillSpike || net == kSkillServe) {
+//                         passEvent = "";
+//                     }
+//                     ev.EventId = pad(index * 10, 4);
+//                     index++;
+//                 }
+//             }
+//         }
+//         else {
+//             //                                NSLog(@"ETS = %@", ets);
+//         }
+//     }
+
+//     if ((sn == 0 || isNaN(sn)) && !eventCreated) {
+//         if (code.substring(1, 2) === "p") {
+//             var sscores = code.substring(2, code.length);
+//             var sss = sscores.split(":");
+//             if (sss.length == 2) {
+//                 homescore = parseInt(sss[0]);
+//                 awayscore = parseInt(sss[1]);
+//                 g.AwayScore = awayscore;
+//                 g.HomeScore = homescore;
+//                 scores = homescore.toString() + "-" + awayscore.toString();
+//                 shouldUpdate = true;
+//             }
+//         }
+//         else if (code.substring(1, 2) === "c") {
+//             if (code.length < 7) {
+
+//             }
+//             else {
+//                 var outpl = parseInt(code.substring(2, 4));
+//                 var inpl = parseInt(code.substring(5, 7));
+//                 vp = 0;
+//                 if (sm.length > 12) {
+//                     var svp = sm[12];
+//                     if (svp.length > 0) {
+//                         vp = parseInt(svp);
+//                         if (vp > lastvp + (60 * 10))    // if vp is more than 10 minutes different then something wrong
+//                         {
+//                             vp = lastvp;
+//                         }
+//                         lastvp = vp;
+//                     }
+//                 }
+//                 var ts2;
+//                 if (tt.length > 0) {
+//                     ts2 = new Date(matchdate + " " + tt.replace('.', ':'))
+//                     if (dateAtVideoPositionZero == null) {
+//                         dateAtVideoPositionZero = ts2;
+//                     }
+//                 }
+//                 if (vp != 0) {
+//                     if (videoposoffset == 0) {
+//                         videoposoffset = vp;
+//                         dateAtVideoPositionZero = new Date(ts2.toTimeString() - vp * 1000);
+//                     }
+//                     if (dateAtVideoPositionZero == null || dateAtVideoPositionZero === undefined) {
+//                         dateAtVideoPositionZero = match.TrainingDate;
+//                     }
+//                     ts2 = new Date(dateAtVideoPositionZero.getTime() + vp * 1000);
+//                 }
+
+//                 if (code.substring(0, 1) === "*")    // home
+//                 {
+//                     var ipl = fetchPlayerInMatch(match.players, inpl);
+//                     var opl = fetchPlayerInMatch(match.players, outpl);
+//                     if (ipl !== null && opl !== null)
+//                     {
+//                         createEvent(index, opl, g, ts2, kSubstitution, 0, 0, 0, 0, "", "", homescore, awayscore, homerow, null, null, ipl.Guid, homeSetter, s, vp);
+//                         index++;
+//                     }
+//                 }
+//                 else if (code.substring(0, 1) === "a")    // away
+//                 {
+//                     var ipl = fetchPlayerInMatch(match.oppositionPlayers, inpl);
+//                     var opl = fetchPlayerInMatch(match.oppositionPlayers, outpl);
+//                     if (ipl !== null && opl !== null)
+//                     {
+//                         createEvent(index, opl, g, ts2, kSubstitution, 0, 0, 0, 0, "", "", homescore, awayscore, awayrow, null, null, ipl.Guid, awaySetter, s, vp);
+//                         index++;
+//                     }
+//                 }
+//             }
+//         }
+//         else if (code.length > 6 && code.substring(0, 7) === "**Drill") {
+//             match.isTraining = true;
+//             isPractice = true;
+//             var lastg = match.drills[currentGame - 1];
+//             lastg.IsLocked = true;
+//             currentGame++;
+//         }
+//         else if ((code.substring(0, 2) === "**") && (code.substring(3, 6) === "set")) {
+//             homescore = 0;
+//             awayscore = 0;
+//             var ssno = parseInt(code.substring(2, 3));
+//             var lastg = match.drills[ssno - 1];
+//             lastg.IsLocked = true;
+//             currentGame = parseInt(sm[8]);
+//         }
+//         else if (code.substring(1, 2) === "z") {
+//             var r = 0;
+//             if (code.substring(0, 1) === "*")    // home setter pos
+//             {
+//                 r = parseInt(code.substring(2, 3));
+//                 homerow = parseInt(rows[r]);
+//                 match.homerow = homerow;
+//                 var xx = parseInt(sm[9]) + 13;
+//                 homeSetter = parseInt(sm[xx]);
+//                 g.PrimarySetter = fetchPlayerInMatch(match.players, homeSetter);
+//                 if (g.PrimarySetter.Positions.filter(obj => obj === 5).length === 0) {
+//                     g.PrimarySetter.Positions.push(5)
+//                 }
+//             }
+//             else if (code.substring(0, 1) === "a")    // home
+//             {
+//                 // away setter
+//                 r = parseInt(code.substring(2, 3));
+//                 awayrow = parseInt(rows[r]);
+//                 match.awayrow = awayrow;
+//                 var xx = parseInt(sm[10]) + 19;
+//                 awaySetter = parseInt(sm[xx]);
+//                 g.oppPrimarySetter = fetchPlayerInMatch(match.oppositionPlayers, awaySetter);
+//                 if (g.oppPrimarySetter.Positions.filter(obj => obj === 5).length === 0) {
+//                     g.oppPrimarySetter.Positions.push(5)
+//                 }
+//             }
+//         }
+//     }
+
+//     if (match.videoStartTime == null && dateAtVideoPositionZero != null) {
+//         match.videoStartTime = dateAtVideoPositionZero;
+//     }
+//     return shouldUpdate;
+
+// }
+
 function processScoutLine(s) {
-    var shouldUpdate = false
+    var shouldUpdate = false;
     var sm = s.split(";");
     if (sm.length < 9) {
-        return shouldUpdate;
+      return shouldUpdate;
     }
     var coneno = 0;
     var thisgame = currentGame;
     if (isPractice == false) {
-        var stg = sm[8];
-        if (stg.length > 0) {
-            thisgame = parseInt(stg)
-        }
+      var stg = sm[8];
+      if (stg.length > 0) {
+        thisgame = parseInt(stg);
+      }
     }
-    var g = match.drills[thisgame - 1]
+    var g = match.drills[thisgame - 1];
     if (g === undefined || g === null) {
-        return false;
+      return false;
     }
-
+  
     currentGame = thisgame;
     var code = sm[0];
-    var isHome = code.substring(0, 1) === "*"
+    var isHome = code.substring(0, 1) === "*";
     var tm = isHome ? match.Team : match.Opposition;
     var currentHomeLineup = [];
     var currentAwayLineup = [];
@@ -620,561 +1208,655 @@ function processScoutLine(s) {
     currentHomeLineup = [];
     awaylineup = [];
     currentAwayLineup = [];
-    var cc1 = code.substring(0, 2)
-    var cc2 = code.substring(4, 8)
+    var cc1 = code.substring(0, 2);
+    var cc2 = code.substring(4, 8);
     if (code.length == 8 && cc1 === "*P" && cc2 === ">LUp") {
-        for (var nr = 0; nr < 6; nr++) {
-            var nh = parseInt(sm[(14 + nr)]);
-
-            var pl = fetchPlayerInMatch(match.players, nh);
-            if (pl != null) {
-                currentHomeLineup.push(pl);
-                if (homelineup.filter(obj => obj.Guid === pl.Guid).length === 0) {
-                    homelineup.push(pl);
-                }
-            }
-
-            var ah = parseInt(sm[(20 + nr)]);
-            pl = fetchPlayerInMatch(match.oppositionPlayers, ah);
-            if (pl != null) {
-                currentAwayLineup.push(pl);
-                if (awaylineup.filter(obj => obj.Guid === pl.Guid).length === 0) {
-                    awaylineup.push(pl);
-                }
-            }
+      for (var nr = 0; nr < 6; nr++) {
+        var nh = parseInt(sm[14 + nr]);
+  
+        var pl = fetchPlayerInMatch(match.players, nh);
+        if (pl != null) {
+          currentHomeLineup.push(pl);
+          if (homelineup.filter((obj) => obj.Guid === pl.Guid).length === 0) {
+            homelineup.push(pl);
+          }
         }
-
-        for (var np = 0; np < homelibs.length; np++) {
-            var pl = homelibs[np]
-            if (homelineup.filter(obj => obj.Guid === pl.Guid).length === 0) {
-                homelineup.push(pl);
-            }
+  
+        var ah = parseInt(sm[20 + nr]);
+        pl = fetchPlayerInMatch(match.oppositionPlayers, ah);
+        if (pl != null) {
+          currentAwayLineup.push(pl);
+          if (awaylineup.filter((obj) => obj.Guid === pl.Guid).length === 0) {
+            awaylineup.push(pl);
+          }
         }
-        currentRotation = "";
-        pos = 1;
-        for (var np = 0; np < homelineup.length; np++) {
-            var pl = homelineup[np]
-            if (currentRotation.length > 0) {
-                currentRotation += ",";
-            }
-            currentRotation += pl.Guid;
-            pos++;
+      }
+  
+      for (var np = 0; np < homelibs.length; np++) {
+        var pl = homelibs[np];
+        if (homelineup.filter((obj) => obj.Guid === pl.Guid).length === 0) {
+          homelineup.push(pl);
         }
-        g.StartingLineup = currentRotation;
-
-        for (var np = 0; np < awaylibs.length; np++) {
-            var pl = awaylibs[np]
-            if (awaylineup.filter(obj => obj.Guid === pl.Guid).length === 0) {
-                awaylineup.push(pl);
-            }
+      }
+      currentRotation = "";
+      pos = 1;
+      for (var np = 0; np < homelineup.length; np++) {
+        var pl = homelineup[np];
+        if (currentRotation.length > 0) {
+          currentRotation += ",";
         }
-        var currentOppRotation = "";
-        pos = 1;
-        for (var np = 0; np < awaylineup.length; np++) {
-            var pl = awaylineup[np]
-            if (currentOppRotation.length > 0) {
-                currentOppRotation += ",";
-            }
-            currentOppRotation += pl.Guid;
-            pos++;
+        currentRotation += pl.Guid;
+        pos++;
+      }
+      g.StartingLineup = currentRotation;
+  
+      for (var np = 0; np < awaylibs.length; np++) {
+        var pl = awaylibs[np];
+        if (awaylineup.filter((obj) => obj.Guid === pl.Guid).length === 0) {
+          awaylineup.push(pl);
         }
-        g.OppositionStartingLineup = currentOppRotation;
+      }
+      var currentOppRotation = "";
+      pos = 1;
+      for (var np = 0; np < awaylineup.length; np++) {
+        var pl = awaylineup[np];
+        if (currentOppRotation.length > 0) {
+          currentOppRotation += ",";
+        }
+        currentOppRotation += pl.Guid;
+        pos++;
+      }
+      g.OppositionStartingLineup = currentOppRotation;
     }
-
+  
     if (code.length < 3) {
-        return shouldUpdate;
+      return shouldUpdate;
     }
-
+  
     var eventCreated = false;
     var vp = 0;
     var tt = sm[7];
     var sn = parseInt(code.substring(1, 3));
     if (code.length >= 6 /* && tt != nil && tt.length > 0 */) {
-        var pls = isHome ? match.players : match.oppositionPlayers
-        var pl = fetchPlayerInMatch(pls, sn);
-        var net = 0;
-        var neg = 0;
-        var et = code.substring(3, 4);
-        var se = code.substring(4, 5);
-        var eg = code.substring(5, 6);
-        var homePlayer = isHome;
-        if (et === "S") {
-            if (homePlayer) {
-                homeServing = true;
-            }
-            else {
-                homeServing = false;
-            }
+      var pls = isHome ? match.players : match.oppositionPlayers;
+      var pl = fetchPlayerInMatch(pls, sn);
+      var net = 0;
+      var neg = 0;
+      var et = code.substring(3, 4);
+      var se = code.substring(4, 5);
+      var eg = code.substring(5, 6);
+      var homePlayer = isHome;
+      if (et === "S") {
+        if (homePlayer) {
+          homeServing = true;
+        } else {
+          homeServing = false;
         }
-        else if (et === "R") {
-            if (homePlayer) {
-                homeServing = false;
+      } else if (et === "R") {
+        if (homePlayer) {
+          homeServing = false;
+        } else {
+          homeServing = true;
+        }
+      }
+      if (tt.length == 0) {
+        tt = lastTime;
+      } else {
+        lastTime = tt;
+      }
+  
+      vp = 0;
+      if (sm.length > 12) {
+        var xnet = ets.indexOf(et);
+        if (xnet != -1) {
+          var svp = sm[12];
+          if (svp.length > 0) {
+            vp = parseInt(svp);
+            // // for occasions when match was coded from segmented videos
+            // if (vp < lastvp && ((lastvp - (vp + keyvp)) > 1000)) {
+            //     keyvp = lastvp;
+            // }
+            // vp += keyvp;
+            // lastvp = vp;
+          }
+        }
+      }
+      var ts2 = null;
+      if (tt.length > 0) {
+        var ttt = matchdate + " " + tt.split(".").join(":")
+        ts2 = new Date(moment(ttt, "MM/DD/YYYY HH:mm:ss"))
+        // ts2 = tryParseDateFromString(ttt, "mdy");
+        // if (ts2 === undefined) {
+        //   ts2 = tryParseDateFromString(ttt, "ymd");
+        // }
+        // if (ts2 === undefined) {
+        //   ts2 = tryParseDateFromString(ttt, "dmy");
+        // }
+        if (
+          dateAtVideoPositionZero === null ||
+          dateAtVideoPositionZero === undefined
+        ) {
+          dateAtVideoPositionZero = ts2;
+        }
+      }
+      if (vp != 0) {
+        if (videoposoffset === 0) {
+          videoposoffset = vp;
+          if (ts2 !== null && ts2 !== undefined) {
+            dateAtVideoPositionZero = new Date(ts2.getTime() - vp * 1000);
+          }
+        }
+        if (
+          dateAtVideoPositionZero === null ||
+          dateAtVideoPositionZero === undefined
+        ) {
+          dateAtVideoPositionZero = match.TrainingDate;
+        }
+        ts2 = new Date(dateAtVideoPositionZero.getTime() + vp * 1000);
+      }
+  
+      var bs = "";
+      var be = "";
+      coneno = 0;
+      if ((et === "S" || et === "A") && code.length >= 11) {
+        var accode = code.substring(6, 8);
+        var atc = fetchAttackComboByCode(accode);
+  
+        var xs = [83, 83, 50, 17, 17, 50, 17, 50, 83];
+        var yss = [210, 210, 210, 210, 210, 210, 210, 210, 210];
+        var ysa = [183, 100, 100, 100, 183, 183, 150, 150, 150];
+        var xe = [17, 17, 50, 83, 83, 50, 83, 50, 17];
+        var ye = [17, 83, 83, 83, 17, 17, 50, 50, 50];
+  
+        var startzone = parseInt(code.substring(9, 10)) - 1;
+        var endzone = parseInt(code.substring(10, 11)) - 1;
+        if (startzone >= 0 && endzone >= 0) {
+          var subendzone = code.length > 11 ? code.substring(11, 12) : "";
+          // srand((int)time(NULL));
+          var rxs = 0; //(rand() % 20) - 10;
+          var rys = 0; //rand() % 5;
+  
+          const min = -4;
+          const max = 4;
+          var rxe = Math.random() * (max - min); //0; //(rand() % 10) - 5;
+          var rye = Math.random() * (max - min); //(rand() % 10) - 5;
+  
+          var xendx = parseInt(xe[endzone]);
+          var xendy = parseInt(ye[endzone]);
+          if (subendzone === "A") {
+            match.isZone = true;
+            xendx -= 8;
+            xendy -= 8;
+          } else if (subendzone === "B") {
+            match.isZone = true;
+            xendx -= 8;
+            xendy += 8;
+          } else if (subendzone === "C") {
+            match.isZone = true;
+            xendx += 8;
+            xendy += 8;
+          } else if (subendzone === "D") {
+            match.isZone = true;
+            xendx += 8;
+            xendy -= 8;
+          } else if (subendzone === "~") {
+            coneno = endzone + 1;
+            rxe = 0; //(rand() % 20) - 10;
+            rye = 0; //(rand() % 20) - 10;
+          }
+  
+          if (et === "S") {
+            bs =
+              (xs[startzone] + rxs).toString() + "," + yss[startzone].toString();
+          } else {
+            if (atc != null) {
+              var apt = atc.hittingPoint;
+              if (apt.x === undefined && apt.y === undefined) {
+                bs =
+                  (xs[startzone] + rxs).toString() +
+                  "," +
+                  ysa[startzone].toString();
+              } else {
+                bs = apt.x.toString() + "," + (100 + (50 - apt.y) * 2).toString();
+              }
+            } else {
+              bs =
+                (xs[startzone] + rxs).toString() +
+                "," +
+                (ysa[startzone] + rys).toString();
             }
-            else {
-                homeServing = true;
-            }
+          }
+          be = (xendx + rxe).toString() + "," + (xendy + rye).toString();
+          var endPoint = { x: xendx, y: xendy };
         }
-        if (tt.length == 0) {
-            tt = lastTime;
-        }
-        else {
-            lastTime = tt;
-        }
-
-        vp = 0;
-        if (sm.length > 12) {
-            var xnet = ets.indexOf(et)
-            if (xnet != -1) {
-                var svp = sm[12];
-                if (svp.length > 0) {
-                    vp = parseInt(svp)
-                    // for occasions when match was coded from segmented videos
-                    if (vp < lastvp && ((lastvp - (vp + keyvp)) > 1000)) {
-                        keyvp = lastvp;
-                    }
-                    vp += keyvp;
-                    lastvp = vp;
+      }
+      net = ets.indexOf(et);
+      if (net == kSkillSet - 1) {
+        net = kSkillSettersCall - 1;
+      }
+      if (net != -1) {
+        var neg = egs.indexOf(eg);
+        if (neg >= 0) {
+          var ac = "";
+          net += 1;
+          var gr = neg;
+          var err = 0;
+          var netOK = true;
+          var breakPoint = 0;
+          switch (net) {
+            case kSkillServe:
+              {
+                if (homescore == 6 && awayscore == 3) {
+                  //                                NSLog("");
                 }
+                if (se === "H") {
+                  subevent = kServeH;
+                } else if (se === "M") {
+                  subevent = kServeM;
+                } else if (se === "Q") {
+                  subevent = kServeQ;
+                } else {
+                  subevent = kServeO;
+                }
+  
+                if (eg === "=") gr = 0;
+                else if (eg === "/") gr = 5;
+                else if (eg === "!") gr = 2;
+                else if (eg === "-") gr = 1;
+                else if (eg === "+") gr = 4;
+                else if (eg === "#") {
+                  gr = 3;
+                  breakPoint = 1;
+                } else gr = 1;
+              }
+              break;
+            case kSkillPass:
+              {
+                if (se === "H") {
+                  subevent = kPassH;
+                } else if (se === "M") {
+                  subevent = kPassM;
+                } else if (se === "Q") {
+                  subevent = kPassQ;
+                } else {
+                  subevent = kPassO;
+                }
+                passEvent = code;
+                if (eg === "=") gr = 0;
+                else if (eg === "/") {
+                  gr = 1;
+                  err = 1;
+                } else if (eg === "-") gr = 1;
+                else if (eg === "!") gr = 2;
+                else if (eg === "+") {
+                  gr = 3;
+                  err = 1;
+                } else if (eg === "#") gr = 3;
+                else gr = 1;
+              }
+              break;
+            case kSkillSet:
+              {
+                if (eg === "=") gr = 0;
+                else if (eg === "-") gr = 1;
+                else if (eg === "+") gr = 2;
+                else if (eg === "#") gr = 3;
+                else gr = 1;
+              }
+              break;
+            case kSkillSettersCall:
+              {
+                if (code.length > 6) {
+                  sc = code.substring(6, code.length);
+                }
+                if (eg === "=") gr = 0;
+                else if (eg === "-") gr = 1;
+                else if (eg === "+") gr = 2;
+                else if (eg === "#") gr = 3;
+                else gr = 1;
+              }
+              break;
+            case kSkillSpike:
+              {
+                if (code.length > 6) {
+                  ac = code.substring(6, 8);
+                }
+                if (se === "H") {
+                  subevent = kSpikeH;
+                } else if (se === "M") {
+                  subevent = kSpikeM;
+                } else if (se === "Q") {
+                  subevent = kSpikeQ;
+                } else if (se === "T") {
+                  subevent = kSpikeT;
+                } else if (se === "U") {
+                  subevent = kSpikeU;
+                } else if (se === "F") {
+                  subevent = kSpikeF;
+                } else {
+                  subevent = kSpikeO;
+                }
+  
+                if (eg === "=") gr = 0;
+                else if (eg === "/") {
+                  gr = 0;
+                  err = 2;
+                } else if (eg === "-") gr = 1;
+                else if (eg === "!") {
+                  gr = 1;
+                  err = 2;
+                } else if (eg === "+") gr = 2;
+                else if (eg === "#") {
+                  gr = 3;
+                  if (
+                    (homePlayer && homeServing) ||
+                    (!homePlayer && !homeServing)
+                  ) {
+                    breakPoint = 1;
+                  }
+                } else gr = 1;
+              }
+              break;
+            case kSkillBlock:
+              {
+                if (eg === "=") gr = 0;
+                else if (eg === "/") {
+                  gr = 0;
+                  err = 1;
+                } else if (eg === "-") {
+                  gr = 1;
+                  err = 1;
+                } else if (eg === "+") gr = 1;
+                else if (eg === "#") {
+                  gr = 2;
+                  if (
+                    (homePlayer && homeServing) ||
+                    (!homePlayer && !homeServing)
+                  ) {
+                    breakPoint = 1;
+                  }
+                  if (code.length > 12) {
+                    var bt = code.substring(12, 13);
+                    if (bt === "A") {
+                      //assist
+                      gr = 3;
+                    } else if (bt === "T") {
+                      //attempt
+                    }
+                  }
+                } else gr = 1;
+              }
+              break;
+            case kSkillDefense:
+              {
+                if (eg === "=") gr = 0;
+                else if (eg === "/") {
+                  gr = 0;
+                  err = 1;
+                } //over
+                else if (eg === "-") {
+                  gr = 0;
+                  err = 2;
+                } //poor
+                else if (eg === "#") gr = 1;
+                else gr = 1;
+              }
+              break;
+            case kSkillFreeball:
+              {
+                if (eg === "=") gr = 0;
+                else if (eg === "/") gr = 2; //no attack
+                else if (eg === "-") gr = 2; //poor
+                else if (eg === "+") gr = 2; //poor
+                else if (eg === "#") gr = 1;
+                else gr = 1;
+              }
+              break;
+            default:
+              {
+                netOK = false;
+              }
+              break;
+          }
+          if (netOK) {
+            eventCreated = true;
+            var ev = null;
+            if (homePlayer) {
+              ev = createEvent(
+                index,
+                pl,
+                g,
+                ts2,
+                net,
+                subevent,
+                breakPoint,
+                gr,
+                err,
+                bs,
+                be,
+                homescore,
+                awayscore,
+                homerow,
+                ac,
+                sc,
+                null,
+                homeSetter,
+                s,
+                vp
+              );
+            } else {
+              ev = createEvent(
+                index,
+                pl,
+                g,
+                ts2,
+                net,
+                subevent,
+                breakPoint,
+                gr,
+                err,
+                bs,
+                be,
+                homescore,
+                awayscore,
+                awayrow,
+                ac,
+                sc,
+                null,
+                awaySetter,
+                s,
+                vp
+              );
             }
+            if (net == kSkillSpike) {
+              ev.UserDefined01 = passEvent;
+              if (code.length >= 9) {
+                var sz = code.substring(9, 10);
+                ev.startZone = sz;
+                ev.endZone = coneno.toString();
+              }
+              sc = "";
+            }
+            if (net == kSkillSpike || net == kSkillServe) {
+              passEvent = "";
+            }
+            ev.EventId = pad(index * 10, 4);
+            index++;
+          }
         }
-        var ts2 = null;
-        if (tt.length > 0) {
-            var ttt = matchdate + " " + tt.replace('.', ':')
-            ts2 = tryParseDateFromString(ttt, "mdy")
-            if (ts2 === undefined) {
-                ts2 = tryParseDateFromString(ttt, "ymd")
-            }
-            if (ts2 === undefined) {
-                ts2 = tryParseDateFromString(ttt, "dmy")
-            }
-            if (dateAtVideoPositionZero === null || dateAtVideoPositionZero === undefined) {
-                dateAtVideoPositionZero = ts2;
-            }
+      } else {
+        //                                NSLog("ETS = %", ets);
+      }
+    }
+  
+    if ((sn == 0 || isNaN(sn)) && !eventCreated) {
+      if (code.substring(1, 2) === "p") {
+        var sscores = code.substring(2, code.length);
+        var sss = sscores.split(":");
+        if (sss.length == 2) {
+          homescore = parseInt(sss[0]);
+          awayscore = parseInt(sss[1]);
+          g.AwayScore = awayscore;
+          g.HomeScore = homescore;
+          scores = homescore.toString() + "-" + awayscore.toString();
+          shouldUpdate = true;
         }
-        if (vp != 0) {
-            if (videoposoffset === 0) {
-                videoposoffset = vp;
-                dateAtVideoPositionZero = new Date(ts2.getTime() - vp * 1000);
+      } else if (code.substring(1, 2) === "c") {
+        if (code.length < 7) {
+        } else {
+          var outpl = parseInt(code.substring(2, 4));
+          var inpl = parseInt(code.substring(5, 7));
+          vp = 0;
+          if (sm.length > 12) {
+            var svp = sm[12];
+            if (svp.length > 0) {
+              vp = parseInt(svp);
+              if (vp > lastvp + 60 * 10) {
+                // if vp is more than 10 minutes different then something wrong
+                vp = lastvp;
+              }
+              lastvp = vp;
             }
-            if (dateAtVideoPositionZero === null || dateAtVideoPositionZero === undefined) {
-                dateAtVideoPositionZero = match.TrainingDate;
+          }
+          var ts2;
+          if (tt.length > 0) {
+            var ttt = matchdate + " " + tt.split(".").join(":")
+            ts2 = new Date(moment(ttt, "MM/DD/YYYY HH:mm:ss"))    
+            // ts2 = new Date(matchdate + " " + tt.replace(".", ":"));
+            if (dateAtVideoPositionZero == null) {
+              dateAtVideoPositionZero = ts2;
+            }
+          }
+          if (vp != 0) {
+            if (videoposoffset == 0) {
+              videoposoffset = vp;
+              dateAtVideoPositionZero = new Date(ts2.toTimeString() - vp * 1000);
+            }
+            if (
+              dateAtVideoPositionZero == null ||
+              dateAtVideoPositionZero === undefined
+            ) {
+              dateAtVideoPositionZero = match.TrainingDate;
             }
             ts2 = new Date(dateAtVideoPositionZero.getTime() + vp * 1000);
-        }
-
-        var bs = "";
-        var be = "";
-        coneno = 0;
-        if ((et === "S" || et === "A") && code.length >= 11) {
-            var accode = code.substring(6, 8);
-            var atc = fetchAttackComboByCode(accode);
-
-            var xs = [83, 83, 50, 17, 17, 50, 17, 50, 83];
-            var yss = [210, 210, 210, 210, 210, 210, 210, 210, 210];
-            var ysa = [183, 100, 100, 100, 183, 183, 150, 150, 150];
-            var xe = [17, 17, 50, 83, 83, 50, 83, 50, 17];
-            var ye = [17, 83, 83, 83, 17, 17, 50, 50, 50];
-
-            var startzone = parseInt(code.substring(9, 10)) - 1;
-            var endzone = parseInt(code.substring(10, 11)) - 1;
-            if (startzone >= 0 && endzone >= 0) {
-                var subendzone = code.length > 11 ? code.substring(11, 12) : "";
-                // srand((int)time(NULL));
-                var rxs = 0; //(rand() % 20) - 10;
-                var rys = 0; //rand() % 5;
-
-                const min = -4;
-                const max = 4;
-                var rxe = Math.random() * (max - min); //0; //(rand() % 10) - 5;
-                var rye = Math.random() * (max - min); //(rand() % 10) - 5;
-
-                var xendx = parseInt(xe[endzone]);
-                var xendy = parseInt(ye[endzone]);
-                if (subendzone === "A") {
-                    match.isZone = true;
-                    xendx -= 8;
-                    xendy -= 8;
-                }
-                else if (subendzone === "B") {
-                    match.isZone = true;
-                    xendx -= 8;
-                    xendy += 8;
-                }
-                else if (subendzone === "C") {
-                    match.isZone = true;
-                    xendx += 8;
-                    xendy += 8;
-                }
-                else if (subendzone === "D") {
-                    match.isZone = true;
-                    xendx += 8;
-                    xendy -= 8;
-                }
-                else if (subendzone === "~") {
-                    coneno = endzone + 1;
-                    rxe = 0; //(rand() % 20) - 10;
-                    rye = 0; //(rand() % 20) - 10;
-                }
-
-                if (et === "S") {
-                    bs = (xs[startzone] + rxs).toString() + "," + yss[startzone].toString();
-                }
-                else {
-                    if (atc != null) {
-                        var apt = atc.hittingPoint;
-                        if (apt.x === undefined && apt.y === undefined) {
-                            bs = (xs[startzone] + rxs).toString() + "," + ysa[startzone].toString();
-                        }
-                        else {
-                            bs = apt.x.toString() + "," + (100 + (50 - apt.y) * 2).toString();
-                        }
-                    }
-                    else {
-                        bs = (xs[startzone] + rxs).toString() + "," + (ysa[startzone] + rys).toString();
-                    }
-                }
-                be = (xendx + rxe).toString() + "," + (xendy + rye).toString();
-                var endPoint = { x: xendx, y: xendy };
+          }
+  
+          if (code.substring(0, 1) === "*") {
+            // home
+            var ipl = fetchPlayerInMatch(match.players, inpl);
+            var opl = fetchPlayerInMatch(match.players, outpl);
+            if (ipl !== null && opl !== null) {
+              createEvent(
+                index,
+                opl,
+                g,
+                ts2,
+                kSubstitution,
+                0,
+                0,
+                0,
+                0,
+                "",
+                "",
+                homescore,
+                awayscore,
+                homerow,
+                null,
+                null,
+                ipl.Guid,
+                homeSetter,
+                s,
+                vp
+              );
+              index++;
             }
-        }
-        net = ets.indexOf(et);
-        if (net == kSkillSet - 1) {
-            net = kSkillSettersCall - 1;
-        }
-        if (net != -1) {
-            var neg = egs.indexOf(eg)
-            if (neg >= 0) {
-                var ac = "";
-                net += 1;
-                var gr = neg;
-                var err = 0;
-                var netOK = true;
-                var breakPoint = 0;
-                switch (net) {
-                    case kSkillServe:
-                        {
-                            if (homescore == 6 && awayscore == 3) {
-                                //                                NSLog(@"");
-                            }
-                            if (se === "H") {
-                                subevent = kServeH;
-                            }
-                            else if (se === "M") {
-                                subevent = kServeM;
-                            }
-                            else if (se === "Q") {
-                                subevent = kServeQ;
-                            }
-                            else {
-                                subevent = kServeO;
-                            }
-
-                            if (eg === "=") gr = 0;
-                            else if (eg === "/") gr = 5;
-                            else if (eg === "!") gr = 2;
-                            else if (eg === "-") gr = 1;
-                            else if (eg === "+") gr = 4;
-                            else if (eg === "#") {
-                                gr = 3;
-                                breakPoint = 1;
-                            }
-                            else gr = 1;
-                        }
-                        break;
-                    case kSkillPass:
-                        {
-                            if (se === "H") {
-                                subevent = kPassH;
-                            }
-                            else if (se === "M") {
-                                subevent = kPassM;
-                            }
-                            else if (se === "Q") {
-                                subevent = kPassQ;
-                            }
-                            else {
-                                subevent = kPassO;
-                            }
-                            passEvent = code;
-                            if (eg === "=") gr = 0;
-                            else if (eg === "/") { gr = 1; err = 1; }
-                            else if (eg === "-") gr = 1;
-                            else if (eg === "!") gr = 2;
-                            else if (eg === "+") { gr = 3; err = 1; }
-                            else if (eg === "#") gr = 3;
-                            else gr = 1;
-                        }
-                        break;
-                    case kSkillSet:
-                        {
-                            if (eg === "=") gr = 0;
-                            else if (eg === "-") gr = 1;
-                            else if (eg === "+") gr = 2;
-                            else if (eg === "#") gr = 3;
-                            else gr = 1;
-                        }
-                        break;
-                    case kSkillSettersCall:
-                        {
-                            if (code.length > 6) {
-                                sc = code.substring(6, code.length);
-                            }
-                            if (eg === "=") gr = 0;
-                            else if (eg === "-") gr = 1;
-                            else if (eg === "+") gr = 2;
-                            else if (eg === "#") gr = 3;
-                            else gr = 1;
-                        }
-                        break;
-                    case kSkillSpike:
-                        {
-                            if (code.length > 6) {
-                                ac = code.substring(6, 8);
-                            }
-                            if (se === "H") {
-                                subevent = kSpikeH;
-                            }
-                            else if (se === "M") {
-                                subevent = kSpikeM;
-                            }
-                            else if (se === "Q") {
-                                subevent = kSpikeQ;
-                            }
-                            else if (se === "T") {
-                                subevent = kSpikeT;
-                            }
-                            else if (se === "U") {
-                                subevent = kSpikeU;
-                            }
-                            else if (se === "F") {
-                                subevent = kSpikeF;
-                            }
-                            else {
-                                subevent = kSpikeO;
-                            }
-
-                            if (eg === "=") gr = 0;
-                            else if (eg === "/") { gr = 0; err = 2; }
-                            else if (eg === "-") gr = 1;
-                            else if (eg === "!") { gr = 1; err = 2; }
-                            else if (eg === "+") gr = 2;
-                            else if (eg === "#") {
-                                gr = 3;
-                                if ((homePlayer && homeServing) ||
-                                    (!homePlayer && !homeServing)) {
-                                    breakPoint = 1;
-                                }
-                            }
-                            else gr = 1;
-                        }
-                        break;
-                    case kSkillBlock:
-                        {
-                            if (eg === "=") gr = 0;
-                            else if (eg === "/") { gr = 0; err = 1; }
-                            else if (eg === "-") { gr = 1; err = 1; }
-                            else if (eg === "+") gr = 1;
-                            else if (eg === "#") {
-                                gr = 2;
-                                if ((homePlayer && homeServing) ||
-                                    (!homePlayer && !homeServing)) {
-                                    breakPoint = 1;
-                                }
-                                if (code.length > 12) {
-                                    var bt = code.substring(12, 13);
-                                    if (bt === "A")  //assist
-                                    {
-                                        gr = 3;
-                                    }
-                                    else if (bt === "T") //attempt
-                                    {
-                                    }
-                                }
-                            }
-
-                            else gr = 1;
-                        }
-                        break;
-                    case kSkillDefense:
-                        {
-                            if (eg === "=") gr = 0;
-                            else if (eg === "/") { gr = 0; err = 1; }//over
-                            else if (eg === "-") { gr = 0; err = 2; }//poor
-                            else if (eg === "#") gr = 1;
-                            else gr = 1;
-                        }
-                        break;
-                    case kSkillFreeball:
-                        {
-                            if (eg === "=") gr = 0;
-                            else if (eg === "/") gr = 2; //no attack
-                            else if (eg === "-") gr = 2; //poor
-                            else if (eg === "+") gr = 2; //poor
-                            else if (eg === "#") gr = 1;
-                            else gr = 1;
-                        }
-                        break;
-                    default:
-                        {
-                            netOK = false;
-                        }
-                        break;
-                }
-                if (netOK) {
-                    eventCreated = true;
-                    var ev = null;
-                    if (homePlayer) {
-                        ev = createEvent(index, pl, g, ts2, net, subevent, breakPoint, gr, err, bs, be, homescore, awayscore, homerow, ac, sc, null, homeSetter, s, vp);
-                    }
-                    else {
-                        ev = createEvent(index, pl, g, ts2, net, subevent, breakPoint, gr, err, bs, be, homescore, awayscore, awayrow, ac, sc, null, awaySetter, s, vp);
-                    }
-                    if (net == kSkillSpike) {
-                        ev.UserDefined01 = passEvent;
-                        if (code.length >= 9) {
-                            var sz = code.substring(9, 10);
-                            ev.startZone = sz;
-                            ev.endZone = coneno.toString();
-                        }
-                        sc = "";
-                    }
-                    if (net == kSkillSpike || net == kSkillServe) {
-                        passEvent = "";
-                    }
-                    ev.EventId = pad(index * 10, 4);
-                    index++;
-                }
+          } else if (code.substring(0, 1) === "a") {
+            // away
+            var ipl = fetchPlayerInMatch(match.oppositionPlayers, inpl);
+            var opl = fetchPlayerInMatch(match.oppositionPlayers, outpl);
+            if (ipl !== null && opl !== null) {
+              createEvent(
+                index,
+                opl,
+                g,
+                ts2,
+                kSubstitution,
+                0,
+                0,
+                0,
+                0,
+                "",
+                "",
+                homescore,
+                awayscore,
+                awayrow,
+                null,
+                null,
+                ipl.Guid,
+                awaySetter,
+                s,
+                vp
+              );
+              index++;
             }
+          }
         }
-        else {
-            //                                NSLog(@"ETS = %@", ets);
+      } else if (code.length > 6 && code.substring(0, 7) === "**Drill") {
+        match.isTraining = true;
+        isPractice = true;
+        var lastg = match.drills[currentGame - 1];
+        lastg.IsLocked = true;
+        currentGame++;
+      } else if (
+        code.substring(0, 2) === "**" &&
+        code.substring(3, 6) === "set"
+      ) {
+        homescore = 0;
+        awayscore = 0;
+        var ssno = parseInt(code.substring(2, 3));
+        var lastg = match.drills[ssno - 1];
+        lastg.IsLocked = true;
+        currentGame = parseInt(sm[8]);
+      } else if (code.substring(1, 2) === "z") {
+        var r = 0;
+        if (code.substring(0, 1) === "*") {
+          // home setter pos
+          r = parseInt(code.substring(2, 3));
+          homerow = parseInt(rows[r]);
+          match.homerow = homerow;
+          var xx = parseInt(sm[9]) + 13;
+          homeSetter = parseInt(sm[xx]);
+          g.PrimarySetter = fetchPlayerInMatch(match.players, homeSetter);
+          if (g.PrimarySetter.Positions.filter((obj) => obj === 5).length === 0) {
+            g.PrimarySetter.Positions.push(5);
+          }
+        } else if (code.substring(0, 1) === "a") {
+          // home
+          // away setter
+          r = parseInt(code.substring(2, 3));
+          awayrow = parseInt(rows[r]);
+          match.awayrow = awayrow;
+          var xx = parseInt(sm[10]) + 19;
+          awaySetter = parseInt(sm[xx]);
+          g.oppPrimarySetter = fetchPlayerInMatch(
+            match.oppositionPlayers,
+            awaySetter
+          );
+          if (
+            g.oppPrimarySetter.Positions.filter((obj) => obj === 5).length === 0
+          ) {
+            g.oppPrimarySetter.Positions.push(5);
+          }
         }
+      }
     }
-
-    if ((sn == 0 || isNaN(sn)) && !eventCreated) {
-        if (code.substring(1, 2) === "p") {
-            var sscores = code.substring(2, code.length);
-            var sss = sscores.split(":");
-            if (sss.length == 2) {
-                homescore = parseInt(sss[0]);
-                awayscore = parseInt(sss[1]);
-                g.AwayScore = awayscore;
-                g.HomeScore = homescore;
-                scores = homescore.toString() + "-" + awayscore.toString();
-                shouldUpdate = true;
-            }
-        }
-        else if (code.substring(1, 2) === "c") {
-            if (code.length < 7) {
-
-            }
-            else {
-                var outpl = parseInt(code.substring(2, 4));
-                var inpl = parseInt(code.substring(5, 7));
-                vp = 0;
-                if (sm.length > 12) {
-                    var svp = sm[12];
-                    if (svp.length > 0) {
-                        vp = parseInt(svp);
-                        if (vp > lastvp + (60 * 10))    // if vp is more than 10 minutes different then something wrong
-                        {
-                            vp = lastvp;
-                        }
-                        lastvp = vp;
-                    }
-                }
-                var ts2;
-                if (tt.length > 0) {
-                    ts2 = new Date(matchdate + " " + tt.replace('.', ':'))
-                    if (dateAtVideoPositionZero == null) {
-                        dateAtVideoPositionZero = ts2;
-                    }
-                }
-                if (vp != 0) {
-                    if (videoposoffset == 0) {
-                        videoposoffset = vp;
-                        dateAtVideoPositionZero = new Date(ts2.toTimeString() - vp * 1000);
-                    }
-                    if (dateAtVideoPositionZero == null || dateAtVideoPositionZero === undefined) {
-                        dateAtVideoPositionZero = match.TrainingDate;
-                    }
-                    ts2 = new Date(dateAtVideoPositionZero.getTime() + vp * 1000);
-                }
-
-                if (code.substring(0, 1) === "*")    // home
-                {
-                    var ipl = fetchPlayerInMatch(match.players, inpl);
-                    var opl = fetchPlayerInMatch(match.players, outpl);
-                    if (ipl !== null && opl !== null)
-                    {
-                        createEvent(index, opl, g, ts2, kSubstitution, 0, 0, 0, 0, "", "", homescore, awayscore, homerow, null, null, ipl.Guid, homeSetter, s, vp);
-                        index++;
-                    }
-                }
-                else if (code.substring(0, 1) === "a")    // away
-                {
-                    var ipl = fetchPlayerInMatch(match.oppositionPlayers, inpl);
-                    var opl = fetchPlayerInMatch(match.oppositionPlayers, outpl);
-                    if (ipl !== null && opl !== null)
-                    {
-                        createEvent(index, opl, g, ts2, kSubstitution, 0, 0, 0, 0, "", "", homescore, awayscore, awayrow, null, null, ipl.Guid, awaySetter, s, vp);
-                        index++;
-                    }
-                }
-            }
-        }
-        else if (code.length > 6 && code.substring(0, 7) === "**Drill") {
-            match.isTraining = true;
-            isPractice = true;
-            var lastg = match.drills[currentGame - 1];
-            lastg.IsLocked = true;
-            currentGame++;
-        }
-        else if ((code.substring(0, 2) === "**") && (code.substring(3, 6) === "set")) {
-            homescore = 0;
-            awayscore = 0;
-            var ssno = parseInt(code.substring(2, 3));
-            var lastg = match.drills[ssno - 1];
-            lastg.IsLocked = true;
-            currentGame = parseInt(sm[8]);
-        }
-        else if (code.substring(1, 2) === "z") {
-            var r = 0;
-            if (code.substring(0, 1) === "*")    // home setter pos
-            {
-                r = parseInt(code.substring(2, 3));
-                homerow = parseInt(rows[r]);
-                match.homerow = homerow;
-                var xx = parseInt(sm[9]) + 13;
-                homeSetter = parseInt(sm[xx]);
-                g.PrimarySetter = fetchPlayerInMatch(match.players, homeSetter);
-                if (g.PrimarySetter.Positions.filter(obj => obj === 5).length === 0) {
-                    g.PrimarySetter.Positions.push(5)
-                }
-            }
-            else if (code.substring(0, 1) === "a")    // home
-            {
-                // away setter
-                r = parseInt(code.substring(2, 3));
-                awayrow = parseInt(rows[r]);
-                match.awayrow = awayrow;
-                var xx = parseInt(sm[10]) + 19;
-                awaySetter = parseInt(sm[xx]);
-                g.oppPrimarySetter = fetchPlayerInMatch(match.oppositionPlayers, awaySetter);
-                if (g.oppPrimarySetter.Positions.filter(obj => obj === 5).length === 0) {
-                    g.oppPrimarySetter.Positions.push(5)
-                }
-            }
-        }
-    }
-
+  
     if (match.videoStartTime == null && dateAtVideoPositionZero != null) {
-        match.videoStartTime = dateAtVideoPositionZero;
+      match.videoStartTime = dateAtVideoPositionZero;
     }
     return shouldUpdate;
-
-}
-
+  }
+  
 function createEvent(eindex, pl, g, ts2, et, se, se2, grade, err, bs, be, xhomescore, xawayscore, row, ud, scall, subGuid, setter, dvs, vp) {
     var ev = {}
     ev.Player = pl
@@ -1225,6 +1907,49 @@ function createEvent(eindex, pl, g, ts2, et, se, se2, grade, err, bs, be, xhomes
         else if (ev.DVGrade === "#") gr = 3;
     }
     ev.passingGrade = gr
+
+    switch (ev.EventType) {
+        case 1:
+          ev.EventString = "Serve ";
+          break;
+        case 2:
+          ev.EventString = "Pass ";
+          break;
+        case 3:
+          ev.EventString = "Set ";
+          break;
+        case 4:
+          ev.EventString = "Spike ";
+          break;
+        case 5:
+          ev.EventString = "Block ";
+          break;
+        case 6:
+          ev.EventString = "Dig ";
+          break;
+        case 7:
+          ev.EventString = "Cover";
+          break;
+        case 20:
+          ev.EventString = "Setter Calls ";
+          break;
+        case 250:
+          ev.EventString = "Substitution ";
+          break;
+        default:
+          break;
+      }
+  
+      if (ev.ExtraCode2.length > 0 && ev.ExtraCode2 !== "~")
+      {
+          const n = Number.parseInt(ev.ExtraCode2);
+      
+        if (n >= 0 && n < 5)
+        {
+            var str = ["No Block", "1 Block", "2 Blocks", "3 Blocks", "Seam"];
+            ev.NumberOfBlocks = str[n];
+        }
+    }
 
     g.events.push(ev)
     match.events.push(ev)
@@ -1435,3 +2160,170 @@ export function calculateDVWStats(m) {
 
     return m
 }
+
+export function eventString(e) {
+    var s = "";
+    switch (e.EventType) {
+      case 1:
+        s += "Serve ";
+        break;
+      case 2:
+        s += "Pass ";
+        break;
+      case 3:
+        s += "Set ";
+        break;
+      case 4:
+        s += "Spike ";
+        break;
+      case 5:
+        s += "Block ";
+        break;
+      case 6:
+        s += "Dig ";
+        break;
+      case 7:
+        s += "Cover";
+        break;
+      case 20:
+        s += "Setter Calls ";
+        break;
+      case 250:
+        s += "Substitution ";
+        break;
+      default:
+        break;
+    }
+    const gr1 = ["Error", "1", "2", "Ace", "3", "Speed"];
+    const gr1err = ["", "Net", "Out Long", "Out Side"];
+    const gr2 = ["Error", "1", "2", "3"];
+    const gr3 = ["Error", "", "Set Assist", ""];
+    const gr4 = ["Error", "In Play", "In Play", "Kill"];
+    const gr4err = ["", "Out", "Blocked", "Net", "Net Touch"];
+    const gr5 = ["Error", "Control", "Solo", "Block Assist"];
+    const gr6 = ["Error", "1", "2", "3"];
+    const hr = ["", "Off-speed", "Dump", "Power", "Off-Block"];
+    const sr = ["", "Jump", "Jump-Float", "Float", "Topspin"];
+  
+    const eerr = e.ErrorType;
+    const eg = e.EventGrade;
+    if (eg < 0) eg = 0;
+    var sub = e.SubEvent;
+    const sub2 = e.SubEvent2;
+    const set = 0;
+    if (sub >= 110) {
+      const x = sub % 1000;
+      set = x - 110;
+      sub = (sub - x) / 1000;
+    }
+  
+    switch (e.EventType) {
+      case 1:
+        s += gr1[eg];
+        if (sub > 0) {
+          s += " " + sr[sub];
+        }
+        if (eg == 0 && eerr > 0) {
+          s += " (" + gr1err[eerr] + ")";
+        }
+        break;
+      case 2:
+        if (eg >= gr2.length) break;
+        s += gr2[eg];
+        break;
+      case 3:
+        s += gr3[eg];
+        break;
+      case 4: {
+        {
+          var numblocks = "";
+          if (sub2 != 0) {
+            numblocks = " " + (sub2 - 1).toString() + "B";
+          }
+          if (eg == 0) {
+            {
+              s += gr4[0];
+              if (eerr > 0) {
+                s += " (" + gr4err[eerr] + ")";
+              }
+              s += numblocks;
+              break;
+            }
+          } else if (eg == 1 || eg == 2) {
+            if (sub == 0) {
+              s += gr4[2] + numblocks;
+              break;
+            } //if (sub != 3)
+            else {
+              if (sub < 0 || sub >= hr.length) {
+                sub = 0;
+              }
+              s += gr4[2] + " " + hr[sub] + numblocks;
+              break;
+            }
+          } else {
+            if (sub > 0 && sub != 3 && sub < hr.length) {
+              s += gr4[3] + " " + hr[sub] + numblocks;
+              break;
+            } else {
+              s += gr4[3] + numblocks;
+              break;
+            }
+          }
+        }
+      }
+      case 5: {
+        const n = eg;
+        if (n > 3) {
+          break;
+        }
+        if (eg == 3) {
+          if (sub == 0) {
+            n = 2;
+          }
+        }
+        s += gr5[n];
+        break;
+      }
+      case 6:
+        if (eg < gr6.length) {
+          s += gr6[eg];
+          break;
+        } else {
+          break;
+        }
+      case kSkillSettersCall: {
+        s += e.settersCall.substring(0, 2); // setters call
+        break;
+      }
+      case 250:
+          {
+              break;
+          }
+    }
+    return s;
+  }
+  
+export function DVEventString(e)
+{
+    var sc = e.settersCall != undefined && e.settersCall.length >= 2 ? e.settersCall.substring(0, 2) : "";
+    if (e.EventType == kSubstitution)
+    {
+        var sub = null
+        var substr = sub == null ? "" : "";
+        return e.EventString;
+    }
+    else if (e.EventType == kSkillSpike)
+    {
+        return e.DVGrade + " " + e.EventString + " - " + e.attackCombo + " - " + sc + " - " + e.ExtraCode1 + " - " + e.NumberOfBlocks;
+    }
+    else if (e.EventType == kSkillSettersCall)
+    {
+        return e.DVGrade + " " + e.EventString + " - "+ sc;
+    }
+    else
+    {
+        return e.DVGrade + " " + e.EventString;
+    }
+}
+

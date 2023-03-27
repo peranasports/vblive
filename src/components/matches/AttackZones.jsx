@@ -104,7 +104,7 @@ function AttackZones({ match, selectedGame, selectedTeam }) {
 
     useEffect(() => {
         calculateZones()
-    }, [selectedGame])
+    }, [selectedGame, selectedTeam])
 
     if (events === null) {
         return <></>
