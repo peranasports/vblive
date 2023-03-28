@@ -15,7 +15,7 @@ function EventItem({ event, isSelected, onEventSelected }) {
   };
 
   const getEventStringColor = (e) => {
-    var s = "pl-2 text-md";
+    var s = "pl-2 pt-1 text-sm font-semibold";
     if (e.EventType === 20 || e.EventType === 250) {
       s += " text-gray-600";
     }
@@ -61,13 +61,13 @@ function EventItem({ event, isSelected, onEventSelected }) {
     <div className={background()} onClick={() => doEventSelect()}>
       <div className="">
         {event.Player && event.dvString.substring(0, 1) === "*" ? (
-          <div className="text-left bg-white text-gray-500">
+          <div className="text-left bg-gray-900 text-gray-500">
             <p className="pl-2 text-md font-semibold">
               {event.Player.shirtNumber}. {event.Player.NickName.toUpperCase()}
             </p>
           </div>
         ) : (
-          <div className="text-right bg-white text-gray-500">
+          <div className="text-right bg-gray-900 text-gray-500">
             <p className="pr-2 text-md font-semibold">
               {event.Player.shirtNumber}. {event.Player.NickName.toUpperCase()}
             </p>
@@ -75,7 +75,7 @@ function EventItem({ event, isSelected, onEventSelected }) {
         )}
         <div className="flex justify-between">
           <p className={getEventStringColor(event)}>{DVEventString(event)}</p>
-          <p className="pr-2 pb-2 text-md">
+          <p className="pr-2 pt-1 text-sm font-semibold">
             ({event.Drill.GameNumber}) {event.TeamScore}-{event.OppositionScore}
           </p>
         </div>

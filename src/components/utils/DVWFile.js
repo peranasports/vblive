@@ -98,6 +98,10 @@ var ssecs = ["[3MATCH]", "[3TEAMS]", "[3MORE]", "[3SET]", "[3PLAYERS-H]", "[3PLA
 export function generateMatch(str) {
     var lastvp = -1;
     var keyvp = 0;
+    homerow = 0;
+    awayrow = 0;
+    homescore = 0;
+    awayscore = 0;
     homeTeam = null
     awayTeam = null
 
@@ -1940,15 +1944,22 @@ function createEvent(eindex, pl, g, ts2, et, se, se2, grade, err, bs, be, xhomes
           break;
       }
   
-      if (ev.ExtraCode2.length > 0 && ev.ExtraCode2 !== "~")
+      if (ev.ExtraCode2.length > 0)
       {
+        if (ev.ExtraCode2 === "~")
+        {
+          ev.NumberOfBlocks = "BU";
+        }
+        else
+        {
           const n = Number.parseInt(ev.ExtraCode2);
       
         if (n >= 0 && n < 5)
         {
-            var str = ["No Block", "1 Block", "2 Blocks", "3 Blocks", "Seam"];
+            var str = ["B0", "B1", "B2", "B3", "BS"];
             ev.NumberOfBlocks = str[n];
         }
+      }
     }
 
     g.events.push(ev)
@@ -2315,7 +2326,17 @@ export function DVEventString(e)
     }
     else if (e.EventType == kSkillSpike)
     {
-        return e.DVGrade + " " + e.EventString + " - " + e.attackCombo + " - " + sc + " - " + e.ExtraCode1 + " - " + e.NumberOfBlocks;
+      const aitems = ["", "H", "M", "Q", "T", "U", "F", "O"];
+      var sse = ""
+      if (e.SubEvent !== undefined && e.SubEvent < aitems.length && e.SubEvent >= 0)
+      {
+        sse = aitems[e.SubEvent]
+      }
+      else
+      {
+        sse = "?"
+      }
+      return e.DVGrade + " " + e.EventString + " - " + e.attackCombo + " - " + sc + " - " + e.ExtraCode1 + " " + sse + " - " + e.NumberOfBlocks;
     }
     else if (e.EventType == kSkillSettersCall)
     {
