@@ -2317,6 +2317,12 @@ export function eventString(e) {
   
 export function DVEventString(e)
 {
+  if (e.DVGrade === undefined)  // PSVB
+  {
+    
+  }
+  else
+  {
     var sc = e.settersCall != undefined && e.settersCall.length >= 2 ? e.settersCall.substring(0, 2) : "";
     if (e.EventType == kSubstitution)
     {
@@ -2346,5 +2352,6 @@ export function DVEventString(e)
     {
         return e.DVGrade + " " + e.EventString;
     }
+  }
 }
 

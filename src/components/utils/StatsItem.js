@@ -1,14 +1,14 @@
 import { pad, replaceItemInArray } from './Utils'
 
-const kSkillServe = 1
-const kSkillPass = 2
-const kSkillSet = 3
-const kSkillSpike = 4
-const kSkillBlock = 5
-const kSkillDefense = 6
-const kSkillFreeball = 7
-const kSkillCover = 7
-const kSkillCoachTag = 8
+export const kSkillServe = 1
+export const kSkillPass = 2
+export const kSkillSet = 3
+export const kSkillSpike = 4
+export const kSkillBlock = 5
+export const kSkillDefense = 6
+export const kSkillFreeball = 7
+export const kSkillCover = 7
+export const kSkillCoachTag = 8
 const kSkillEndOfSet = 9
 const kSkillTransitionSO = 10
 const kSkillTransitionPovar = 11
@@ -20,20 +20,20 @@ const kSkilliCodaAttack = 16
 const kSkilliCodaDefense = 17
 const kSkillCodeError = 18
 const kSkillOppositionError = 19
-const kSkillSettersCall = 20
+export const kSkillSettersCall = 20
 const kSkillSpeedServe = 30
 const kSkillLift = 40
 
-const kOppositionScore = 100
-const kOppositionError = 101
-const kOppositionHitKill = 102
-const kOppositionHitError = 103
-const kOppositionServeError = 104
-const kOppositionServeAce = 105
-const kSkillCommentary = 200
-const kSkillTimeout = 201
-const kSkillTechTimeout = 202
-const kSubstitution = 250
+export const kOppositionScore = 100
+export const kOppositionError = 101
+export const kOppositionHitKill = 102
+export const kOppositionHitError = 103
+export const kOppositionServeError = 104
+export const kOppositionServeAce = 105
+export const kSkillCommentary = 200
+export const kSkillTimeout = 201
+export const kSkillTechTimeout = 202
+export const kSubstitution = 250
 const kSkillOppositionServe = 401
 const kSkillOppositionSpike = 404
 

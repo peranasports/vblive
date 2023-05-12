@@ -19,7 +19,7 @@ import VideoAnalysis from '../components/matches/VideoAnalysis'
 function Session() {
     const { session, appName, loading, dispatch } = useContext(VBLiveAPIContext)
     const location = useLocation()
-    const { sessionId, dvwFileData } = location.state
+    const { sessionId, dvwFileData, psvbFileData } = location.state
     const params = useParams()
     const [match, setMatch] = useState(null)
     const [latest, setLatest] = useState(null)
@@ -58,12 +58,21 @@ function Session() {
     }, [sessionId, selectedTeam])
 
     useEffect(() => {
-        if (dvwFileData !== null)
+        if (dvwFileData !== undefined)
         {
             var m = generateMatch(dvwFileData)
             var mx = calculateDVWStats(m)
             mx.app = 'DataVolley'
             mx = calculateSideoutStats(mx, 'DataVolley')
+            setMatch(mx)
+            forceUpdate((n) => !n)
+        }
+        else if (psvbFileData !== undefined)
+        {
+            var m = initWithPSVBCompressedBuffer(psvbFileData)
+            var mx = calculatePSVBStats(m)
+            mx.app = 'VBStats'
+            mx = calculateSideoutStats(mx, 'VBStats')
             setMatch(mx)
             forceUpdate((n) => !n)
         }

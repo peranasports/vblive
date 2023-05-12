@@ -367,7 +367,7 @@ function VideoAnalysis({ match }) {
 
   const doSelectEvent = (ev) => {
     setSelectedEvent(ev);
-    if (ev.VideoPosition !== 0) {
+    if (ev.VideoPosition !== undefined && ev.VideoPosition !== 0) {
       playerRef.current.seekTo(ev.VideoPosition - 3, "seconds");
     } else {
       if (startVideoTime !== null && videoOffset !== null) {
@@ -420,18 +420,26 @@ function VideoAnalysis({ match }) {
   };
 
   useEffect(() => {
-    const vobj = localStorage.getItem("videoInfo");
-    if (vobj !== null) {
-      const vinfo = JSON.parse(vobj);
-      if (vinfo.matchDVString === match.dvstring) {
-        if (vinfo.videoOnlineUrl !== null) {
-          setVideoOnlineUrl(vinfo.videoOnlineUrl);
-          setVideoFilePath(vinfo.videoOnlineUrl);
-        } else if (vinfo.videoFileObject !== null) {
-          const fobj = JSON.parse(vinfo.videoFileObject);
-          // const vfp = URL.createObjectURL(fobj)
-          // setVideoFilePath(vfp)
-          setVideoFileName(fobj.name);
+    if (match.videoUrl !== undefined)
+    {
+      setVideoOnlineUrl(match.videoUrl);
+      setVideoFilePath(match.videoUrl);
+    }
+    else
+    {
+      const vobj = localStorage.getItem("videoInfo");
+      if (vobj !== null) {
+        const vinfo = JSON.parse(vobj);
+        if (vinfo.matchDVString === match.dvstring) {
+          if (vinfo.videoOnlineUrl !== null) {
+            setVideoOnlineUrl(vinfo.videoOnlineUrl);
+            setVideoFilePath(vinfo.videoOnlineUrl);
+          } else if (vinfo.videoFileObject !== null) {
+            const fobj = JSON.parse(vinfo.videoFileObject);
+            // const vfp = URL.createObjectURL(fobj)
+            // setVideoFilePath(vfp)
+            setVideoFileName(fobj.name);
+          }
         }
       }
     }
@@ -444,10 +452,13 @@ function VideoAnalysis({ match }) {
     var natcbs = 0;
     var atcbs = [{ value: 0, label: "All Combos" }];
     var selatcbs = [{ value: 0, label: "All Combos" }];
-    for (const atcb of match.attackCombos) {
-      natcbs++;
-      const xx = { value: natcbs, label: atcb.code, name: atcb.name };
-      atcbs.push(xx);
+    if (match.attackCombos !== undefined)
+    {
+      for (const atcb of match.attackCombos) {
+        natcbs++;
+        const xx = { value: natcbs, label: atcb.code, name: atcb.name };
+        atcbs.push(xx);
+      }
     }
     setAttackCombos(atcbs);
     setSelectedAttackCombos(selatcbs);
@@ -455,10 +466,13 @@ function VideoAnalysis({ match }) {
     var nscs = 0;
     var scs = [{ value: 0, label: "All Calls" }];
     var selscs = [{ value: 0, label: "All Calls" }];
-    for (const sc of match.setterCalls) {
-      nscs++;
-      const xx = { value: nscs, label: sc.code, name: sc.name };
-      scs.push(xx);
+    if (match.setterCalls !== undefined)
+    {
+      for (const sc of match.setterCalls) {
+        nscs++;
+        const xx = { value: nscs, label: sc.code, name: sc.name };
+        scs.push(xx);
+      }
     }
     setSetterCalls(scs);
     setSelectedSetterCalls(selscs);
