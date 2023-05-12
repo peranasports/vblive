@@ -58,7 +58,7 @@ function Session() {
     }, [sessionId, selectedTeam])
 
     useEffect(() => {
-        if (dvwFileData !== undefined)
+        if (dvwFileData !== undefined && dvwFileData !== null)
         {
             var m = generateMatch(dvwFileData)
             var mx = calculateDVWStats(m)
