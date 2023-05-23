@@ -93,7 +93,7 @@ var passEvent = "";
 var homeServing = true;
 var scores = "0-0";
 var genday;
-var ssecs = ["[3MATCH]", "[3TEAMS]", "[3MORE]", "[3SET]", "[3PLAYERS-H]", "[3PLAYERS-V]", "[3ATTACKCOMBINATION]", "[3SETTERCALL]", "[3SCOUT]"]
+var ssecs = ["[3MATCH]", "[3TEAMS]", "[3MORE]", "[3SET]", "[3PLAYERS-H]", "[3PLAYERS-V]", "[3ATTACKCOMBINATION]", "[3SETTERCALL]", "[3SCOUT]", "[3VIDEO]"]
 
 export function generateMatch(str) {
     var lastvp = -1;
@@ -350,6 +350,11 @@ export function generateMatch(str) {
             case 8: //scout
                 {
                     processScoutLine(s);
+                }
+                break;
+                case 9: // video
+                {
+                  match.videoUrl = s;
                 }
                 break;
         }
@@ -1944,6 +1949,7 @@ function createEvent(eindex, pl, g, ts2, et, se, se2, grade, err, bs, be, xhomes
           break;
       }
   
+      ev.NumberOfBlocks = "";
       if (ev.ExtraCode2.length > 0)
       {
         if (ev.ExtraCode2 === "~")

@@ -4,6 +4,7 @@ import { AlertProvider } from './context/Alert/AlertContext'
 import Navbar from './components/layout/Navbar'
 import Footer from './components/layout/Footer'
 import Home from './pages/Home'
+import SignIn from './pages/SignIn'
 import Session from './pages/Session'
 import NotFound from './pages/NotFound'
 import { CookiesProvider } from 'react-cookie';
@@ -19,6 +20,7 @@ function App() {
               <main className='container mx-auto px-3 pb-12'>
                 <Routes>
                   <Route path='/' element={<Home />} />
+                  <Route path='/signin' element={<SignIn />} />
                   <Route path='/session' element={<Session />} />
                   {/* <Route path='/about' element={<About />} />
             <Route path='/player/:playerId' element={<Player />} />
