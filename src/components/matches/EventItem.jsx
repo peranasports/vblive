@@ -76,7 +76,7 @@ function EventItem({ event, isSelected, onEventSelected }) {
 
   const getEventInfo = (e) => {
     var subcolor = "text-warning";
-    var sub = ""
+    var sub = "";
     var pl = e.Player;
     var firstname = pl && pl.FirstName ? pl.FirstName : "";
     var lastname = pl && pl.LastName ? pl.LastName.toUpperCase() : "";
@@ -145,24 +145,17 @@ function EventItem({ event, isSelected, onEventSelected }) {
     return <p className={stxt}>{sub}</p>;
   };
 
-  const isHomePlayer = (e) =>
-  {
-    if (e.Player)
-    {
-      if (e.dvString !== undefined)
-      {
-        return (e.dvString.substring(0, 1) === "*")
-      }
-      else
-      {
+  const isHomePlayer = (e) => {
+    if (e.Player) {
+      if (e.dvString !== undefined) {
+        return e.dvString.substring(0, 1) === "*";
+      } else {
         return e.homePlayer;
       }
-    }
-    else
-    {
+    } else {
       return false;
     }
-  }
+  };
 
   return (
     <div className={background()} onClick={() => doEventSelect()}>
@@ -186,13 +179,25 @@ function EventItem({ event, isSelected, onEventSelected }) {
           </div>
         )}
         <div className="flex justify-between">
-          {event.DVGrade === undefined ? (
-            getEventInfo(event)
-          ) : (
-            <p className={getEventStringColor(event)}>{DVEventString(event)}</p>
-          )}
+          <div className="flex gap-1">
+            {event.DVGrade === undefined ? (
+              getEventInfo(event)
+            ) : (
+              <p className={getEventStringColor(event)}>
+                {DVEventString(event)}
+              </p>
+            )}
+            {event.radar === null || event.radar === undefined ? (
+              <></>
+            ) : (
+              <div className="badge badge-info gap-2 mt-1 mx-2">
+                {event.radar.speed}
+              </div>
+            )}
+          </div>
           <p className="pr-2 pt-1 text-sm font-semibold">
-            ({event.Drill.GameNumber}) {event.TeamScore}-{event.OppositionScore} R{event.Row}
+            ({event.Drill.GameNumber}) {event.TeamScore}-{event.OppositionScore}{" "}
+            R{event.Row}
           </p>
         </div>
         {event.vertData === undefined ? (

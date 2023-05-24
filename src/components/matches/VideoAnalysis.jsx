@@ -1,12 +1,17 @@
 import { useEffect, useState, useRef } from "react";
 import { useCookies } from "react-cookie";
+import { sortBy, sortedIndex } from "lodash";
 import Select from "react-select";
 import ReactPlayer from "react-player";
 import EventsList from "./EventsList";
+import { toast } from "react-toastify";
 
 function VideoAnalysis({ match }) {
   const playerRef = useRef();
   const dvRef = useRef();
+  const radarRef = useRef();
+  const [showRadarFile, setShowRadarFile] = useState(false);
+  const [radarFileName, setRadarFileName] = useState(null);
   const [cookies, setCookie] = useCookies(["videofile"]);
   const [videoOnlineUrl, setVideoOnlineUrl] = useState(null);
   const [videoFilePath, setVideoFilePath] = useState(null);
@@ -415,18 +420,125 @@ function VideoAnalysis({ match }) {
     forceUpdate((n) => !n);
   };
 
+  const handleRadarUpload = (event) => {
+    var url = URL.createObjectURL(event.target.files[0]);
+    setRadarFileName(event.target.files[0].name);
+    const fileReader = new FileReader();
+    fileReader.readAsText(event.target.files[0], "UTF-8");
+    fileReader.onload = (e) => {
+      var matches = readRadarFileData(e.target.result);
+      if (matches > 0)
+      {
+        toast.success("Import " + matches + " radar readings!");
+        setShowRadarFile(false);
+        forceUpdate((n) => !n);
+      }
+      else
+      {
+        toast.error("Unable to import radar readings!");
+      }
+    };
+  };
+
+  const readRadarFileData = (buf) => {
+    var rds = [];
+
+    var a = buf.split(/\r?\n/);
+    if (a.length === 0) {
+      return null;
+    }
+    for (var nl = 1; nl < a.length; nl++) {
+      const line = a[nl];
+      var tokens = line.split(",");
+      const ts = new Date(tokens[0] + " " + tokens[1]);
+      rds.push({
+        timestamp: ts,
+        activity: tokens[2],
+        speed: Number.parseInt(tokens[4]),
+        unit: tokens[5],
+        index: nl,
+      });
+    }
+
+    rds = sortBy(rds, "timestamp");
+
+    var serves = [];
+    for (var e of match.events) {
+      if (e.EventType === 1) {
+        e.radar = null;
+        serves.push(e);
+      }
+    }
+
+    var bestmatches = 0;
+    var bestmatchesrd = 0;
+    for (var startrd = 0; startrd < rds.length - serves.length; startrd++) {
+      const threshold = 3000;
+      var matches = 0;
+      var nextrd = startrd;
+      var firstetime = serves[0].TimeStamp.getTime();
+      var firstrdtime = rds[startrd].timestamp.getTime();
+      for (var e of serves) {
+        const etime = e.TimeStamp.getTime();
+        const ediff = etime - firstetime;
+        for (var nr = nextrd; nr < rds.length - serves.length; nr++) {
+          const rd = rds[nr];
+          const rtime = rd.timestamp.getTime();
+          const rdiff = rtime - firstrdtime;
+          const diff = Math.abs(rdiff - ediff);
+          if (diff <= threshold) {
+            e.radar = rd;
+            matches++;
+            nextrd = nr + 1;
+            break;
+          }
+        }
+        if (matches > bestmatches) {
+          bestmatches = matches;
+          bestmatchesrd = startrd;
+        }
+      }
+      // console.log(startrd, matches);
+    }
+    // console.log("best:", bestmatchesrd, bestmatches);
+
+    const threshold = 3000;
+    matches = 0;
+    startrd = bestmatchesrd;
+    nextrd = bestmatchesrd;
+    firstetime = serves[0].TimeStamp.getTime();
+    firstrdtime = rds[startrd].timestamp.getTime();
+    for (var e of serves) {
+      e.radar = null;
+      const etime = e.TimeStamp.getTime();
+      const ediff = etime - firstetime;
+      for (var nr = nextrd; nr < rds.length - serves.length; nr++) {
+        const rd = rds[nr];
+        const rtime = rd.timestamp.getTime();
+        const rdiff = rtime - firstrdtime;
+        const diff = Math.abs(rdiff - ediff);
+        if (diff <= threshold) {
+          e.radar = rd;
+          matches++;
+          nextrd = nr + 1;
+          break;
+        }
+      }
+    }
+    // console.log(startrd, matches);
+
+    return bestmatches;
+  };
+
   const onGameChanged = (idx) => {
     setSelectedSet(idx);
   };
 
   useEffect(() => {
-    if (match.videoUrl !== undefined)
-    {
+    if (match.videoUrl !== undefined) {
       setVideoOnlineUrl(match.videoUrl);
       setVideoFilePath(match.videoUrl);
-    }
-    else
-    {
+    } else {
       const vobj = localStorage.getItem("videoInfo");
       if (vobj !== null) {
         const vinfo = JSON.parse(vobj);
@@ -452,8 +564,7 @@ function VideoAnalysis({ match }) {
     var natcbs = 0;
     var atcbs = [{ value: 0, label: "All Combos" }];
     var selatcbs = [{ value: 0, label: "All Combos" }];
-    if (match.attackCombos !== undefined)
-    {
+    if (match.attackCombos !== undefined) {
       for (const atcb of match.attackCombos) {
         natcbs++;
         const xx = { value: natcbs, label: atcb.code, name: atcb.name };
@@ -466,8 +577,7 @@ function VideoAnalysis({ match }) {
     var nscs = 0;
     var scs = [{ value: 0, label: "All Calls" }];
     var selscs = [{ value: 0, label: "All Calls" }];
-    if (match.setterCalls !== undefined)
-    {
+    if (match.setterCalls !== undefined) {
       for (const sc of match.setterCalls) {
         nscs++;
         const xx = { value: nscs, label: sc.code, name: sc.name };
@@ -506,9 +616,40 @@ function VideoAnalysis({ match }) {
       <div className="drawer drawer-mobile">
         <input id="my-drawer-3" type="checkbox" className="drawer-toggle" />
         <div className="drawer-content">
-          <div className="flex flex-col w-full justify-between">
+          <div className="flex flex-col w-full justify-between ml-2">
             <div>
-              <div className="flex my-4">
+              {showRadarFile === false ? (
+                <></>
+              ) : (
+                <div className="flex my-2">
+                  <input
+                    type="file"
+                    id="selectedRadarFile"
+                    ref={radarRef}
+                    style={{ display: "none" }}
+                    onChange={handleRadarUpload}
+                    onClick={(event) => {
+                      event.target.value = null;
+                    }}
+                  />
+                  <input
+                    type="button"
+                    className="btn btn-sm w-60"
+                    value="Select Radar File..."
+                    onClick={() =>
+                      document.getElementById("selectedRadarFile").click()
+                    }
+                  />
+                  <label className="label ml-4">
+                    <span className="label-text">
+                      {videoFileName === null
+                        ? "radar file not selected"
+                        : radarFileName}
+                    </span>
+                  </label>
+                </div>
+              )}
+              <div className="flex my-2">
                 <input
                   type="file"
                   id="selectedVideoFile"
@@ -535,7 +676,7 @@ function VideoAnalysis({ match }) {
                   </span>
                 </label>
               </div>
-              <div className="flex justify-between my-4">
+              <div className="flex justify-between my-2">
                 <input
                   type="text"
                   className="w-full text-gray-500 bg-gray-200 input input-sm rounded-sm"
@@ -568,30 +709,40 @@ function VideoAnalysis({ match }) {
         <div className="drawer-side h-full">
           <label htmlFor="my-drawer-3" className="drawer-overlay"></label>
           <div className="flex-col mt-2">
-            <div className="flex gap-1">
-              <label
-                htmlFor="modal-filters"
-                className="btn btn-sm bg-gray-600 hover:btn-gray-900"
-              >
-                Filters
-              </label>
-              <div className="dropdown">
+            <div className="flex justify-between">
+              <div className="flex gap-1">
                 <label
-                  tabIndex={0}
+                  htmlFor="modal-filters"
                   className="btn btn-sm bg-gray-600 hover:btn-gray-900"
                 >
-                  Set
+                  Filters
                 </label>
-                <ul
-                  tabIndex={0}
-                  className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52"
+                <div className="dropdown">
+                  <label
+                    tabIndex={0}
+                    className="btn btn-sm bg-gray-600 hover:btn-gray-900"
+                  >
+                    Set
+                  </label>
+                  <ul
+                    tabIndex={0}
+                    className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52"
+                  >
+                    {match.sets.map((vobj, idx) => (
+                      <li key={idx} onClick={() => onGameChanged(idx + 1)}>
+                        <a>Set {vobj.GameNumber}</a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+              <div>
+                <button
+                  className="btn btn-sm bg-gray-600 hover:btn-gray-900"
+                  onClick={() => setShowRadarFile(!showRadarFile)}
                 >
-                  {match.sets.map((vobj, idx) => (
-                    <li key={idx} onClick={() => onGameChanged(idx + 1)}>
-                      <a>Set {vobj.GameNumber}</a>
-                    </li>
-                  ))}
-                </ul>
+                  Radar
+                </button>
               </div>
             </div>
             <div className="flex h-[40vw] mt-2">

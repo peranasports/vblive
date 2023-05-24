@@ -354,7 +354,10 @@ export function generateMatch(str) {
                 break;
                 case 9: // video
                 {
-                  match.videoUrl = s;
+                  if (s.startsWith("http") === true)
+                  {
+                    match.videoUrl = s;
+                  }
                 }
                 break;
         }
