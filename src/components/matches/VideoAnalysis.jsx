@@ -472,7 +472,7 @@ function VideoAnalysis({ match }) {
 
     var bestmatches = 0;
     var bestmatchesrd = 0;
-    for (var startrd = 0; startrd < rds.length - serves.length; startrd++) {
+    for (var startrd = 0; startrd < rds.length; startrd++) {
       const threshold = 3000;
       var matches = 0;
       var nextrd = startrd;
@@ -481,7 +481,7 @@ function VideoAnalysis({ match }) {
       for (var e of serves) {
         const etime = e.TimeStamp.getTime();
         const ediff = etime - firstetime;
-        for (var nr = nextrd; nr < rds.length - serves.length; nr++) {
+        for (var nr = nextrd; nr < rds.length; nr++) {
           const rd = rds[nr];
           const rtime = rd.timestamp.getTime();
           const rdiff = rtime - firstrdtime;
@@ -512,7 +512,7 @@ function VideoAnalysis({ match }) {
       e.radar = null;
       const etime = e.TimeStamp.getTime();
       const ediff = etime - firstetime;
-      for (var nr = nextrd; nr < rds.length - serves.length; nr++) {
+      for (var nr = nextrd; nr < rds.length; nr++) {
         const rd = rds[nr];
         const rtime = rd.timestamp.getTime();
         const rdiff = rtime - firstrdtime;
