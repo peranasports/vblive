@@ -4,8 +4,12 @@ import { AlertProvider } from "./context/Alert/AlertContext";
 import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
 import Home from "./pages/Home";
+import About from "./pages/About";
 import SignIn from "./pages/SignIn";
+import SignUp from "./pages/SignUp";
+import ForgotPassword from "./pages/ForgotPassword";
 import Session from "./pages/Session";
+import Input from "./pages/Input";
 import NotFound from "./pages/NotFound";
 import { CookiesProvider } from "react-cookie";
 import { ToastContainer } from "react-toastify";
@@ -23,21 +27,19 @@ function App() {
                 <Routes>
                   <Route path="/" element={<Home />} />
                   <Route path="/signin" element={<SignIn />} />
+                  <Route path="/signup" element={<SignUp />} />
+                  <Route path="/forgotpassword" element={<ForgotPassword />} />
+                  <Route path="/about" element={<About />} />
                   <Route path="/session" element={<Session />} />
-                  {/* <Route path='/about' element={<About />} />
-            <Route path='/player/:playerId' element={<Player />} />
-            <Route path='/filtersanalysis/:matchIds/:playerId' element={<FiltersAnalysis />} />
-            <Route path='/playlist/:playerId' element={<Playlist />} />
-            <Route path='/filtersvideo' element={<FiltersVideo />} />
-            <Route path='/notfound' element={<NotFound />} /> */}
+                  <Route path="/input" element={<Input />} />
                   <Route path="/*" element={<NotFound />} />
                 </Routes>
               </main>
               <Footer />
             </div>
           </Router>
-          <ToastContainer />
         </AlertProvider>
+        <ToastContainer />
       </VBLiveAPIProvider>
     </CookiesProvider>
   );

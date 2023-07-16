@@ -14,7 +14,7 @@ function BoxScore({ match, selectedGame, selectedTeam }) {
             var sis = selectedTeam === 0 ? match.sets[selectedGame - 1].teamAStatsItems : match.sets[selectedGame - 1].teamBStatsItems
             setStatsItems(sis)
         }
-    }, [selectedGame])
+    }, [selectedGame, selectedTeam])
 
     // if (loading) {
     //     return <Spinner />

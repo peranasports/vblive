@@ -7,6 +7,7 @@ function EventsList({ match, filters, selectedSet, doSelectEvent }) {
   const [selectedEventTypes, setSelectedEventTypes] = useState(null);
   const [selectedEventResults, setSelectedEventResults] = useState(null);
   const [selectedJumpHeights, setSelectedJumpHeights] = useState(null);
+  const [, forceUpdate] = useState(0);
 
   const onEventSelected = (ev) => {
     setSelectedEvent(ev);
@@ -140,7 +141,7 @@ function EventsList({ match, filters, selectedSet, doSelectEvent }) {
         const e = s.events[ne];
         if (games.includes(e.Drill.GameNumber) === false) continue;
         if (rotations.includes(e.Row) === false) continue;
-        if (guids.includes(e.Player.Guid) === false) continue;
+        if (e.Player && guids.includes(e.Player.Guid) === false) continue;
         if (eventtypes.includes(e.EventType) === false) continue;
         if (eventresults.includes(e.DVGrade) === false) continue;
         if (eventtypes.includes(20) && e.EventType === 20) {
@@ -219,6 +220,7 @@ function EventsList({ match, filters, selectedSet, doSelectEvent }) {
         inline: "start",
       });
     }
+    forceUpdate((n) => !n);
   }, [selectedSet]);
 
   if (match === undefined || match.sets[0].filteredEvents === undefined) {

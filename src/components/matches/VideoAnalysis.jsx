@@ -6,7 +6,7 @@ import ReactPlayer from "react-player";
 import EventsList from "./EventsList";
 import { toast } from "react-toastify";
 
-function VideoAnalysis({ match }) {
+function VideoAnalysis({ match, selectedGame }) {
   const playerRef = useRef();
   const dvRef = useRef();
   const radarRef = useRef();
@@ -95,6 +95,29 @@ function VideoAnalysis({ match }) {
     { value: 5, label: "Not Specified" },
   ];
   const [selectedBlockTypes, setSelectedBlockTypes] = useState([blockTypes[0]]);
+
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+
+  // the required distance between touchStart and touchEnd to be detected as a swipe
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e) => {
+    setTouchEnd(null); // otherwise the swipe is fired even with usual touch events
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e) => setTouchEnd(e.targetTouches[0].clientX);
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    if (isLeftSwipe || isRightSwipe)
+      console.log("swipe", isLeftSwipe ? "left" : "right");
+    // add your conditional logic here
+  };
 
   function handleSelectEventTypes(data) {
     if (data.length === 0) {
@@ -427,14 +450,11 @@ function VideoAnalysis({ match }) {
     fileReader.readAsText(event.target.files[0], "UTF-8");
     fileReader.onload = (e) => {
       var matches = readRadarFileData(e.target.result);
-      if (matches > 0)
-      {
+      if (matches > 0) {
         toast.success("Import " + matches + " radar readings!");
         setShowRadarFile(false);
         forceUpdate((n) => !n);
-      }
-      else
-      {
+      } else {
         toast.error("Unable to import radar readings!");
       }
     };
@@ -607,6 +627,11 @@ function VideoAnalysis({ match }) {
     forceUpdate((n) => !n);
   }, []);
 
+  useEffect(() => {
+    setSelectedSet(selectedGame);
+    forceUpdate((n) => !n);
+  }, [selectedGame]);
+
   if (match === undefined) {
     return <></>;
   }
@@ -692,7 +717,12 @@ function VideoAnalysis({ match }) {
                 </button>
               </div>
 
-              <div className="flex ml-4 my-4">
+              <div
+                className="flex ml-4 my-4"
+                onTouchStart={onTouchStart}
+                onTouchMove={onTouchMove}
+                onTouchEnd={onTouchEnd}
+              >
                 <ReactPlayer
                   ref={playerRef}
                   url={videoFilePath}
@@ -701,7 +731,10 @@ function VideoAnalysis({ match }) {
                   height="100%"
                   controls={true}
                   onReady={() => playerReady()}
-                />
+                  onTouchStart={onTouchStart}
+                  onTouchMove={onTouchMove}
+                  onTouchEnd={onTouchEnd}
+                  />
               </div>
             </div>
           </div>

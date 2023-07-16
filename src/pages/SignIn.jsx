@@ -1,11 +1,32 @@
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import VBLiveLogo from "../components/assets/logo512.png";
+import {
+  setDoc,
+  doc,
+  collection,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
+import {
+  EyeIcon,
+  EyeSlashIcon,
+  ArrowRightIcon,
+} from "@heroicons/react/20/solid";
+import { db } from "../firebase.config";
+
+// Icons
+//import { ReactComponent as ArrowRightIcon } from "../assets/svg/keyboardArrowRightIcon.svg";
+//import visibilityIcon from "../assets/svg/visibilityIcon.svg";
+
 // Firebase Authentication
 import { signInWithEmailAndPassword, getAuth } from "firebase/auth";
 
+// React Toastify
+import { toast } from "react-toastify";
+
 function SignIn() {
-  const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -13,7 +34,48 @@ function SignIn() {
 
   const { email, password } = formData;
 
-  const onSubmit = async (e) => {
+  const navigate = useNavigate();
+
+  const onChange = (e) => {
+    setFormData((prevState) => ({
+      ...prevState,
+      [e.target.id]: e.target.value,
+    }));
+  };
+
+  // const fetchUser = async (user) => {
+  //   try {
+  //     const eRef = collection(db, "users");
+  //     const q = query(eRef, where("uid", "==", user.uid));
+  //     const querySnap = await getDocs(q);
+  //     const empls = [];
+  //     querySnap.forEach((doc) => {
+  //       return empls.push(doc.data());
+  //     });
+  //     if (empls.length > 0) {
+  //       var empl = empls[0];
+  //     } else {
+  //       const q2 = query(eRef, where("emailAddress", "==", user.email));
+  //       const querySnap2 = await getDocs(q2);
+  //       querySnap2.forEach((doc) => {
+  //         return empls.push({
+  //           id: doc.id,
+  //           data: doc.data(),
+  //         });
+  //       });
+  //       if (empls.length > 0) {
+  //         var empl = empls[0].data;
+  //         empl.uid = user.uid;
+  //         await setDoc(doc(db, "users", empls[0].id), empl);
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  //   return empl;
+  // };
+
+  const onSubmit = async (e) => { 
     e.preventDefault();
 
     try {
@@ -26,141 +88,102 @@ function SignIn() {
       );
 
       if (userCredential.user) {
-        // var user = await fetchUser(userCredential.user)
-        // console.log(user.role + " " + user.email)
+        navigate("/input");
+        // var user = await fetchUser(userCredential.user);
+        // console.log(user.role + " " + user.email);
         // if (user.role === 1) {
-        //   navigate('/admin', { state: user })
-        // }
-        // else if (user.role === 2)
-        // {
-        //   if (user.active === false)
-        //   {
-        //     // toast.error("You are no longer an active user at CRMS");
+        //   navigate("/admin", { state: user });
+        // } else if (user.role === 2) {
+        //   if (user.active === false) {
+        //     toast.error("You are no longer an active user at ts-online");
+        //   } else {
+        //     navigate("/coach", { state: user.uid });
         //   }
-        //   else
-        //   {
-        //     navigate('/coach', { state: user.uid });
+        // } else if (user.role === 3) {
+        //   if (user.active === false) {
+        //     toast.error("You are no longer an active user at CRMS");
+        //   } else {
+        //     navigate("/student", { state: user.uid });
         //   }
-        // }
-        // else if (user.role === 3)
-        // {
-        //   if (user.active === false)
-        //   {
-        //     // toast.error("You are no longer an active user at CRMS");
-        //   }
-        //   else
-        //   {
-        //     navigate('/student', { state: user.uid });
-        //   }
+        // } else if (user.role === 0) {
+        //   navigate("/import-psts", { state: user });
         // }
       }
     } catch (error) {
-      // toast.error("Error Signing In\n" + error.message);
+      toast.error("Error Signing In\n" + error.message);
     }
   };
 
   return (
     <>
-      {/*
-        This example requires updating your template:
+      <div className="pageContainer">
+        <header>
+          <p className="pageHeader mt-10 text-xl">Welcome Back!</p>
+        </header>
 
-        ```
-        <html class="h-full bg-white">
-        <body class="h-full">
-        ```
-      */}
-      <div className="flex min-h-full flex-1 items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
-        <div className="w-full max-w-sm space-y-10">
-          <div>
-            <img
-              className="mx-auto h-20 w-auto"
-              src={VBLiveLogo}
-              alt="Perana sports"
+        <main>
+          <form className=" max-w-md" onSubmit={onSubmit}>
+            <input
+              type="email"
+              id="email"
+              className="w-full mt-10 pr-40 bg-gray-200 input text-xl input-md text-black"
+              // className="emailInput"
+              placeholder="Email"
+              value={email}
+              onChange={onChange}
             />
-            <p className="text-3xl font-bold text-center">VBLive</p>
-            <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-base-900">
-              Sign in to your account
-            </h2>
-          </div>
-          <form className="space-y-6" action="#" method="POST">
-            <div className="relative -space-y-px rounded-md shadow-sm">
-              <div className="pointer-events-none absolute inset-0 z-10 rounded-md ring-1 ring-inset ring-gray-300" />
-              <div>
-                <label htmlFor="email-address" className="sr-only">
-                  Email address
-                </label>
-                <input
-                  id="email-address"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  className="relative block w-full rounded-t-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-100 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 px-2"
-                  placeholder="Email address"
+
+            <div className="passwordInputDiv relative mt-10 mb-2">
+              <input
+                type={showPassword ? "text" : "password"}
+                id="password"
+                className="w-full pr-40 bg-gray-200 input text-xl input-md text-black"
+                // className="passwordInput"
+                placeholder="Password"
+                value={password}
+                onChange={onChange}
+              />
+              {/* <button
+                type='submit'
+                className='absolute mt-10 top-0 right-0 rounded-l-none w-36 btn btn-lg'>
+                Go
+              </button> */}
+
+              {showPassword ? (
+                <EyeSlashIcon
+                  className="showPassword absolute top-0 right-0 rounded-l-none w-16 btn btn-md text-gray-400"
+                  aria-hidden="true"
+                  onClick={() => setShowPassword((prevState) => !prevState)}
                 />
-              </div>
-              <div>
-                <label htmlFor="password" className="sr-only">
-                  Password
-                </label>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
-                  required
-                  className="relative block w-full rounded-b-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-100 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 px-2"
-                  placeholder="Password"
+              ) : (
+                <EyeIcon
+                  className="showPassword absolute top-0 right-0 rounded-l-none w-16 btn btn-md text-gray-400"
+                  aria-hidden="true"
+                  onClick={() => setShowPassword((prevState) => !prevState)}
                 />
-              </div>
+              )}
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
-                />
-                <label
-                  htmlFor="remember-me"
-                  className="ml-3 block text-sm leading-6 text-base-900"
-                >
-                  Remember me
-                </label>
-              </div>
+            <Link
+              to="/forgot-password"
+              className="link link-error text-xl text-success mt-6"
+            >
+              Forgot Password
+            </Link>
 
-              <div className="text-sm leading-6">
-                <a
-                  href="#"
-                  className="font-semibold text-secondary hover:text-secondary"
-                >
-                  Forgot password?
-                </a>
-              </div>
-            </div>
-
-            <div>
-              <button
-                type="submit"
-                className="flex w-full justify-center rounded-md bg-secondary px-3 py-1.5 text-sm font-semibold leading-6 text-white hover:bg-secondary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-              >
-                Sign in
+            <div className="signInBar">
+              <button className="mt-10 w-40 btn btn-lg btn-primary">
+                Sign In
               </button>
             </div>
           </form>
-
-          <p className="text-center text-sm leading-6 text-base-500">
-            Not a member?{" "}
-            <a
-              href="#"
-              className="font-semibold text-secondary hover:text-secondary-300"
-            >
-              Sign up for free
-            </a>
-          </p>
-        </div>
+          <div className="flex gap-2 mt-6 text-xl">
+            <p>Don't have an account? </p>
+            <Link to="/signup" className="w-40 text-xl text-success">
+              Sign up for free!
+            </Link>
+          </div>
+        </main>
       </div>
     </>
   );

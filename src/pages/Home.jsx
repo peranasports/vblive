@@ -1,14 +1,12 @@
-
-import React from 'react'
-import SignIn from './SignIn';
-import Input from './Input';
+import React from "react";
+import SignIn from "./SignIn";
+import Input from "./Input";
+import { useAuthStatus } from "../components/hooks/useAuthStatus";
 
 function Home() {
+  const { loggedIn, currentUser, checkingStatus } = useAuthStatus();
 
-  return (
-    // <SignIn />
-    <Input />
-  )
+  return <>{loggedIn ? <Input /> : <SignIn />}</>;
 }
 
-export default Home
+export default Home;

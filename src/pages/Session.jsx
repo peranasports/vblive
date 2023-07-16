@@ -110,7 +110,7 @@ function Session() {
             return <HittingChartReport match={match} selectedGame={selectedGame} selectedTeam={selectedTeam}/>
         }
         else if (currentReport === 6) {
-            return <VideoAnalysis match={match}/>
+            return <VideoAnalysis match={match} selectedGame={selectedGame}/>
         }
     }
 

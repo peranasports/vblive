@@ -15,22 +15,22 @@ function MatchSummary({ match, gameSelected, onGameSelected, teamSelected, onTea
     }
 
     return match && (
-        <div className="sm:flex-auto mb-4">
-            <a className={teamSelected === 0 ? "tab tab-bordered text-xl font-bold tab-active" : "tab tab-bordered text-xl font-bold"} 
+        <div className="flex-auto mb-4 tabs-boxed">
+            <a className={teamSelected === 0 ? "tab text-xl text-primary font-medium tab-active" : "tab text-xl font-medium"} 
                 onClick={() => doSelectTeam(0)}
             >
                 {match.teamA.Name.toUpperCase()}
             </a>
             <a>  vs  </a>
-            <a className={teamSelected === 1 ? "tab tab-bordered text-xl font-bold tab-active" : "tab tab-bordered text-xl font-bold"} 
+            <a className={teamSelected === 1 ? "tab text-xl text-primary font-medium tab-active" : "tab text-xl font-medium"} 
                 onClick={() => doSelectTeam(1)}
             >
                 {match.teamB.Name.toUpperCase()}
             </a>
-            <p className="mt-0 text-sm text-base-700">
-                {Moment(match.TrainingDate).format('DD-MMM-yyyy')}
+            <p className="ml-4 my-1 text-sm text-base-700">
+                {Moment(match.TrainingDate).format('DD-MMM-yyyy')} - {match.tournamentName}
             </p>
-            <div className="tabs tabs-boxed">
+            <div className="ml-2 tabs tabs-boxed">
                 <a className={gameSelected == 0 ? "tab tab-active" : "tab"}
                     onClick={() => {
                         doSelectGame(0)
