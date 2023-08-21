@@ -38,7 +38,10 @@ function HittingChartReport({ match, selectedGame, selectedTeam }) {
           return true;
         }
         for (var ni = 0; ni < option.items.length; ni++) {
-          if (option.items[ni].name === objectname || option.items[ni].number === objectname) {
+          if (
+            option.items[ni].name === objectname ||
+            option.items[ni].number === objectname
+          ) {
             return option.items[ni].selected;
           }
         }
@@ -74,19 +77,18 @@ function HittingChartReport({ match, selectedGame, selectedTeam }) {
       }
     }
 
-    if (init === false)
-    {
-        setAllEvents(evs);
-        setSpikerNames(evs);
-        if (match.app !== "VBStats") {
-          setSetterNames(evs);
-          setAttackCombos(evs);
-        }
-        setInit(true);
+    if (init === false) {
+      setAllEvents(evs);
+      setSpikerNames(evs);
+      if (match.app !== "VBStats") {
+        setSetterNames(evs);
+        setAttackCombos(evs);
+      }
+      setInit(true);
     }
 
-    const egs = ["Errors", "In-play", "In-play", "Kill"]
-    const srcs = { "F": "Front", "B": "Back", "C": "Centre" }
+    const egs = ["Errors", "In-play", "In-play", "Kill"];
+    const srcs = { F: "Front", B: "Back", C: "Centre" };
 
     if (match.app === "VBStats") {
       for (var ne = 0; ne < evs.length; ne++) {
@@ -99,19 +101,21 @@ function HittingChartReport({ match, selectedGame, selectedTeam }) {
     } else {
       for (var ne = 0; ne < evs.length; ne++) {
         var e = evs[ne];
-        if (checkFilter("Attackers", e.Player.LastName) === false) {
-          continue;
-        }
         if (
-          e.setter !== null &&
-          checkFilter("Setters", e.setter) === false
+          checkFilter("Stages", e.isSideOut ? "Side Out" : "Transition") ===
+          false
         ) {
           continue;
         }
-        if (checkFilter("Results", egs[e.EventGrade]) === false) {
-            continue;
+        if (checkFilter("Attackers", e.Player.LastName) === false) {
+          continue;
         }
-  
+        if (e.setter !== null && checkFilter("Setters", e.setter) === false) {
+          continue;
+        }
+        if (checkFilter("Results", egs[e.EventGrade]) === false) {
+          continue;
+        }
 
         var nacs = match.attackCombos.length;
         var ac = getAttackComboOfEvent(e.attackCombo);
@@ -121,29 +125,32 @@ function HittingChartReport({ match, selectedGame, selectedTeam }) {
         if (checkFilter("Attack Combos", ac.code) === false) {
           continue;
         }
-        if (checkFilter("Source", srcs[ac.targetHitter]) === false)
-        {
-            continue;
+        if (checkFilter("Source", srcs[ac.targetHitter]) === false) {
+          continue;
         }
         if ((nacs > 0 && ac != null && ac.targetHitter !== "-") || nacs == 0) {
           var row = e.Row - 1;
           var startZone = 0;
           if (nacs > 0) {
-            if (ac.isBackcourt) {
-              if (ac.targetHitter === "B") {
-                startZone = 9;
-              } else if (ac.targetHitter === "F") {
-                startZone = 7;
-              } else {
-                startZone = 8;
-              }
+            if (ac.startZone !== undefined) {
+              startZone = Number.parseInt(ac.startZone);
             } else {
-              if (ac.targetHitter === "B") {
-                startZone = 2;
-              } else if (ac.targetHitter === "F") {
-                startZone = 4;
+              if (ac.isBackcourt) {
+                if (ac.targetHitter === "B") {
+                  startZone = 9;
+                } else if (ac.targetHitter === "F") {
+                  startZone = 7;
+                } else {
+                  startZone = 8;
+                }
               } else {
-                startZone = 3;
+                if (ac.targetHitter === "B") {
+                  startZone = 2;
+                } else if (ac.targetHitter === "F") {
+                  startZone = 4;
+                } else {
+                  startZone = 3;
+                }
               }
             }
           } else {

@@ -94,13 +94,16 @@ function HittingChart({ match, events, rows, drawMode }) {
             var epx = x + ptEnd.x * xscale;
             var epy = y + ptEnd.y * yscale;
 
-            ctx.lineWidth = 1
-            ctx.strokeStyle = '#000000'
+            const colors = ["red", "white", "white", "green"];
+            ctx.beginPath();
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = colors[e.EventGrade];        
             ctx.moveTo(spx, spy)
             ctx.lineTo(epx, epy)
             ctx.stroke()
-            ctx.fillStyle = '#000000'
+            ctx.fillStyle = colors[e.EventGrade];
             ctx.fillRect(spx - 3, spy - 3, 6, 6)
+            ctx.closePath();
         }
     }
 

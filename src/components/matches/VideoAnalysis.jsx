@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useCookies } from "react-cookie";
 import { sortBy, sortedIndex } from "lodash";
 import Select from "react-select";
-import ReactPlayer from "react-player";
+import ReactPlayer from "react-player/lazy";
 import EventsList from "./EventsList";
 import { toast } from "react-toastify";
 
@@ -718,23 +718,37 @@ function VideoAnalysis({ match, selectedGame }) {
               </div>
 
               <div
-                className="flex ml-4 my-4"
+                className="flex ml-4 my-4 justify-center"
                 onTouchStart={onTouchStart}
                 onTouchMove={onTouchMove}
                 onTouchEnd={onTouchEnd}
               >
-                <ReactPlayer
-                  ref={playerRef}
-                  url={videoFilePath}
-                  playing={true}
-                  width="100%"
-                  height="100%"
-                  controls={true}
-                  onReady={() => playerReady()}
-                  onTouchStart={onTouchStart}
-                  onTouchMove={onTouchMove}
-                  onTouchEnd={onTouchEnd}
+                {videoFilePath && videoFilePath.includes("youtube") ? (
+                  <ReactPlayer
+                    ref={playerRef}
+                    url={videoFilePath}
+                    playing={true}
+                    // width="100%"
+                    controls={true}
+                    onReady={() => playerReady()}
+                    onTouchStart={onTouchStart}
+                    onTouchMove={onTouchMove}
+                    onTouchEnd={onTouchEnd}
                   />
+                ) : (
+                  <ReactPlayer
+                    ref={playerRef}
+                    url={videoFilePath}
+                    playing={true}
+                    width="100%"
+                    height="100%"
+                    controls={true}
+                    onReady={() => playerReady()}
+                    onTouchStart={onTouchStart}
+                    onTouchMove={onTouchMove}
+                    onTouchEnd={onTouchEnd}
+                  />
+                )}
               </div>
             </div>
           </div>

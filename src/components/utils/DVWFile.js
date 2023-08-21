@@ -68,6 +68,7 @@ const kSpikeF = 6;
 const kSpikeO = 7;
 
 var currentGame = null;
+var isSideOut = false;
 
 export function initWithDVWCompressedBuffer(buf) {
   var buffer = unzipBuffer(buf);
@@ -1828,6 +1829,9 @@ function processScoutLine(s) {
           }
           if (net == kSkillSpike) {
             ev.UserDefined01 = passEvent;
+            ev.isSideOut = isSideOut;
+            passEvent = "";
+            isSideOut = false;
             if (code.length >= 9) {
               var sz = code.substring(9, 10);
               ev.startZone = sz;
@@ -1835,8 +1839,9 @@ function processScoutLine(s) {
             }
             sc = "";
           }
-          if (net == kSkillSpike || net == kSkillServe) {
+          if (net == kSkillServe) {
             passEvent = "";
+            isSideOut = true;
           }
           ev.EventId = pad(index * 10, 4);
           index++;
