@@ -419,6 +419,12 @@ export function generateMatch(str) {
           if (s.startsWith("http") === true) {
             match.videoUrl = s;
           }
+          else if (s.startsWith(";http") === true) {
+            match.videoUrl = s.substring(1);
+          }
+          else if (s.startsWith(";offset=") === true) {
+            match.videoOffset = Number.parseInt(s.substring(8));
+          }
         }
         break;
     }

@@ -15,11 +15,12 @@ import AttackZones from '../components/matches/AttackZones'
 import HittingChartReport from '../components/matches/HittingChartReport'
 import ServeReceiveReport from '../components/matches/ServeReceiveReport'
 import VideoAnalysis from '../components/matches/VideoAnalysis'
+import { unzipBuffer } from '../components/utils/Utils'
 
 function Session() {
     const { session, appName, loading, dispatch } = useContext(VBLiveAPIContext)
     const location = useLocation()
-    const { sessionId, dvwFileData, psvbFileData } = location.state
+    const { sessionId, dvwFileData, psvbFileData, filename } = location.state
     const params = useParams()
     const [match, setMatch] = useState(null)
     const [latest, setLatest] = useState(null)
@@ -61,6 +62,8 @@ function Session() {
         if (dvwFileData !== undefined && dvwFileData !== null)
         {
             var m = generateMatch(dvwFileData)
+            m.filename = filename;
+            m.buffer = dvwFileData;
             var mx = calculateDVWStats(m)
             mx.app = 'DataVolley'
             mx = calculateSideoutStats(mx, 'DataVolley')
@@ -70,6 +73,8 @@ function Session() {
         else if (psvbFileData !== undefined)
         {
             var m = initWithPSVBCompressedBuffer(psvbFileData)
+            m.filename = filename;
+            m.buffer = unzipBuffer(psvbFileData);
             var mx = calculatePSVBStats(m)
             mx.app = 'VBStats'
             mx = calculateSideoutStats(mx, 'VBStats')

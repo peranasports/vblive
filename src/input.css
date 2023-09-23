@@ -157,3 +157,39 @@
   
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+    .underline-input {
+      @apply px-1 py-1 bg-base-200 text-base-content border-b-2 border-neutral-700 rounded-none w-full;
+    }
+    .btn-ps-primary {
+        @apply btn btn-sm btn-primary text-primary-content rounded-none hover:bg-[#00000030]
+    }
+    .btn-ps-secondary {
+        @apply btn btn-sm btn-secondary text-secondary-content rounded-none hover:bg-[#00000020]
+    }
+    .select-base-200 {
+        @apply px-1 py-1 bg-base-200 text-base-content text-sm border-b-2 border-neutral-700 rounded-none w-full
+    }
+    .table-div {
+        @apply overflow-hidden rounded-none border-2 border-neutral
+    }
+    .table-header {
+        @apply bg-neutral text-neutral-content
+    }
+    .table-column-header {
+        @apply py-2 pl-4 pr-3 text-left text-sm
+    }
+    .table-column-header-centre {
+        @apply py-2 pl-4 pr-3 text-center text-sm
+    }
+    .table-body {
+        @apply bg-base-100 text-base-content
+    }
+    .table-cell {
+        @apply whitespace-nowrap px-3 py-2.5 text-sm
+    }
+    .check-primary {
+        @apply checkbox checkbox-primary w-7 h-7 rounded-none
+    }
+  }

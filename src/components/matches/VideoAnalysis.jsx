@@ -1,18 +1,31 @@
 import { useEffect, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import { sortBy, sortedIndex } from "lodash";
 import Select from "react-select";
 import ReactPlayer from "react-player/lazy";
 import EventsList from "./EventsList";
+import Timing from "./Timing";
 import { toast } from "react-toastify";
+import {
+  getEventInfo,
+  getTimingForEvent,
+  makeFilename,
+  saveToPC,
+  getEventStringColor,
+} from "../utils/Utils";
+import { myzip, myunzip } from "../utils/zip";
+import { DVEventString } from "../utils/DVWFile";
 
 function VideoAnalysis({ match, selectedGame }) {
+  const navigate = useNavigate();
   const playerRef = useRef();
   const dvRef = useRef();
   const radarRef = useRef();
   const [showRadarFile, setShowRadarFile] = useState(false);
   const [radarFileName, setRadarFileName] = useState(null);
   const [cookies, setCookie] = useCookies(["videofile"]);
+  const [videoInfo, setVideoInfo] = useState(null);
   const [videoOnlineUrl, setVideoOnlineUrl] = useState(null);
   const [videoFilePath, setVideoFilePath] = useState(null);
   const [videoFileName, setVideoFileName] = useState(null);
@@ -37,6 +50,11 @@ function VideoAnalysis({ match, selectedGame }) {
   const [rotations, setRotations] = useState(null);
   const [selectedGames, setSelectedGames] = useState(null);
   const [selectedRotations, setSelectedRotations] = useState(null);
+  const [leadTimes, setLeadTimes] = useState([0, 0, 3, 3, 3, 3]);
+  const [durations, setDurations] = useState([8, 8, 8, 8, 8, 8]);
+  const [filteredEvents, setFilteredEvents] = useState(null);
+  const menuRef = useRef();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const eventTypes = [
     { value: 0, label: "All Types" },
@@ -395,13 +413,15 @@ function VideoAnalysis({ match, selectedGame }) {
 
   const doSelectEvent = (ev) => {
     setSelectedEvent(ev);
-    if (ev.VideoPosition !== undefined && ev.VideoPosition !== 0) {
-      playerRef.current.seekTo(ev.VideoPosition - 3, "seconds");
+    const tm = getTimingForEvent(ev);
+    if (startVideoTime !== null && videoOffset !== null) {
+      const secondsSinceEpoch = Math.round(ev.TimeStamp.getTime() / 1000);
+      const loc =
+        secondsSinceEpoch - startVideoTime + videoOffset - tm.leadTime;
+      playerRef.current.seekTo(loc, "seconds");
     } else {
-      if (startVideoTime !== null && videoOffset !== null) {
-        const secondsSinceEpoch = Math.round(ev.TimeStamp.getTime() / 1000);
-        const loc = secondsSinceEpoch - startVideoTime + videoOffset;
-        playerRef.current.seekTo(loc, "seconds");
+      if (ev.VideoPosition !== undefined && ev.VideoPosition !== 0) {
+        playerRef.current.seekTo(ev.VideoPosition - tm.leadTime, "seconds");
       }
     }
   };
@@ -410,17 +430,121 @@ function VideoAnalysis({ match, selectedGame }) {
     setVideoOnlineUrl(e.target.value);
   };
 
+  const onSynchVideo = () => {
+    if (selectedEvent === null) {
+      toast.error("Please select an event to synch with video!");
+      return;
+    }
+    const secondsSinceEpoch = Math.round(
+      selectedEvent.TimeStamp.getTime() / 1000
+    );
+    setStartVideoTime(secondsSinceEpoch);
+    const voffset = playerRef.current.getCurrentTime();
+    setVideoOffset(voffset);
+    const prefix = match.app === "VBStats" ? match.Guid : match.dvstring;
+    const obj = localStorage.getItem(prefix + "_videoInfo");
+    if (vobj !== null) {
+      var vobj = JSON.parse(obj);
+      vobj.videoOffset = voffset;
+      vobj.startVideoTime = secondsSinceEpoch;
+    }
+    localStorage.setItem(prefix + "_videoInfo", JSON.stringify(vobj));
+    // localStorage.setItem(videoFileName + "_offset", voffset.toString());
+    // localStorage.setItem(
+    //   videoFileName + "_startVideoTime",
+    //   secondsSinceEpoch.toString()
+    // );
+  };
+
+  const doSaveFile = () => {
+    var a = match.buffer.split(/\r?\n/);
+    if (a.length == 0) {
+      return;
+    }
+    var fn = "";
+    var buffer = "";
+    if (match.app === "DataVolley") {
+      if (a[0] !== "[3DATAVOLLEYSCOUT]") {
+        return;
+      }
+      var incomments = false;
+      for (var nl = 0; nl < a.length; nl++) {
+        var s = a[nl];
+        if (s.includes("[3COMMENTS]")) {
+          incomments = true;
+        } else if (incomments && s.includes("[") && s.includes("]")) {
+          buffer += "\n";
+          if (videoOffset && videoOffset > 0) {
+            buffer += ";" + videoOnlineUrl + "\n";
+            buffer += ";offset=" + videoOffset + "\n";
+            buffer += ";start=" + startVideoTime + "\n";
+          } else {
+            buffer += ";" + videoOnlineUrl + "\n";
+          }
+          buffer += s;
+          incomments = false;
+          continue;
+        }
+        if (incomments) {
+          if (s.includes(";http")) continue;
+          if (s.includes(";offset")) continue;
+          if (s.includes(";start")) continue;
+        }
+        if (buffer.length > 0) buffer += "\n";
+        buffer += s;
+      }
+    } else if (match.app === "VBStats") {
+      if (a[0].includes("PSVB") === false) {
+        return;
+      }
+      var buf = "";
+      for (const s of a) {
+        if (buf.length > 0) buf += "\n";
+        if (s.includes("M~")) {
+          var json = s.split("~");
+          var m = JSON.parse(json[1]);
+          m.videoOnlineUrl = videoOnlineUrl;
+          m.videoOffset = videoOffset;
+          m.startVideoTime = startVideoTime;
+          buf += "M~" + JSON.stringify(m);
+        } else {
+          buf += s;
+        }
+      }
+      buffer = myzip(buf);
+    }
+
+    fn = makeFilename(match.filename.name, "vblive", "");
+    // if (match.filename.name.includes("_vblive")) {
+    //   fn = match.filename.name;
+    // } else {
+    //   const tokens = match.filename.name.split(".");
+    //   for (var nn = 0; nn < tokens.length - 1; nn++) {
+    //     if (fn.length > 0) fn += ".";
+    //     fn += tokens[nn];
+    //   }
+    //   fn += "_vblive" + "." + tokens[tokens.length - 1];
+    // }
+    console.log(fn);
+    saveToPC(buffer, fn);
+  };
+
   const showOnlineVideo = () => {
     const vinfo = {
       matchDVString: match.dvstring,
       videoOnlineUrl: videoOnlineUrl,
       videoFileName: null,
       videoFileObject: null,
+      videoOffset: null,
+      startVideoTime: null,
     };
-    localStorage.setItem("videoInfo", JSON.stringify(vinfo));
+    const prefix = match.app === "VBStats" ? match.Guid : match.dvstring;
+    localStorage.setItem(prefix + "_videoInfo", JSON.stringify(vinfo));
     setVideoFileObject(null);
     setVideoFileName(null);
-    setVideoFilePath(videoOnlineUrl);
+    setVideoOffset(null);
+    const yturl = convertYouTubeUrl(videoOnlineUrl);
+    setVideoFilePath(yturl);
     forceUpdate((n) => !n);
   };
 
@@ -438,8 +562,11 @@ function VideoAnalysis({ match, selectedGame }) {
       videoOnlineUrl: null,
       videoFileName: vfn,
       videoFileObject: vfo,
+      videoOffset: null,
+      startVideoTime: null,
     };
-    localStorage.setItem("videoInfo", JSON.stringify(vinfo));
+    const prefix = match.app === "VBStats" ? match.Guid : match.dvstring;
+    localStorage.setItem(prefix + "_videoInfo", JSON.stringify(vinfo));
     forceUpdate((n) => !n);
   };
 
@@ -554,25 +681,159 @@ function VideoAnalysis({ match, selectedGame }) {
     setSelectedSet(idx);
   };
 
-  useEffect(() => {
-    if (match.videoUrl !== undefined) {
-      setVideoOnlineUrl(match.videoUrl);
-      setVideoFilePath(match.videoUrl);
-    } else {
-      const vobj = localStorage.getItem("videoInfo");
-      if (vobj !== null) {
-        const vinfo = JSON.parse(vobj);
-        if (vinfo.matchDVString === match.dvstring) {
-          if (vinfo.videoOnlineUrl !== null) {
-            setVideoOnlineUrl(vinfo.videoOnlineUrl);
-            setVideoFilePath(vinfo.videoOnlineUrl);
-          } else if (vinfo.videoFileObject !== null) {
-            const fobj = JSON.parse(vinfo.videoFileObject);
-            // const vfp = URL.createObjectURL(fobj)
-            // setVideoFilePath(vfp)
-            setVideoFileName(fobj.name);
+  const onFilter = (fes) => {
+    setFilteredEvents(fes);
+  };
+
+  const selectAllItems = () => {
+    setMenuOpen(false);
+    for (var ev of filteredEvents) {
+      ev.playlist = true;
+    }
+    forceUpdate((n) => !n);
+  };
+
+  const unselectAllItems = () => {
+    setMenuOpen(false);
+    for (var ev of filteredEvents) {
+      ev.playlist = false;
+    }
+    forceUpdate((n) => !n);
+  };
+
+  const createPlaylist = () => {
+    setMenuOpen(false);
+    if (videoOnlineUrl === null || videoOnlineUrl.length === 0)
+    {
+      toast.error("Play lists can only be created with an online video.");
+      return;
+    }
+    var evs = [];
+    for (var ev of filteredEvents) {
+      if (ev.playlist) {
+        var loc = 0;
+        const tm = getTimingForEvent(ev);
+        if (startVideoTime !== null && videoOffset !== null) {
+          const secondsSinceEpoch = Math.round(ev.TimeStamp.getTime() / 1000);
+          loc = secondsSinceEpoch - startVideoTime + videoOffset - tm.leadTime;
+        } else {
+          if (ev.VideoPosition !== undefined && ev.VideoPosition !== 0) {
+            loc = ev.VideoPosition - tm.leadTime;
           }
         }
+
+        var xx = "";
+        var col = "";
+        if (ev.DVGrade === undefined) {
+          const ss = getEventInfo(ev);
+          xx = ss.sub;
+          col = ss.subcolor;
+        } else {
+          xx = DVEventString(ev);
+          col = getEventStringColor(ev);
+        }
+        const evx = {
+          playerName:
+            ev.Player.shirtNumber + ". " + ev.Player.NickName.toUpperCase(),
+          eventString: xx,
+          eventStringColor: col,
+          eventSubstring:
+            "Set " +
+            ev.Drill.GameNumber +
+            " " +
+            ev.TeamScore +
+            "-" +
+            ev.OppositionScore +
+            " R" +
+            ev.Row,
+          videoOnlineUrl: videoOnlineUrl,
+          videoPosition: loc,
+        };
+        evs.push(evx);
+      }
+    }
+    if (evs.length === 0)
+    {
+      toast.error("Play list is empty.")
+    }
+    else
+    {
+      const pl = {
+        events: evs,
+      };
+      const fn = makeFilename(match.filename.name, "vblive", "playlist");
+      const buffer = JSON.stringify(pl);
+      const st = {
+        sessionId: null,
+        playlistFileData: buffer,
+        filename: fn,
+      };
+      navigate("/playlist", { state: st });
+
+      // saveToPC(buffer, fn);  
+    }
+  };
+
+  const doCloseTiming = () => {
+    document.getElementById("modal-timing").click();
+    const obj = localStorage.getItem("vblive_timings");
+    if (obj !== null) {
+      const vobj = JSON.parse(obj);
+      const lts = vobj.leadTimes.split(",");
+      setLeadTimes(lts);
+      const ds = vobj.durations.split(",");
+      setDurations(ds);
+    }
+  };
+
+  const convertYouTubeUrl = (str) => {
+    if (str.includes("youtu.be") === false) return str;
+    const regex = /.*\/([0-9a-zA-Z-]*)/gm;
+    let m;
+    while ((m = regex.exec(str)) !== null) {
+      // This is necessary to avoid infinite loops with zero-width matches
+      if (m.index === regex.lastIndex) {
+        regex.lastIndex++;
+      }
+
+      // The result can be accessed through the `m`-variable.
+      m.forEach((match, groupIndex) => {
+        console.log(`Found match, group ${groupIndex}: ${match}`);
+      });
+      if (m[1] !== null) {
+        return "https://www.youtube.com/watch?v=" + m[1];
+      }
+    }
+    return str;
+  };
+
+  useEffect(() => {
+    setFilteredEvents(match.events);
+    const prefix = match.app === "VBStats" ? match.Guid : match.dvstring;
+    const vobj = localStorage.getItem(prefix + "_videoInfo");
+    if (vobj !== null) {
+      const vinfo = JSON.parse(vobj);
+      setVideoInfo(vobj);
+      if (vinfo.matchDVString === match.dvstring) {
+        setVideoOffset(vinfo.videoOffset);
+        setStartVideoTime(vinfo.startVideoTime);
+        if (vinfo.videoOnlineUrl !== null) {
+          const yturl = convertYouTubeUrl(vinfo.videoOnlineUrl);
+          setVideoOnlineUrl(yturl);
+          setVideoFilePath(yturl);
+        } else if (vinfo.videoFileObject !== null) {
+          const fobj = JSON.parse(vinfo.videoFileObject);
+          // const vfp = URL.createObjectURL(fobj)
+          // setVideoFilePath(vfp)
+          setVideoFileName(fobj.name);
+        }
+      }
+    } else {
+      if (match.videoUrl !== undefined) {
+        const yturl = convertYouTubeUrl(match.videoUrl);
+        setVideoOnlineUrl(yturl);
+        setVideoFilePath(yturl);
+      } else {
       }
     }
 
@@ -631,6 +892,26 @@ function VideoAnalysis({ match, selectedGame }) {
     setSelectedSet(selectedGame);
     forceUpdate((n) => !n);
   }, [selectedGame]);
+
+  useEffect(() => {
+    // Bind the event listener
+    document.addEventListener("mousedown", handleOutsideClicks);
+    return () => {
+      // Unbind the event listener on clean up
+      document.removeEventListener("mousedown", handleOutsideClicks);
+    };
+  }, [menuOpen]);
+
+  //create a function in your component to handleOutsideClicks
+  const handleOutsideClicks = (event) => {
+    if (
+      menuOpen &&
+      menuRef.current &&
+      !menuRef.current.contains(event.target)
+    ) {
+      setMenuOpen(false);
+    }
+  };
 
   if (match === undefined) {
     return <></>;
@@ -701,7 +982,7 @@ function VideoAnalysis({ match, selectedGame }) {
                   </span>
                 </label>
               </div>
-              <div className="flex justify-between my-2">
+              <div className="flex gap-1 mx-2 my-2">
                 <input
                   type="text"
                   className="w-full text-gray-500 bg-gray-200 input input-sm rounded-sm"
@@ -714,6 +995,9 @@ function VideoAnalysis({ match, selectedGame }) {
                   onClick={() => showOnlineVideo()}
                 >
                   Apply
+                </button>
+                <button className="btn btn-sm" onClick={() => onSynchVideo()}>
+                  Synch
                 </button>
               </div>
 
@@ -750,6 +1034,23 @@ function VideoAnalysis({ match, selectedGame }) {
                   />
                 )}
               </div>
+              <div className="flex justify-between">
+                <div className="flex gap-2">
+                  <label
+                    htmlFor="modal-timing"
+                    className="btn btn-sm bg-info text-white hover:btn-gray-900"
+                  >
+                    Timing
+                  </label>
+                  <button
+                    className="btn btn-sm btn-info text-white"
+                    onClick={() => doSaveFile()}
+                  >
+                    Save Video Settings
+                  </button>
+                </div>
+                {videoOffset !== 0 ? <p>Offset = {videoOffset} secs</p> : <></>}
+              </div>
             </div>
           </div>
         </div>
@@ -782,6 +1083,33 @@ function VideoAnalysis({ match, selectedGame }) {
                     ))}
                   </ul>
                 </div>
+                <div className="dropdown" ref={menuRef}>
+                  <label
+                    tabIndex={0}
+                    className="btn btn-sm bg-gray-600 hover:btn-gray-900"
+                    onClick={() => setMenuOpen(!menuOpen)}
+                  >
+                    Play List
+                  </label>
+                  {menuOpen ? (
+                    <ul
+                      tabIndex={0}
+                      className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52"
+                    >
+                      <li onClick={() => selectAllItems()}>
+                        <a>Select all items</a>
+                      </li>
+                      <li onClick={() => unselectAllItems()}>
+                        <a>Unselect all items</a>
+                      </li>
+                      <li onClick={() => createPlaylist()}>
+                        <a>Create play list</a>
+                      </li>
+                    </ul>
+                  ) : (
+                    <></>
+                  )}
+                </div>
               </div>
               <div>
                 <button
@@ -799,6 +1127,7 @@ function VideoAnalysis({ match, selectedGame }) {
                   filters={allFilters}
                   selectedSet={selectedSet}
                   doSelectEvent={(ev) => doSelectEvent(ev)}
+                  onFilter={(fes) => onFilter(fes)}
                 />
               </div>
             </div>
@@ -822,6 +1151,33 @@ function VideoAnalysis({ match, selectedGame }) {
           <h3 className="mb-4 font-bold text-2xl">Filters</h3>
           <div className="form">
             <div className="my-4">
+              <div className="flex justify-between mt-4">
+                <div className="flex=col justify-between w-full mx-2">
+                  <p className="text-xs">{match.teamA.Name} Players</p>
+                  <Select
+                    id="teamAPlayersSelect"
+                    name="teamAPlayersSelect"
+                    onChange={handleSelectTeamAPlayers}
+                    className="mt-2 block w-full border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500 text-lg sm:text-md"
+                    options={teamAPlayers}
+                    value={selectedTeamAPlayers}
+                    isMulti
+                  />
+                </div>
+                <div className="flex=col justify-between w-full mx-2">
+                  <p className="text-xs">{match.teamB.Name} Players</p>
+                  <Select
+                    id="teamBPlayersSelect"
+                    name="teamBPlayersSelect"
+                    onChange={handleSelectTeamBPlayers}
+                    className="mt-2 block w-full border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500 text-lg sm:text-md"
+                    options={teamBPlayers}
+                    value={selectedTeamBPlayers}
+                    isMulti
+                  />
+                </div>
+              </div>
+
               <div className="flex justify-between mt-4">
                 <div className="flex=col justify-between w-full mx-2">
                   <p className="text-xs">Set</p>
@@ -875,7 +1231,6 @@ function VideoAnalysis({ match, selectedGame }) {
                   />
                 </div>
               </div>
-
               <div className="flex justify-between mt-4">
                 <div className="flex=col justify-between w-full mx-2">
                   <p className="text-xs">Attack Type</p>
@@ -940,33 +1295,6 @@ function VideoAnalysis({ match, selectedGame }) {
                   />
                 </div>
               </div>
-
-              <div className="flex justify-between mt-4">
-                <div className="flex=col justify-between w-full mx-2">
-                  <p className="text-xs">{match.teamA.Name} Players</p>
-                  <Select
-                    id="teamAPlayersSelect"
-                    name="teamAPlayersSelect"
-                    onChange={handleSelectTeamAPlayers}
-                    className="mt-2 block w-full border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500 text-lg sm:text-md"
-                    options={teamAPlayers}
-                    value={selectedTeamAPlayers}
-                    isMulti
-                  />
-                </div>
-                <div className="flex=col justify-between w-full mx-2">
-                  <p className="text-xs">{match.teamB.Name} Players</p>
-                  <Select
-                    id="teamBPlayersSelect"
-                    name="teamBPlayersSelect"
-                    onChange={handleSelectTeamBPlayers}
-                    className="mt-2 block w-full border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500 text-lg sm:text-md"
-                    options={teamBPlayers}
-                    value={selectedTeamBPlayers}
-                    isMulti
-                  />
-                </div>
-              </div>
             </div>
           </div>
           <div className="modal-action">
@@ -977,6 +1305,18 @@ function VideoAnalysis({ match, selectedGame }) {
             >
               Apply
             </label>
+          </div>
+        </div>
+      </div>
+
+      <input type="checkbox" id="modal-timing" className="modal-toggle" />
+      <div className="modal">
+        <div className="modal-box w-4/12 max-w-5xl h-[62vh]">
+          <h3 className="mb-4 font-bold text-2xl">Timing</h3>
+          <div className="flex flex-col">
+            <div>
+              <Timing onClose={() => doCloseTiming()} />
+            </div>
           </div>
         </div>
       </div>

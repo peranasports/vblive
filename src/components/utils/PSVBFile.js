@@ -6,11 +6,18 @@ import {
   calculateAllStats,
 } from "./StatsItem.js";
 import { kSkillSettersCall } from "./StatsItem";
+import { myzip, myunzip } from "./zip";
 
 var currentGame = null;
 
 export function initWithPSVBCompressedBuffer(buf) {
-  var buffer = unzipBuffer(buf);
+  // var buffer = unzipBuffer(buf);
+  var buffer = "";
+  buffer = unzipBuffer(buf);
+  if (buffer === null || buffer.length === 0)
+  {
+    buffer = myunzip(buf);
+  }
   return generateMatch(buffer);
 }
 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import EventItem from "./EventItem";
 
-function EventsList({ match, filters, selectedSet, doSelectEvent }) {
+function EventsList({ match, filters, selectedSet, doSelectEvent, onFilter }) {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedGuids, setSelectedGuids] = useState(null);
   const [selectedEventTypes, setSelectedEventTypes] = useState(null);
@@ -134,6 +134,7 @@ function EventsList({ match, filters, selectedSet, doSelectEvent }) {
       settercalls.push(filters.setterCalls[nta].label);
     }
 
+    var mes = [];
     for (var ns = 0; ns < match.sets.length; ns++) {
       var fes = [];
       var s = match.sets[ns];
@@ -188,11 +189,12 @@ function EventsList({ match, filters, selectedSet, doSelectEvent }) {
           )
             continue;
         }
-
         fes.push(e);
+        mes.push(e);
       }
       s.filteredEvents = fes;
     }
+    onFilter(mes);
   };
 
   useEffect(() => {

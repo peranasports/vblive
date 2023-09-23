@@ -1,23 +1,8 @@
 import React from "react";
 import { eventString, DVEventString } from "../utils/DVWFile";
 import { getEventDescription } from "../utils/PSVBFile";
-import {
-  kSkillBlock,
-  kSkillPass,
-  kSkillDefense,
-  kSubstitution,
-  kSkillCommentary,
-  kSkillCoachTag,
-  kOppositionScore,
-  kOppositionHitKill,
-  kOppositionServeAce,
-  kSkillTimeout,
-  kSkillTechTimeout,
-  kSkillSettersCall,
-  kOppositionServeError,
-  kOppositionError,
-  kOppositionHitError,
-} from "../utils/StatsItem";
+import { QueueListIcon } from "@heroicons/react/20/solid";
+import { getEventInfo, getEventStringColor } from "../utils/Utils";
 
 function EventItem({ event, isSelected, onEventSelected }) {
   const doEventSelect = () => {
@@ -26,38 +11,10 @@ function EventItem({ event, isSelected, onEventSelected }) {
 
   const background = () => {
     if (isSelected === false) {
-      return "mb-2 rounded-xl card-compact bg-gray-700 hover:bg-base-300";
+      return "mb-2 rounded-none card-compact bg-gray-700 hover:bg-base-300 cursor-pointer";
     } else {
-      return "mb-2 rounded-xl card-compact bg-blue-800 hover:bg-blue-900";
+      return "mb-2 rounded-none card-compact bg-blue-800 hover:bg-blue-900 cursor-pointer";
     }
-  };
-
-  const getEventStringColor = (e) => {
-    var s = "pl-2 pt-1 text-sm font-semibold";
-    if (e.EventType === 20 || e.EventType === 250) {
-      s += " text-gray-600";
-    }
-    if (e.EventGrade === 0) {
-      s += " text-error";
-    } else if (e.EventGrade === 3) {
-      if (e.EventType === 1 || e.EventType === 4 || e.EventType === 5) {
-        s += " text-success";
-      } else {
-        s += " text-info";
-      }
-    } else if (
-      e.EventGrade === 3 &&
-      e.EventGrade.EventType !== 2 &&
-      e.EventGrade.EventType !== 3 &&
-      e.EventGrade.EventType !== 20
-    ) {
-      s += " text-success";
-    } else if (e.EventGrade === 2 && e.EventGrade.EventType === 5) {
-      s += " text-success";
-    } else {
-      s += " text-warning";
-    }
-    return s;
   };
 
   const getLandingImpact = (ev) => {
@@ -74,76 +31,11 @@ function EventItem({ event, isSelected, onEventSelected }) {
     }
   };
 
-  const getEventInfo = (e) => {
-    var subcolor = "text-warning";
-    var sub = "";
-    var pl = e.Player;
-    var firstname = pl && pl.FirstName ? pl.FirstName : "";
-    var lastname = pl && pl.LastName ? pl.LastName.toUpperCase() : "";
-    var plname = firstname + " " + lastname;
-
-    if (e.EventGrade === 0) {
-      subcolor = "text-error";
-    } else if (e.EventGrade === 2 && e.EventType === kSkillBlock) {
-      subcolor = "text-success";
-    } else if (e.EventGrade === 3) {
-      if (e.EventType !== kSkillPass && e.EventType !== kSkillDefense) {
-        subcolor = "text-success";
-      }
-    }
-
-    if (pl !== null) {
-      plname = pl.shirtNumber + ". " + firstname + " " + lastname;
-      if (e.EventType === kSubstitution) {
-        subcolor = "text-info";
-        sub += " Substitution";
-        // Player *sp = [XAppDelegate fetchPlayerByGuid:e.UserDefined01];
-      } else {
-        sub += getEventDescription(e);
-      }
-    } else {
-      plname = "";
-      if (e.EventType == kOppositionError) {
-        subcolor = "text-success";
-        sub += " - Opposition Error";
-      } else if (e.EventType == kOppositionServeError) {
-        subcolor = "text-success";
-        sub += " - Opposition Serve Error";
-      } else if (e.EventType == kOppositionHitError) {
-        subcolor = "text-success";
-        sub += " - Opposition Hit Error";
-      } else if (e.EventType == kOppositionScore) {
-        subcolor = "text-error";
-        sub += " - Opposition Score";
-      } else if (e.EventType == kOppositionHitKill) {
-        subcolor = "text-error";
-        sub += " - Opposition Kill";
-      } else if (e.EventType == kOppositionServeAce) {
-        subcolor = "text-error";
-        sub += " - Opposition Ace";
-      } else if (e.EventType == kSkillCommentary) {
-        subcolor = "text-info";
-        sub += " - Commentary";
-      } else if (e.EventType == kSkillTimeout) {
-        subcolor = "text-info";
-        sub += " Timeout #" + e.SubEvent;
-        // Team *tm = [XAppDelegate fetchTeamByGuid:e.UserDefined01];
-        // NSString *tname = tm == null ? @"" : tm.Name;
-        // [sub appendFormat:@" %@ %@ #%@", tname, " - Timeout"], e.SubEvent];
-      } else if (e.EventType == kSkillTechTimeout) {
-        subcolor = "text-info";
-        sub += " Tech Timeout #" + e.SubEvent;
-      } else if (e.EventType == kSkillCoachTag) {
-        subcolor = "text-info";
-        sub += "Coach Tag";
-      } else {
-        plname = "Opposition";
-        sub = getEventDescription(e);
-      }
-    }
-    var stxt = "pl-2 pt-1 text-sm font-semibold " + subcolor;
-    return <p className={stxt}>{sub}</p>;
-  };
+  const doGetEventInfo = (e) => {
+    const ss = getEventInfo(e);
+    var stxt = "pl-2 pt-1 text-sm font-semibold " + ss.subcolor;
+    return <p className={stxt}>{ss.sub}</p>;
+  }
 
   const isHomePlayer = (e) => {
     if (e.Player) {
@@ -155,6 +47,10 @@ function EventItem({ event, isSelected, onEventSelected }) {
     } else {
       return false;
     }
+  };
+
+  const togglePlaylist = () => {
+    event.playlist = event.playlist ? false : true;
   };
 
   return (
@@ -181,11 +77,13 @@ function EventItem({ event, isSelected, onEventSelected }) {
         <div className="flex justify-between">
           <div className="flex gap-1">
             {event.DVGrade === undefined ? (
-              getEventInfo(event)
+              doGetEventInfo(event)
             ) : (
-              <p className={getEventStringColor(event)}>
-                {DVEventString(event)}
-              </p>
+              <div className="flex gap-1">
+                <p className={getEventStringColor(event)}>
+                  {DVEventString(event)}
+                </p>
+              </div>
             )}
             {event.radar === null || event.radar === undefined ? (
               <></>
@@ -195,10 +93,23 @@ function EventItem({ event, isSelected, onEventSelected }) {
               </div>
             )}
           </div>
-          <p className="pr-2 pt-1 text-sm font-semibold">
-            ({event.Drill.GameNumber}) {event.TeamScore}-{event.OppositionScore}{" "}
-            R{event.Row}
-          </p>
+          <div className="flex gap-1 mr-1 -mt-1">
+            <p className="pr-2 pt-1 text-sm font-semibold">
+              ({event.Drill.GameNumber}) {event.TeamScore}-
+              {event.OppositionScore} R{event.Row}
+            </p>
+            {event.playlist ? (
+              <QueueListIcon
+                className="w-4 h4 text-success mt-1"
+                onClick={() => togglePlaylist()}
+              />
+            ) : (
+              <QueueListIcon
+                className="w-4 h4 text-base-300 mt-1"
+                onClick={() => togglePlaylist()}
+              />
+            )}
+          </div>
         </div>
         {event.vertData === undefined ? (
           <></>
