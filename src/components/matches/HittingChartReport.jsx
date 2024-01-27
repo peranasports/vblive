@@ -118,7 +118,7 @@ function HittingChartReport({ match, selectedGame, selectedTeam }) {
         }
 
         var nacs = match.attackCombos.length;
-        var ac = getAttackComboOfEvent(e.attackCombo);
+        var ac = e.attackCombo === "~~" ? {code:"~~"} : getAttackComboOfEvent(e.attackCombo);
         if (ac === null || ac.code === undefined) {
           continue;
         }

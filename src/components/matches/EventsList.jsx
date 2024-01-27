@@ -218,8 +218,8 @@ function EventsList({ match, filters, selectedSet, doSelectEvent, onFilter }) {
       // 👇 Will scroll smoothly to the top of the next section
       element.scrollIntoView({
         behavior: "smooth",
-        block: "nearest",
-        inline: "start",
+        // block: "nearest",
+        // inline: "start",
       });
     }
     forceUpdate((n) => !n);
@@ -231,15 +231,16 @@ function EventsList({ match, filters, selectedSet, doSelectEvent, onFilter }) {
 
   return (
     <>
-      <div className="bg-gray-800">
+      <div className="bg-base-300">
         {match.sets.map((set, id) => (
           <div
+            
             key={id}
             tabIndex={0}
-            className="collapse collapse-arrow collapse-open border border-base-300 bg-base-500"
+            className=""//"collapse collapse-arrow collapse-open border border-base-300 bg-base-300"
           >
-            <input type="checkbox" className="peer" />
-            <div className="collapse-title">
+            {/* <input type="checkbox" className="peer" /> */}
+            <div className="">
               <div className="flex justify-between">
                 <p>Set {id + 1}</p>
                 <p>
@@ -247,7 +248,7 @@ function EventsList({ match, filters, selectedSet, doSelectEvent, onFilter }) {
                 </p>
               </div>
             </div>
-            <div className="collapse-content" id={set.GameNumber}>
+            <div className="" id={set.GameNumber}>
               {set.filteredEvents.map((event, eid) => (
                 <EventItem
                   key={eid}

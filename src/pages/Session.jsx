@@ -122,7 +122,7 @@ function Session() {
     return match && (
         <>
             <div>
-                <div className='container mx-auto'>
+                <div className=''>
                     <MatchSummary 
                         match={match} 
                         gameSelected={selectedGame}
@@ -173,7 +173,7 @@ function Session() {
                         }}
                     >Video Analysis</a>
                 </div>
-                <div>
+                <div className=''>
                     {
                         renderReport()
                     }

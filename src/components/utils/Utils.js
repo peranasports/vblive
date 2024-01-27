@@ -404,7 +404,7 @@ export function getEventInfo(e){
 export function getEventStringColor(e) {
   var s = "pl-2 pt-1 -mt-1 text-sm font-semibold";
   if (e.EventType === 20 || e.EventType === 250) {
-    s += " text-gray-600";
+    s += " text-base-content";
   }
   if (e.EventGrade === 0) {
     s += " text-error";

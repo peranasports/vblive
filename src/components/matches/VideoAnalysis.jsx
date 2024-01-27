@@ -894,6 +894,9 @@ function VideoAnalysis({ match, selectedGame }) {
   }, [selectedGame]);
 
   useEffect(() => {
+  }, [selectedSet]);
+
+  useEffect(() => {
     // Bind the event listener
     document.addEventListener("mousedown", handleOutsideClicks);
     return () => {
@@ -919,7 +922,7 @@ function VideoAnalysis({ match, selectedGame }) {
 
   return (
     <>
-      <div className="drawer drawer-mobile">
+      <div className="drawer drawer-mobile h-[64vh]">
         <input id="my-drawer-3" type="checkbox" className="drawer-toggle" />
         <div className="drawer-content">
           <div className="flex flex-col w-full justify-between ml-2">
@@ -1054,27 +1057,27 @@ function VideoAnalysis({ match, selectedGame }) {
             </div>
           </div>
         </div>
-        <div className="drawer-side h-full">
+        <div className="drawer-side h-[64vh]">
           <label htmlFor="my-drawer-3" className="drawer-overlay"></label>
-          <div className="flex-col mt-2">
-            <div className="flex justify-between">
+          <div className="flex-col mt-2 bg-base-200">
+            <div className="flex justify-between p-2">
               <div className="flex gap-1">
                 <label
                   htmlFor="modal-filters"
-                  className="btn btn-sm bg-gray-600 hover:btn-gray-900"
+                  className="btn btn-sm bg-gray-600 hover:btn-gray-900 rounded-none"
                 >
                   Filters
                 </label>
                 <div className="dropdown">
                   <label
                     tabIndex={0}
-                    className="btn btn-sm bg-gray-600 hover:btn-gray-900"
+                    className="btn btn-sm bg-gray-600 hover:btn-gray-900 rounded-none"
                   >
                     Set
                   </label>
                   <ul
                     tabIndex={0}
-                    className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52"
+                    className="dropdown-content menu p-2 shadow bg-base-100 rounded-none w-52"
                   >
                     {match.sets.map((vobj, idx) => (
                       <li key={idx} onClick={() => onGameChanged(idx + 1)}>
@@ -1086,7 +1089,7 @@ function VideoAnalysis({ match, selectedGame }) {
                 <div className="dropdown" ref={menuRef}>
                   <label
                     tabIndex={0}
-                    className="btn btn-sm bg-gray-600 hover:btn-gray-900"
+                    className="btn btn-sm bg-gray-600 hover:btn-gray-900 rounded-none"
                     onClick={() => setMenuOpen(!menuOpen)}
                   >
                     Play List
@@ -1113,15 +1116,15 @@ function VideoAnalysis({ match, selectedGame }) {
               </div>
               <div>
                 <button
-                  className="btn btn-sm bg-gray-600 hover:btn-gray-900"
+                  className="btn btn-sm bg-gray-600 hover:btn-gray-900 rounded-none"
                   onClick={() => setShowRadarFile(!showRadarFile)}
                 >
                   Radar
                 </button>
               </div>
             </div>
-            <div className="flex h-[40vw] mt-2">
-              <div className="flex-col w-80 h-90 overflow-y-auto">
+            <div className="flex overflow-y-auto h-[60vh]">
+              <div className="w-84 h-full px-2">
                 <EventsList
                   match={match}
                   filters={allFilters}

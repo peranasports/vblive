@@ -24,7 +24,7 @@ function App() {
           <Router>
             <div className="flex flex-col h-screen">
               <Navbar />
-              <main className="container mx-auto px-3 pb-12">
+              <main className="mx-4 px-3 pb-2">
                 <Routes>
                   <Route path="/" element={<Home />} />
                   <Route path="/signin" element={<SignIn />} />

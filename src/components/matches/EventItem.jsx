@@ -11,9 +11,9 @@ function EventItem({ event, isSelected, onEventSelected }) {
 
   const background = () => {
     if (isSelected === false) {
-      return "mb-2 rounded-none card-compact bg-gray-700 hover:bg-base-300 cursor-pointer";
+      return "mb-2 rounded-none card-compact p-1 border border-base-100 text-base-content bg-base-100 hover:bg-base-100 hover:opacity-75 cursor-pointer";
     } else {
-      return "mb-2 rounded-none card-compact bg-blue-800 hover:bg-blue-900 cursor-pointer";
+      return "mb-2 rounded-none card-compact p-1 border border-base-100 text-accent-content bg-accent hover:bg-accent hover:opacity-75 cursor-pointer";
     }
   };
 
@@ -57,13 +57,13 @@ function EventItem({ event, isSelected, onEventSelected }) {
     <div className={background()} onClick={() => doEventSelect()}>
       <div className="">
         {isHomePlayer(event) ? (
-          <div className="text-left bg-gray-900 text-gray-500">
+          <div className="text-leftt">
             <p className="pl-2 text-md font-semibold">
               {event.Player.shirtNumber}. {event.Player.NickName.toUpperCase()}
             </p>
           </div>
         ) : (
-          <div className="text-right bg-gray-900 text-gray-500">
+          <div className="text-right">
             {event.Player ? (
               <p className="pr-2 text-md font-semibold">
                 {event.Player.shirtNumber}.{" "}
@@ -105,7 +105,7 @@ function EventItem({ event, isSelected, onEventSelected }) {
               />
             ) : (
               <QueueListIcon
-                className="w-4 h4 text-base-300 mt-1"
+                className="w-4 h4 text-base-content mt-1"
                 onClick={() => togglePlaylist()}
               />
             )}
