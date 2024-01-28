@@ -15,7 +15,7 @@ function MatchSummary({ match, gameSelected, onGameSelected, teamSelected, onTea
     }
 
     return match && (
-        <div className="flex-auto mb-4 tabs-boxed">
+        <div className="flex-auto tabs-boxed">
             <a className={teamSelected === 0 ? "tab text-xl text-primary font-medium tab-active" : "tab text-xl font-medium"} 
                 onClick={() => doSelectTeam(0)}
             >

@@ -22,7 +22,7 @@ function App() {
       <VBLiveAPIProvider>
         <AlertProvider>
           <Router>
-            <div className="flex flex-col h-screen">
+            <div className="flex flex-col h-screen" style={{paddingBottom:"60px"}}>
               <Navbar />
               <main className="mx-4 px-3 pb-2">
                 <Routes>

@@ -192,4 +192,10 @@
     .check-primary {
         @apply checkbox checkbox-primary w-7 h-7 rounded-none
     }
+    .primary-bg {
+      background-color: theme('colors.primary');
+    }
+    .events-list-height {      
+      height: calc(100vh - theme('spacing.80'));
+    }
   }

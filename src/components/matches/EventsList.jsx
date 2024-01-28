@@ -240,15 +240,15 @@ function EventsList({ match, filters, selectedSet, doSelectEvent, onFilter }) {
             className=""//"collapse collapse-arrow collapse-open border border-base-300 bg-base-300"
           >
             {/* <input type="checkbox" className="peer" /> */}
-            <div className="">
-              <div className="flex justify-between">
+            <div className="" id={set.GameNumber}>
+              <div className="flex justify-between p-2 bg-primary text-primary-content">
                 <p>Set {id + 1}</p>
                 <p>
                   {set.HomeScore} - {set.AwayScore}
                 </p>
               </div>
             </div>
-            <div className="" id={set.GameNumber}>
+            <div className="px-2">
               {set.filteredEvents.map((event, eid) => (
                 <EventItem
                   key={eid}
