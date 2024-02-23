@@ -15,6 +15,7 @@ import Playlist from "./components/playlist/Playlist";
 import { CookiesProvider } from "react-cookie";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { Analytics } from '@vercel/analytics/react';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
             <div className="flex flex-col h-screen" style={{paddingBottom:"60px"}}>
               <Navbar />
               <main className="mx-4 px-3 pb-2">
+                <Analytics />
                 <Routes>
                   <Route path="/" element={<Home />} />
                   <Route path="/signin" element={<SignIn />} />
