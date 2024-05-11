@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useLayoutEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import { sortBy, sortedIndex } from "lodash";
 import Select from "react-select";
@@ -17,7 +17,10 @@ import {
 import { myzip, myunzip } from "../utils/zip";
 import { DVEventString } from "../utils/DVWFile";
 
-function VideoAnalysis({ match, selectedGame }) {
+function VideoAnalysis() {
+  // function VideoAnalysis({ match, selectedGame }) {
+  const location = useLocation();
+  const { match, selectedGame } = location.state;
   const navigate = useNavigate();
   const playerRef = useRef();
   const dvRef = useRef();
@@ -56,7 +59,12 @@ function VideoAnalysis({ match, selectedGame }) {
   const menuRef = useRef();
   const [menuOpen, setMenuOpen] = useState(false);
   const wref = useRef(null);
+  const refWindow = useRef();
+  const refList = useRef();
   const [contentsHeight, setContentsHeight] = useState(0);
+  const [isYoutube, setIsYoutube] = useState(false);
+  const [videoWidth, setVideoWidth] = useState(0);
+  const [windowHeight, setWindowHeight] = useState(0);
 
   const eventTypes = [
     { value: 0, label: "All Types" },
@@ -551,6 +559,7 @@ function VideoAnalysis({ match, selectedGame }) {
   };
 
   const handleVideoUpload = (event) => {
+    setIsYoutube(false);
     var url = URL.createObjectURL(event.target.files[0]);
     const vfo = fileObjectToJsonString(event.target.files[0]);
     setVideoFileObject(vfo);
@@ -799,9 +808,11 @@ function VideoAnalysis({ match, selectedGame }) {
         console.log(`Found match, group ${groupIndex}: ${match}`);
       });
       if (m[1] !== null) {
+        setIsYoutube(true);
         return "https://www.youtube.com/watch?v=" + m[1];
       }
     }
+    setIsYoutube(false);
     return str;
   };
 
@@ -810,6 +821,12 @@ function VideoAnalysis({ match, selectedGame }) {
       const ch = wref.current.offsetHeight - 162;
       console.log("contentsHeight:" + ch);
       setContentsHeight(ch);
+    }
+    if (refWindow.current && refList.current) {
+      setVideoWidth(
+        refWindow.current.offsetWidth - refList.current.offsetWidth
+      );
+      setWindowHeight(window.innerHeight);
     }
   }, []);
 
@@ -899,6 +916,12 @@ function VideoAnalysis({ match, selectedGame }) {
         console.log("contentsHeight:" + ch);
         setContentsHeight(ch);
       }
+      if (refWindow.current && refList.current) {
+        setVideoWidth(
+          refWindow.current.offsetWidth - refList.current.offsetWidth
+        );
+        setWindowHeight(window.innerHeight);
+      }
     }
 
     window.addEventListener("resize", handleWindowResize);
@@ -942,366 +965,31 @@ function VideoAnalysis({ match, selectedGame }) {
     );
   };
 
+  const onBackClick = () => {
+    navigate(-1);
+  };
+
+  const calcVideoSize = () => {
+    var maxh = windowHeight - 300;
+    var w = videoWidth;
+    var h = (videoWidth * 9) / 16;
+    if (h > maxh) {
+      h = maxh;
+      w = (h * 16) / 9;
+    }
+    return { width: w, height: h };
+  };
+
   if (match === undefined) {
     return <></>;
   }
 
   return (
     <>
-      <div className="flex">
-        <div className="flex-col w-[40vw]">
-          <div className="flex justify-between py-2">
-            <div className="flex gap-1">
-              <label
-                htmlFor="modal-filters"
-                className="btn btn-sm bg-gray-600 hover:btn-gray-900 "
-              >
-                Filters
-              </label>
-              <div className="dropdown">
-                <label
-                  tabIndex={0}
-                  className="btn btn-sm bg-gray-600 hover:btn-gray-900 "
-                >
-                  Set
-                </label>
-                <ul
-                  tabIndex={0}
-                  className="dropdown-content menu p-2 shadow bg-base-100 w-52"
-                >
-                  {match.sets.map((vobj, idx) => (
-                    <li key={idx} onClick={() => onGameChanged(idx + 1)}>
-                      <a>Set {vobj.GameNumber}</a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="dropdown" ref={menuRef}>
-                <label
-                  tabIndex={0}
-                  className="btn btn-sm bg-gray-600 hover:btn-gray-900 "
-                  onClick={() => setMenuOpen(!menuOpen)}
-                >
-                  Play List
-                </label>
-                {menuOpen ? (
-                  <ul
-                    tabIndex={0}
-                    className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52"
-                  >
-                    <li onClick={() => selectAllItems()}>
-                      <a>Select all items</a>
-                    </li>
-                    <li onClick={() => unselectAllItems()}>
-                      <a>Unselect all items</a>
-                    </li>
-                    <li onClick={() => createPlaylist()}>
-                      <a>Create play list</a>
-                    </li>
-                  </ul>
-                ) : (
-                  <></>
-                )}
-              </div>
-            </div>
-            <div>
-              <button
-                className="btn btn-sm bg-gray-600 hover:btn-gray-900 "
-                onClick={() => setShowRadarFile(!showRadarFile)}
-              >
-                Radar
-              </button>
-            </div>
-          </div>
-          <div className="events-list-height overflow-y-auto">
-            <div className="">
-              <EventsList
-                match={match}
-                filters={allFilters}
-                selectedSet={selectedSet}
-                doSelectEvent={(ev) => doSelectEvent(ev)}
-                onFilter={(fes) => onFilter(fes)}
-              />
-            </div>
-          </div>
-        </div>
-        <div className="flex-col w-full">
-          <div className="flex flex-col w-full justify-between ml-2">
-            <div>
-              {showRadarFile === false ? (
-                <></>
-              ) : (
-                <div className="flex my-2">
-                  <input
-                    type="file"
-                    id="selectedRadarFile"
-                    ref={radarRef}
-                    style={{ display: "none" }}
-                    onChange={handleRadarUpload}
-                    onClick={(event) => {
-                      event.target.value = null;
-                    }}
-                  />
-                  <input
-                    type="button"
-                    className="btn btn-sm w-60"
-                    value="Select Radar File..."
-                    onClick={() =>
-                      document.getElementById("selectedRadarFile").click()
-                    }
-                  />
-                  <label className="label ml-4">
-                    <span className="label-text">
-                      {videoFileName === null
-                        ? "radar file not selected"
-                        : radarFileName}
-                    </span>
-                  </label>
-                </div>
-              )}
-              <div className="flex my-2">
-                <input
-                  type="file"
-                  id="selectedVideoFile"
-                  ref={dvRef}
-                  style={{ display: "none" }}
-                  onChange={handleVideoUpload}
-                  onClick={(event) => {
-                    event.target.value = null;
-                  }}
-                />
-                <input
-                  type="button"
-                  className="btn btn-sm w-60"
-                  value="Select Match Video..."
-                  onClick={() =>
-                    document.getElementById("selectedVideoFile").click()
-                  }
-                />
-                <label className="label ml-4">
-                  <span className="label-text">
-                    {videoFileName === null
-                      ? "match video not selected"
-                      : videoFileName}
-                  </span>
-                </label>
-              </div>
-              <div className="flex gap-1 mx-2 my-2">
-                <input
-                  type="text"
-                  className="w-full text-gray-500 bg-gray-200 input input-sm rounded-sm"
-                  id="onlineVideoUrl"
-                  value={videoOnlineUrl}
-                  placeholder="Online video URL"
-                  onChange={handleChange}
-                />
-                <button
-                  className="btn btn-sm"
-                  onClick={() => showOnlineVideo()}
-                >
-                  Apply
-                </button>
-                <button className="btn btn-sm" onClick={() => onSynchVideo()}>
-                  Synch
-                </button>
-              </div>
-
-              <div
-                className="flex p-4 justify-center"
-                onTouchStart={onTouchStart}
-                onTouchMove={onTouchMove}
-                onTouchEnd={onTouchEnd}
-              >
-                {videoFilePath && videoFilePath.includes("youtube") ? (
-                  <ReactPlayer
-                    ref={playerRef}
-                    url={videoFilePath}
-                    playing={true}
-                    // width="100%"
-                    controls={true}
-                    onReady={() => playerReady()}
-                    onTouchStart={onTouchStart}
-                    onTouchMove={onTouchMove}
-                    onTouchEnd={onTouchEnd}
-                  />
-                ) : (
-                  <ReactPlayer
-                    ref={playerRef}
-                    url={videoFilePath}
-                    playing={true}
-                    width="100%"
-                    height="100%"
-                    controls={true}
-                    onReady={() => playerReady()}
-                    onTouchStart={onTouchStart}
-                    onTouchMove={onTouchMove}
-                    onTouchEnd={onTouchEnd}
-                  />
-                )}
-              </div>
-              <div className="flex justify-between">
-                <div className="flex gap-2">
-                  <label
-                    htmlFor="modal-timing"
-                    className="btn btn-sm bg-info text-white hover:btn-gray-900"
-                  >
-                    Timing
-                  </label>
-                  <button
-                    className="btn btn-sm btn-info text-white"
-                    onClick={() => doSaveFile()}
-                  >
-                    Save Video Settings to DVW File
-                  </button>
-                </div>
-                {videoOffset !== 0 ? <p>Offset = {videoOffset} secs</p> : <></>}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      {/* <div className="drawer drawer-mobile h-full bg-purple-200" ref={wref}>
-        <input id="my-drawer-3" type="checkbox" className="drawer-toggle" />
-        <div className="drawer-content">
-          <div className="flex flex-col w-full justify-between ml-2">
-            <div>
-              {showRadarFile === false ? (
-                <></>
-              ) : (
-                <div className="flex my-2">
-                  <input
-                    type="file"
-                    id="selectedRadarFile"
-                    ref={radarRef}
-                    style={{ display: "none" }}
-                    onChange={handleRadarUpload}
-                    onClick={(event) => {
-                      event.target.value = null;
-                    }}
-                  />
-                  <input
-                    type="button"
-                    className="btn btn-sm w-60"
-                    value="Select Radar File..."
-                    onClick={() =>
-                      document.getElementById("selectedRadarFile").click()
-                    }
-                  />
-                  <label className="label ml-4">
-                    <span className="label-text">
-                      {videoFileName === null
-                        ? "radar file not selected"
-                        : radarFileName}
-                    </span>
-                  </label>
-                </div>
-              )}
-              <div className="flex my-2">
-                <input
-                  type="file"
-                  id="selectedVideoFile"
-                  ref={dvRef}
-                  style={{ display: "none" }}
-                  onChange={handleVideoUpload}
-                  onClick={(event) => {
-                    event.target.value = null;
-                  }}
-                />
-                <input
-                  type="button"
-                  className="btn btn-sm w-60"
-                  value="Select Match Video..."
-                  onClick={() =>
-                    document.getElementById("selectedVideoFile").click()
-                  }
-                />
-                <label className="label ml-4">
-                  <span className="label-text">
-                    {videoFileName === null
-                      ? "match video not selected"
-                      : videoFileName}
-                  </span>
-                </label>
-              </div>
-              <div className="flex gap-1 mx-2 my-2">
-                <input
-                  type="text"
-                  className="w-full text-gray-500 bg-gray-200 input input-sm rounded-sm"
-                  id="onlineVideoUrl"
-                  value={videoOnlineUrl}
-                  onChange={handleChange}
-                />
-                <button
-                  className="btn btn-sm"
-                  onClick={() => showOnlineVideo()}
-                >
-                  Apply
-                </button>
-                <button className="btn btn-sm" onClick={() => onSynchVideo()}>
-                  Synch
-                </button>
-              </div>
-
-              <div
-                className="flex ml-4 my-4 justify-center"
-                onTouchStart={onTouchStart}
-                onTouchMove={onTouchMove}
-                onTouchEnd={onTouchEnd}
-              >
-                {videoFilePath && videoFilePath.includes("youtube") ? (
-                  <ReactPlayer
-                    ref={playerRef}
-                    url={videoFilePath}
-                    playing={true}
-                    // width="100%"
-                    controls={true}
-                    onReady={() => playerReady()}
-                    onTouchStart={onTouchStart}
-                    onTouchMove={onTouchMove}
-                    onTouchEnd={onTouchEnd}
-                  />
-                ) : (
-                  <ReactPlayer
-                    ref={playerRef}
-                    url={videoFilePath}
-                    playing={true}
-                    width="100%"
-                    height="100%"
-                    controls={true}
-                    onReady={() => playerReady()}
-                    onTouchStart={onTouchStart}
-                    onTouchMove={onTouchMove}
-                    onTouchEnd={onTouchEnd}
-                  />
-                )}
-              </div>
-              <div className="flex justify-between">
-                <div className="flex gap-2">
-                  <label
-                    htmlFor="modal-timing"
-                    className="btn btn-sm bg-info text-white hover:btn-gray-900"
-                  >
-                    Timing
-                  </label>
-                  <button
-                    className="btn btn-sm btn-info text-white"
-                    onClick={() => doSaveFile()}
-                  >
-                    Save Video Settings
-                  </button>
-                </div>
-                {videoOffset !== 0 ? <p>Offset = {videoOffset} secs</p> : <></>}
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className={drawerSideClass}>
-          <label htmlFor="my-drawer-3" className="drawer-overlay"></label>
-          <div className="flex-col mt-2 bg-red-200 ">
-            <div
-              className="flex justify-between p-2 h-12"
-              style={{ backgroundColor: "theme('primary'" }}
-            >
+      <div className="flex-col">
+        <div className="flex h-full w-full" ref={refWindow}>
+          <div className="flex-col">
+            <div className="flex justify-between py-2">
               <div className="flex gap-1">
                 <label
                   htmlFor="modal-filters"
@@ -1318,7 +1006,7 @@ function VideoAnalysis({ match, selectedGame }) {
                   </label>
                   <ul
                     tabIndex={0}
-                    className="dropdown-content menu p-2 shadow bg-base-100  w-52"
+                    className="dropdown-content menu p-2 shadow bg-base-100 w-52"
                   >
                     {match.sets.map((vobj, idx) => (
                       <li key={idx} onClick={() => onGameChanged(idx + 1)}>
@@ -1333,7 +1021,7 @@ function VideoAnalysis({ match, selectedGame }) {
                     className="btn btn-sm bg-gray-600 hover:btn-gray-900 "
                     onClick={() => setMenuOpen(!menuOpen)}
                   >
-                    Play List
+                    Playlist
                   </label>
                   {menuOpen ? (
                     <ul
@@ -1364,8 +1052,12 @@ function VideoAnalysis({ match, selectedGame }) {
                 </button>
               </div>
             </div>
-            <div className="flex overflow-y-auto">
-              <div className="w-84 px-2">
+            <div
+              className="overflow-y-auto"
+              ref={refList}
+              style={{ height: `${windowHeight - 140}px` }}
+            >
+              <div className="">
                 <EventsList
                   match={match}
                   filters={allFilters}
@@ -1376,8 +1068,189 @@ function VideoAnalysis({ match, selectedGame }) {
               </div>
             </div>
           </div>
+          <div className="flex-col">
+            <div className="flex flex-col w-full justify-between ml-2">
+              <div>
+                {showRadarFile === false ? (
+                  <></>
+                ) : (
+                  <div className="flex my-2">
+                    <input
+                      type="file"
+                      id="selectedRadarFile"
+                      ref={radarRef}
+                      style={{ display: "none" }}
+                      onChange={handleRadarUpload}
+                      onClick={(event) => {
+                        event.target.value = null;
+                      }}
+                    />
+                    <input
+                      type="button"
+                      className="btn btn-sm w-60"
+                      value="Select Radar File..."
+                      onClick={() =>
+                        document.getElementById("selectedRadarFile").click()
+                      }
+                    />
+                    <label className="label ml-4">
+                      <span className="label-text">
+                        {videoFileName === null
+                          ? "radar file not selected"
+                          : radarFileName}
+                      </span>
+                    </label>
+                  </div>
+                )}
+                <div className="flex justify-between">
+                  <div className="flex my-2">
+                    <input
+                      type="file"
+                      id="selectedVideoFile"
+                      ref={dvRef}
+                      style={{ display: "none" }}
+                      onChange={handleVideoUpload}
+                      onClick={(event) => {
+                        event.target.value = null;
+                      }}
+                    />
+                    <input
+                      type="button"
+                      className="btn btn-sm w-60"
+                      value="Select Match Video..."
+                      onClick={() =>
+                        document.getElementById("selectedVideoFile").click()
+                      }
+                    />
+                    <label className="label ml-4">
+                      <span className="label-text">
+                        {videoFileName === null
+                          ? "match video not selected"
+                          : videoFileName}
+                      </span>
+                    </label>
+                  </div>
+                  <button
+                    className="btn btn-primary btn-sm m-2"
+                    onClick={() => onBackClick()}
+                  >
+                    Back
+                  </button>
+                </div>
+                <div className="flex gap-1 mx-2 my-2">
+                  <input
+                    type="text"
+                    className="w-full text-gray-500 bg-gray-200 input input-sm rounded-sm"
+                    id="onlineVideoUrl"
+                    value={videoOnlineUrl}
+                    placeholder="Online video URL"
+                    onChange={handleChange}
+                  />
+                  <button
+                    className="btn btn-sm"
+                    onClick={() => showOnlineVideo()}
+                  >
+                    Apply
+                  </button>
+                  <button className="btn btn-sm" onClick={() => onSynchVideo()}>
+                    Synch
+                  </button>
+                </div>
+
+                <div
+                  className="flex p-4 justify-center"
+                  onTouchStart={onTouchStart}
+                  onTouchMove={onTouchMove}
+                  onTouchEnd={onTouchEnd}
+                >
+                  {isYoutube ? (
+                    <>
+                      {" "}
+                      <ReactPlayer
+                        ref={playerRef}
+                        url={videoFilePath}
+                        playing={true}
+                        controls={true}
+                        onReady={() => playerReady()}
+                        onTouchStart={onTouchStart}
+                        onTouchMove={onTouchMove}
+                        onTouchEnd={onTouchEnd}
+                        width={`${calcVideoSize().width}px`}
+                        height={`${calcVideoSize().height}px`}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <ReactPlayer
+                        ref={playerRef}
+                        url={videoFilePath}
+                        playing={true}
+                        // width="100%"
+                        // height="100%"
+                        controls={true}
+                        onReady={() => playerReady()}
+                        onTouchStart={onTouchStart}
+                        onTouchMove={onTouchMove}
+                        onTouchEnd={onTouchEnd}
+                        width={`${calcVideoSize().width}px`}
+                        height={`${calcVideoSize().height}px`}
+                      />
+                    </>
+                  )}
+
+                  {/* {videoFilePath && videoFilePath.includes("youtube") ? (
+                  <ReactPlayer
+                    ref={playerRef}
+                    url={videoFilePath}
+                    playing={true}
+                    // width="100%"
+                    controls={true}
+                    onReady={() => playerReady()}
+                    onTouchStart={onTouchStart}
+                    onTouchMove={onTouchMove}
+                    onTouchEnd={onTouchEnd}
+                  />
+                ) : (
+                  <ReactPlayer
+                    ref={playerRef}
+                    url={videoFilePath}
+                    playing={true}
+                    width="100%"
+                    height="100%"
+                    controls={true}
+                    onReady={() => playerReady()}
+                    onTouchStart={onTouchStart}
+                    onTouchMove={onTouchMove}
+                    onTouchEnd={onTouchEnd}
+                  />
+                )} */}
+                </div>
+                <div className="flex justify-between">
+                  <div className="flex gap-2">
+                    <label
+                      htmlFor="modal-timing"
+                      className="btn btn-sm bg-info text-white hover:btn-gray-900"
+                    >
+                      Timing
+                    </label>
+                    <button
+                      className="btn btn-sm btn-info text-white"
+                      onClick={() => doSaveFile()}
+                    >
+                      Save Video Settings to DVW File
+                    </button>
+                  </div>
+                  {videoOffset !== 0 ? (
+                    <p>Offset = {videoOffset} secs</p>
+                  ) : (
+                    <></>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div> */}
+      </div>
 
       <input type="checkbox" id="modal-filters" className="modal-toggle" />
       <div className="modal">

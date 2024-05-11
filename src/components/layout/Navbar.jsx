@@ -23,15 +23,15 @@ function Navbar({ title }) {
 
   return (
     <nav className="navbar shadow-lg bg-neutral text-neutral-content">
-      <div className="container mx-auto">
+      <div className="container mx-auto h-[2px]">
         <div className="flex px-2 mx-2 space-x-4">
-          <img className="pt-1 h-10 w-10" alt="" src={VBLiveLogo} />
-          <Link to="/" className="text-2xl pt-1 font-bold align-middle">
+          <img className="pt-1 h-8 w-8" alt="" src={VBLiveLogo} />
+          <Link to="/" className="text-xl pt-1 font-bold align-middle">
             {title}
           </Link>
         </div>
         <div className="flex-1 px2 mx-2">
-          <div className="flex justify-end">
+          <div className="flex justify-end mt-4">
             <Link to="/" className="btn btn-ghost btn-sm rounded-btn">
               Home
             </Link>
@@ -43,9 +43,9 @@ function Navbar({ title }) {
             <></>
           ) : (
             <div className="flex justify-end">
-              <p className="mt-1 mr-4 text-md font-medium">{getID()}</p>
+              <p className="mt-1 mr-4 text-md">{getID()}</p>
               <button
-                className="logoutButton mb-2 btn btn-sm"
+                className="logoutButton mb-4 btn btn-sm"
                 onClick={doLogout}
               >
                 Log out

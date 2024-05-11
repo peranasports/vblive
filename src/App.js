@@ -11,6 +11,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import Session from "./pages/Session";
 import Input from "./pages/Input";
 import NotFound from "./pages/NotFound";
+import VideoAnalysis from "./components/matches/VideoAnalysis";
 import Playlist from "./components/playlist/Playlist";
 import { CookiesProvider } from "react-cookie";
 import { ToastContainer } from "react-toastify";
@@ -25,7 +26,7 @@ function App() {
           <Router>
             <div className="flex flex-col h-screen" style={{paddingBottom:"60px"}}>
               <Navbar />
-              <main className="mx-4 px-3 pb-2">
+              <main className="mx-2 px-2 pb-2">
                 <Analytics />
                 <Routes>
                   <Route path="/" element={<Home />} />
@@ -35,6 +36,7 @@ function App() {
                   <Route path="/about" element={<About />} />
                   <Route path="/session" element={<Session />} />
                   <Route path="/playlist" element={<Playlist />} />
+                  <Route path="/videoanalysis" element={<VideoAnalysis />} />
                   <Route path="/input" element={<Input />} />
                   <Route path="/*" element={<NotFound />} />
                 </Routes>

@@ -53,8 +53,9 @@ function Session() {
   const [selectedTeam, setSelectedTeam] = useState(0);
   const [currentReport, setCurrentReport] = useState(0);
   const [counter, setCounter] = useState(0);
+  const [showingVideo, setShowingVideo] = useState(false);
   const [, forceUpdate] = useState(0);
-
+  const navigate = useNavigate();
   const getLatest = useCallback(async () => {
     dispatch({ type: "SET_LOADING" });
 
@@ -167,29 +168,37 @@ function Session() {
         />
       );
     } else if (currentReport === 6) {
-      return <VideoAnalysis match={match} selectedGame={selectedGame}/>;
+      return <VideoAnalysis match={match} selectedGame={selectedGame} />;
     }
+  };
+
+  const doVideoAnalysis = () => {
+    const st = { match: match, selectedGame: selectedGame };
+    navigate("/videoanalysis", { state: st });
+    // return <VideoAnalysis match={match} selectedGame={selectedGame} />;
   };
 
   return (
     match && (
       <>
         <div>
-          <div className="">
-            <MatchSummary
-              match={match}
-              gameSelected={selectedGame}
-              onGameSelected={(sgn) => setSelectedGame(sgn)}
-              teamSelected={selectedTeam}
-              onTeamSelected={(tmn) => setSelectedTeam(tmn)}
-            ></MatchSummary>
-          </div>
+          {showingVideo ? (
+            <></>
+          ) : (
+            <div className="">
+              <MatchSummary
+                match={match}
+                gameSelected={selectedGame}
+                onGameSelected={(sgn) => setSelectedGame(sgn)}
+                teamSelected={selectedTeam}
+                onTeamSelected={(tmn) => setSelectedTeam(tmn)}
+              ></MatchSummary>
+            </div>
+          )}
           <div className="tabs tabs-boxed p-2">
             <a
               className={
-                currentReport == 0
-                  ? "tab tab-active bg-secondary"
-                  : "tab "
+                currentReport == 0 ? "tab tab-active bg-secondary" : "tab "
               }
               onClick={() => {
                 setCurrentReport(0);
@@ -198,11 +207,7 @@ function Session() {
               Summary
             </a>
             <a
-              className={
-                currentReport == 1
-                  ? "tab  tab-active"
-                  : "tab "
-              }
+              className={currentReport == 1 ? "tab  tab-active" : "tab "}
               onClick={() => {
                 setCurrentReport(1);
               }}
@@ -210,11 +215,7 @@ function Session() {
               Box Score
             </a>
             <a
-              className={
-                currentReport == 2
-                  ? "tab  tab-active"
-                  : "tab "
-              }
+              className={currentReport == 2 ? "tab  tab-active" : "tab "}
               onClick={() => {
                 setCurrentReport(2);
               }}
@@ -222,11 +223,7 @@ function Session() {
               Sideout Report
             </a>
             <a
-              className={
-                currentReport == 3
-                  ? "tab  tab-active"
-                  : "tab "
-              }
+              className={currentReport == 3 ? "tab  tab-active" : "tab "}
               onClick={() => {
                 setCurrentReport(3);
               }}
@@ -234,11 +231,7 @@ function Session() {
               Serve Receives
             </a>
             <a
-              className={
-                currentReport == 4
-                  ? "tab  tab-active"
-                  : "tab "
-              }
+              className={currentReport == 4 ? "tab  tab-active" : "tab "}
               onClick={() => {
                 setCurrentReport(4);
               }}
@@ -246,11 +239,7 @@ function Session() {
               Attack Zones
             </a>
             <a
-              className={
-                currentReport == 5
-                  ? "tab  tab-active"
-                  : "tab "
-              }
+              className={currentReport == 5 ? "tab  tab-active" : "tab "}
               onClick={() => {
                 setCurrentReport(5);
               }}
@@ -258,13 +247,9 @@ function Session() {
               Hitting Chart
             </a>
             <a
-              className={
-                currentReport == 6
-                  ? "tab  tab-active"
-                  : "tab "
-              }
+              className={currentReport == 6 ? "tab  tab-active" : "tab "}
               onClick={() => {
-                setCurrentReport(6);
+                doVideoAnalysis();
               }}
             >
               Video Analysis
