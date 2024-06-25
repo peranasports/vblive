@@ -418,11 +418,9 @@ export function generateMatch(str) {
         {
           if (s.startsWith("http") === true) {
             match.videoUrl = s;
-          }
-          else if (s.startsWith(";http") === true) {
+          } else if (s.startsWith(";http") === true) {
             match.videoUrl = s.substring(1);
-          }
-          else if (s.startsWith(";offset=") === true) {
+          } else if (s.startsWith(";offset=") === true) {
             match.videoOffset = Number.parseInt(s.substring(8));
           }
         }
@@ -1994,10 +1992,14 @@ function processScoutLine(s) {
         homerow = parseInt(rows[r]);
         match.homerow = homerow;
         var xx = parseInt(sm[9]) + 13;
-        homeSetter = parseInt(sm[xx]);
-        g.PrimarySetter = fetchPlayerInMatch(match.players, homeSetter);
-        if (g.PrimarySetter.Positions.filter((obj) => obj === 5).length === 0) {
-          g.PrimarySetter.Positions.push(5);
+        if (sm[xx].length > 0) {
+          homeSetter = parseInt(sm[xx]);
+          g.PrimarySetter = fetchPlayerInMatch(match.players, homeSetter);
+          if (
+            g.PrimarySetter.Positions.filter((obj) => obj === 5).length === 0
+          ) {
+            g.PrimarySetter.Positions.push(5);
+          }
         }
       } else if (code.substring(0, 1) === "a") {
         // home
@@ -2006,15 +2008,17 @@ function processScoutLine(s) {
         awayrow = parseInt(rows[r]);
         match.awayrow = awayrow;
         var xx = parseInt(sm[10]) + 19;
-        awaySetter = parseInt(sm[xx]);
-        g.oppPrimarySetter = fetchPlayerInMatch(
-          match.oppositionPlayers,
-          awaySetter
-        );
-        if (
-          g.oppPrimarySetter.Positions.filter((obj) => obj === 5).length === 0
-        ) {
-          g.oppPrimarySetter.Positions.push(5);
+        if (sm[xx].length > 0) {
+          awaySetter = parseInt(sm[xx]);
+          g.oppPrimarySetter = fetchPlayerInMatch(
+            match.oppositionPlayers,
+            awaySetter
+          );
+          if (
+            g.oppPrimarySetter.Positions.filter((obj) => obj === 5).length === 0
+          ) {
+            g.oppPrimarySetter.Positions.push(5);
+          }
         }
       }
     }

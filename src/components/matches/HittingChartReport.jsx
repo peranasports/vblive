@@ -282,7 +282,7 @@ function HittingChartReport({ match, selectedGame, selectedTeam }) {
   }
 
   return (
-    <div>
+    <div className="flex-col">
       <div className="drawer drawer-mobile">
         <input id="my-drawer-5" type="checkbox" className="drawer-toggle" />
         <div className="drawer-content">
