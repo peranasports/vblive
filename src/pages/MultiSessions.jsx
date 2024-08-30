@@ -23,7 +23,6 @@ import VBLiveAPIContext from "../context/VBLiveAPI/VBLiveAPIContext";
 import {
   getSession,
   getLatestStats,
-  storeSession,
 } from "../context/VBLiveAPI/VBLiveAPIAction";
 import {
   initWithPSVBCompressedBuffer,
@@ -47,10 +46,10 @@ import { useAuthStatus } from "../components/hooks/useAuthStatus";
 import { myzip } from "../components/utils/zip";
 import { toast } from "react-toastify";
 
-function Session() {
+function MultiSessions() {
   const { session, appName, loading, dispatch } = useContext(VBLiveAPIContext);
   const location = useLocation();
-  const { sessionId, dvwFileData, psvbFileData, filename, msession } = location.state;
+  const { matches, team } = location.state;
   const { currentUser } = useAuthStatus();
   const params = useParams();
   const [match, setMatch] = useState(null);
@@ -58,70 +57,37 @@ function Session() {
   const [selectedGame, setSelectedGame] = useState(0);
   const [selectedTeam, setSelectedTeam] = useState(0);
   const [currentReport, setCurrentReport] = useState(0);
+  const [allMatches, setAllMatches] = useState([]);
   const [counter, setCounter] = useState(0);
   const [showingVideo, setShowingVideo] = useState(false);
   const [, forceUpdate] = useState(0);
   const navigate = useNavigate();
-  const getLatest = useCallback(async () => {
-    dispatch({ type: "SET_LOADING" });
-
-    const sessionData = await getSession(sessionId);
-    dispatch({ type: "GET_SESSION", payload: sessionData });
-    // console.log('appName', sessionData.appName)
-    var m =
-      sessionData.appName === "VBStats"
-        ? initWithPSVBCompressedBuffer(sessionData.stats)
-        : initWithDVWCompressedBuffer(sessionData.stats);
-
-    var mx = null;
-    if (sessionData.appName === "VBStats") {
-      const latestData = await getLatestStats(sessionId, 0);
-      dispatch({ type: "GET_LATEST", payload: latestData });
-      setLatest(latestData);
-      mx =
-        sessionData.appName === "VBStats"
-          ? parseLatestPSVBStats(latestData, m)
-          : parseLatestDVWStats(latestData, m);
-      mx = calculatePSVBStats(mx);
-    } else {
-      mx = calculateDVWStats(m);
-    }
-    mx.app = sessionData.appName;
-    mx = calculateSideoutStats(mx, sessionData.appName);
-    // console.log('sessionId, match=', params.sessionId, mx)
-    setMatch(mx);
-  }, [sessionId, selectedTeam]);
 
   useEffect(() => {
-    if (dvwFileData !== undefined && dvwFileData !== null) {
-      var m = generateMatch(dvwFileData);
-      m.filename = filename;
-      m.buffer = dvwFileData;
-      var mx = calculateDVWStats(m);
-      mx.app = "DataVolley";
-      mx = calculateSideoutStats(mx, "DataVolley");
-      mx.videoOnlineUrl = msession.videoOnlineUrl;
-      mx.videoStartTimeSeconds = msession.videoStartTimeSeconds;
-      mx.videoOffset = msession.videoOffset;
-    setMatch(mx);
-      forceUpdate((n) => !n);
-    } else if (psvbFileData !== undefined) {
-      var m = initWithPSVBCompressedBuffer(psvbFileData);
-      m.filename = filename;
-      m.buffer = unzipBuffer(psvbFileData);
-      var mx = calculatePSVBStats(m);
-      mx.app = "VBStats";
-      mx = calculateSideoutStats(mx, "VBStats");
-      mx.videoOnlineUrl = msession.videoOnlineUrl;
-      mx.videoStartTimeSeconds = msession.videoStartTimeSeconds;
-      mx.videoOffset = msession.videoOffset;
-      setMatch(mx);
-      forceUpdate((n) => !n);
-    } else {
-      getLatest();
-      // setTimeout(() => setCounter(!counter), 30000)
+    var allms = [];
+    for (var match of matches) {
+      if (match.buffer.includes("DATAVOLLEY")) {
+        var m = generateMatch(match.buffer);
+        var mx = calculateDVWStats(m);
+        mx.app = "DataVolley";
+        mx = calculateSideoutStats(mx, "DataVolley");
+        mx.videoOnlineUrl = match.videoOnlineUrl;
+        mx.videoStartTimeSeconds = match.videoStartTimeSeconds;
+        mx.videoOffset = match.videoOffset;
+        allms.push(mx);
+      } else {
+        var m = initWithPSVBCompressedBuffer(match.buffer);
+        var mx = calculatePSVBStats(m);
+        mx.app = "VBStats";
+        mx = calculateSideoutStats(mx, "VBStats");
+        mx.videoOnlineUrl = match.videoOnlineUrl;
+        mx.videoStartTimeSeconds = match.videoStartTimeSeconds;
+        mx.videoOffset = match.videoOffset;
+        allms.push(mx);
+      }
     }
-  }, [getLatest, counter, selectedGame, selectedTeam]);
+    setAllMatches(allms);
+  }, [matches]);
 
   // }, [dispatch, params.sessionId], selectedGame, counter)
 
@@ -133,7 +99,8 @@ function Session() {
     if (currentReport === 0) {
       return (
         <Dashboard
-          matches={[match]}
+          matches={allMatches}
+          team={team}
           selectedGame={selectedGame}
           selectedTeam={selectedTeam}
         />
@@ -141,8 +108,8 @@ function Session() {
     } else if (currentReport === 1) {
       return (
         <BoxScore
-          matches={[match]}
-          team={match.teamA.Name}
+          matches={allMatches}
+          team={team}
           selectedGame={selectedGame}
           selectedTeam={selectedTeam}
         />
@@ -150,8 +117,8 @@ function Session() {
     } else if (currentReport === 2) {
       return (
         <SideoutReport
-          matches={[match]}
-          team={match.teamA.Name}
+          matches={allMatches}
+          team={team}
           selectedGame={selectedGame}
           selectedTeam={selectedTeam}
         />
@@ -160,17 +127,18 @@ function Session() {
     } else if (currentReport === 3) {
       return (
         <ServeReceiveReport
-          matches={[match]}
-          team={match.teamA.Name}
-          selectedGame={selectedGame}
+          matches={allMatches}
+          team={team}
+        // match={allMatches[0]}
+        selectedGame={selectedGame}
           selectedTeam={selectedTeam}
         />
       );
     } else if (currentReport === 4) {
       return (
         <AttackZones
-          matches={[match]}
-          team={match.teamA.Name}
+          matches={allMatches}
+          team={team}
           selectedGame={selectedGame}
           selectedTeam={selectedTeam}
         />
@@ -178,34 +146,25 @@ function Session() {
     } else if (currentReport === 5) {
       return (
         <HittingChartReport
-          matches={[match]}
-          team={match.teamA.Name}
+          matches={allMatches}
+          team={team}
           selectedGame={selectedGame}
           selectedTeam={selectedTeam}
         />
       );
     } else if (currentReport === 6) {
-      return <VideoAnalysis match={match} selectedGame={selectedGame} />;
+      return <VideoAnalysis match={allMatches[0]} selectedGame={selectedGame} />;
     }
   };
 
   const doVideoAnalysis = () => {
-    const st = { matches: [match], team:match.teamA.Name, selectedGame: selectedGame };
+    const st = { matches: allMatches, team:team, selectedGame: selectedGame };
     navigate("/videoanalysis", { state: st });
-    // return <VideoAnalysis match={match} selectedGame={selectedGame} />;
-  };
-
-  const doUpload = async () => {
-    const ret = await storeSession(match, currentUser);
-    if (ret === true) {
-      toast.success("Session uploaded successfully");
-    } else {
-      toast.error("Error uploading session");
-    }
+    // return <VideoAnalysis allMatches[0]={allMatches[0]} selectedGame={selectedGame} />;
   };
 
   return (
-    match && (
+    allMatches && (
       <>
         <div>
           {showingVideo ? (
@@ -213,16 +172,13 @@ function Session() {
           ) : (
             <div className="flex justify-between">
               <MatchSummary
-                matches={[match]}
-                team={match.teamA.Name}
+                matches={allMatches}
+                team={team}
                 gameSelected={selectedGame}
                 onGameSelected={(sgn) => setSelectedGame(sgn)}
                 teamSelected={selectedTeam}
                 onTeamSelected={(tmn) => setSelectedTeam(tmn)}
               ></MatchSummary>
-              <button className="btn btn-primary" onClick={() => doUpload()}>
-                Save to Database
-              </button>
             </div>
           )}
           <div className="tabs tabs-boxed p-2">
@@ -292,4 +248,4 @@ function Session() {
   );
 }
 
-export default Session;
+export default MultiSessions;

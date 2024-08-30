@@ -1,9 +1,16 @@
 import { useState, useEffect } from "react";
 import EventItem from "./EventItem";
 
-function EventsList({ match, filters, selectedSet, doSelectEvent, onFilter }) {
+function EventsList({
+  matches,
+  team,
+  filters,
+  selectedSet,
+  doSelectEvent,
+  onFilter,
+}) {
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const [selectedGuids, setSelectedGuids] = useState(null);
+  const [selectedPlayerNames, setSelectedPlayerNames] = useState(null);
   const [selectedEventTypes, setSelectedEventTypes] = useState(null);
   const [selectedEventResults, setSelectedEventResults] = useState(null);
   const [selectedJumpHeights, setSelectedJumpHeights] = useState(null);
@@ -15,41 +22,53 @@ function EventsList({ match, filters, selectedSet, doSelectEvent, onFilter }) {
   };
 
   const doFilters = () => {
-    var guids = [];
+    var plnames = [];
     if (
       filters.teamAPlayers.length === 1 &&
       filters.teamAPlayers[0].value === 0
     ) {
-      for (var nta = 0; nta < match.teamA.players.length; nta++) {
-        guids.push(match.teamA.players[nta].Guid);
+      for (var match of matches) {
+        const tm = team === match.teamA.Name ? match.teamA : match.teamB;
+        for (var pl of tm.players) {
+          const plname = pl.FirstName + " " + pl.LastName.toUpperCase();
+          if (plnames.includes(plname) === false) {
+            plnames.push(plname);
+          }
+        }
       }
     } else {
       for (var nta = 0; nta < filters.teamAPlayers.length; nta++) {
-        guids.push(filters.teamAPlayers[nta].guid);
+        plnames.push(filters.teamAPlayers[nta].guid);
       }
     }
     if (
       filters.teamBPlayers.length === 1 &&
       filters.teamBPlayers[0].value === 0
     ) {
-      for (var nta = 0; nta < match.teamB.players.length; nta++) {
-        guids.push(match.teamB.players[nta].Guid);
+      for (var match of matches) {
+        const tm = team === match.teamA.Name ? match.teamB : match.teamA;
+        for (var pl of tm.players) {
+          const plname = pl.FirstName + " " + pl.LastName.toUpperCase();
+          if (plnames.includes(plname) === false) {
+            plnames.push(plname);
+          }
+        }
       }
     } else {
       for (var nta = 0; nta < filters.teamBPlayers.length; nta++) {
-        guids.push(filters.teamBPlayers[nta].guid);
+        plnames.push(filters.teamBPlayers[nta].guid);
       }
     }
-    setSelectedGuids(guids);
+    setSelectedPlayerNames(plnames);
 
-    var games = []
-    if (
-      filters.games.length === 1 &&
-      filters.games[0].value === 0
-    ) {
-      for (var ng=1; ng<=match.sets.length; ng++)
-      {
-        games.push(ng)
+    var games = [];
+    if (filters.games.length === 1 && filters.games[0].value === 0) {
+      for (var match of matches) {
+        for (var ng = 1; ng <= match.sets.length; ng++) {
+          if (games.includes(ng) === false) {
+            games.push(ng);
+          }
+        }
       }
     } else {
       for (var nta = 0; nta < filters.games.length; nta++) {
@@ -57,14 +76,10 @@ function EventsList({ match, filters, selectedSet, doSelectEvent, onFilter }) {
       }
     }
 
-    var rotations = []
-    if (
-      filters.rotations.length === 1 &&
-      filters.rotations[0].value === 0
-    ) {
-      for (var nr=1; nr<=6; nr++)
-      {
-        rotations.push(nr)
+    var rotations = [];
+    if (filters.rotations.length === 1 && filters.rotations[0].value === 0) {
+      for (var nr = 1; nr <= 6; nr++) {
+        rotations.push(nr);
       }
     } else {
       for (var nta = 0; nta < filters.rotations.length; nta++) {
@@ -135,64 +150,77 @@ function EventsList({ match, filters, selectedSet, doSelectEvent, onFilter }) {
     }
 
     var mes = [];
-    for (var ns = 0; ns < match.sets.length; ns++) {
-      var fes = [];
-      var s = match.sets[ns];
-      for (var ne = 0; ne < s.events.length; ne++) {
-        const e = s.events[ne];
-        if (games.includes(e.Drill.GameNumber) === false) continue;
-        if (rotations.includes(e.Row) === false) continue;
-        if (e.Player && guids.includes(e.Player.Guid) === false) continue;
-        if (eventtypes.includes(e.EventType) === false) continue;
-        if (eventresults.includes(e.DVGrade) === false) continue;
-        if (eventtypes.includes(20) && e.EventType === 20) {
-          if ((settercalls.includes(e.settersCall.substring(0, 2)) === false) && 
-              (settercalls.includes("All Calls") === false))
-          {
-            continue
-          }
-        }
-        else if (eventtypes.includes(4) && e.EventType === 4) {
-          const ats = ["", "H", "P", "T", ""];
-          const at = ats.indexOf(e.ExtraCode1);
-          if (at === -1) {
-            if (attacktypes.includes(0) === false) {
+    for (var match of matches) {
+      for (var ns = 0; ns < match.sets.length; ns++) {
+        var fes = [];
+        var s = match.sets[ns];
+        for (var ne = 0; ne < s.events.length; ne++) {
+          const e = s.events[ne];
+          if (games.includes(e.Drill.GameNumber) === false) continue;
+          if (rotations.includes(e.Row) === false) continue;
+          if (
+            e.Player &&
+            plnames.includes(
+              e.Player.FirstName + " " + e.Player.LastName.toUpperCase()
+            ) === false
+          )
+            continue;
+          if (eventtypes.includes(e.EventType) === false) continue;
+          if (eventresults.includes(e.DVGrade) === false) continue;
+          if (eventtypes.includes(20) && e.EventType === 20) {
+            if (
+              settercalls.includes(e.settersCall.substring(0, 2)) === false &&
+              settercalls.includes("All Calls") === false
+            ) {
               continue;
             }
-          } else if (
-            attacktypes.includes(ht) === false &&
-            attacktypes.includes(0) === false
-          )
-            continue;
+          } else if (eventtypes.includes(4) && e.EventType === 4) {
+            const ats = ["", "H", "P", "T", ""];
+            const at = ats.indexOf(e.ExtraCode1);
+            if (at === -1) {
+              if (attacktypes.includes(0) === false) {
+                continue;
+              }
+            } else if (
+              attacktypes.includes(ht) === false &&
+              attacktypes.includes(0) === false
+            )
+              continue;
 
-          if ((attackcombos.includes(e.attackCombo) === false) &&
-              (attackcombos.includes("All Combos") === false))
-          {
-            continue
+            if (
+              attackcombos.includes(e.attackCombo) === false &&
+              attackcombos.includes("All Combos") === false
+            ) {
+              continue;
+            }
+
+            if (
+              settercalls.includes(e.settersCall.substring(0, 2)) === false &&
+              settercalls.includes("All Calls") === false
+            ) {
+              continue;
+            }
+
+            var ht = e.SubEvent;
+            if (ht > 6) ht = 6;
+            if (
+              hittypes.includes(ht) === false &&
+              hittypes.includes(0) === false
+            )
+              continue;
+
+            var bt = e.ExtraCode2 === "~" ? 5 : Number.parseInt(e.ExtraCode2);
+            if (
+              blocktypes.includes(bt) === false &&
+              blocktypes.includes(6) === false
+            )
+              continue;
           }
-
-          if ((settercalls.includes(e.settersCall.substring(0, 2)) === false) && 
-              (settercalls.includes("All Calls") === false))
-          {
-            continue
-          }
-
-          var ht = e.SubEvent;
-          if (ht > 6) ht = 6;
-          if (hittypes.includes(ht) === false && hittypes.includes(0) === false)
-            continue;
-
-          var bt = e.ExtraCode2 === "~" ? 5 : Number.parseInt(e.ExtraCode2);
-          if (
-            blocktypes.includes(bt) === false &&
-            blocktypes.includes(6) === false
-          )
-            continue;
+          fes.push(e);
+          mes.push(e);
         }
-        fes.push(e);
-        mes.push(e);
+        s.filteredEvents = fes;
       }
-      s.filteredEvents = fes;
     }
     onFilter(mes);
   };
@@ -201,12 +229,14 @@ function EventsList({ match, filters, selectedSet, doSelectEvent, onFilter }) {
     if (filters !== undefined && filters !== null) {
       doFilters();
     } else {
-      for (var ns = 0; ns < match.sets.length; ns++) {
-        var s = match.sets[ns];
-        s.filteredEvents = s.events;
+      for (var match of matches) {
+        for (var ns = 0; ns < match.sets.length; ns++) {
+          var s = match.sets[ns];
+          s.filteredEvents = s.events;
+        }
       }
     }
-  }, [filters, match]);
+  }, [filters, matches]);
 
   useEffect(() => {
     const elem = document.activeElement;
@@ -225,30 +255,32 @@ function EventsList({ match, filters, selectedSet, doSelectEvent, onFilter }) {
     forceUpdate((n) => !n);
   }, [selectedSet]);
 
-  if (match === undefined || match.sets[0].filteredEvents === undefined) {
+  if (
+    matches === undefined ||
+    matches[0].sets[0].filteredEvents === undefined
+  ) {
     return <></>;
   }
 
-  return (
-    <>
-      <div className="bg-base-300">
+  const showSetEvents = (match, id) => {
+    return (
+      <>
         {match.sets.map((set, id) => (
           <div
-            
             key={id}
             tabIndex={0}
-            className=""//"collapse collapse-arrow collapse-open border border-base-300 bg-base-300"
+            className="collapse collapse-arrow border border-base-100 bg-base-300"
           >
-            {/* <input type="checkbox" className="peer" /> */}
-            <div className="" id={set.GameNumber}>
-              <div className="flex justify-between p-2 bg-primary text-primary-content">
+            <input type="checkbox" className="peer" />
+            <div className="collapse-title">
+              <div className="flex justify-between">
                 <p>Set {id + 1}</p>
                 <p>
                   {set.HomeScore} - {set.AwayScore}
                 </p>
               </div>
             </div>
-            <div className="px-2">
+            <div className="collapse-content" id={set.GameNumber}>
               {set.filteredEvents.map((event, eid) => (
                 <EventItem
                   key={eid}
@@ -260,6 +292,42 @@ function EventsList({ match, filters, selectedSet, doSelectEvent, onFilter }) {
             </div>
           </div>
         ))}
+      </>
+    );
+  };
+
+  return (
+    <>
+      <div className="bg-base-300">
+        {matches.length > 1 ? (
+          <>
+            {matches &&
+              matches.map((match, mid) => (
+                <div
+                  key={mid}
+                  tabIndex={0}
+                  className="collapse collapse-arrow border border-base-300 bg-base-100"
+                >
+                  <input type="checkbox" className="peer" />
+                  <div className="collapse-title">
+                    <div className="flex justify-between">
+                      <p>
+                        {match.teamA.Name} vs {match.teamB.Name}
+                      </p>
+                      <p className="font-bold">
+                        {match.HomeScore} {match.AwayScore}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="collapse-content" id={match.Guid}>
+                    {showSetEvents(match, mid)}
+                  </div>
+                </div>
+              ))}
+          </>
+        ) : (
+          showSetEvents(matches[0], 0)
+        )}
       </div>
     </>
   );

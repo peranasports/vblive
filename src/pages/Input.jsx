@@ -24,7 +24,6 @@ function Input() {
     fileReader.onload = (e) => {
       setDvwFileData(e.target.result);
       const st = {
-        sessionId: null,
         dvwFileData: e.target.result,
         filename: event.target.files[0],
       };
@@ -40,7 +39,6 @@ function Input() {
     fileReader.onload = (e) => {
       setPsvbFileData(e.target.result);
       const st = {
-        sessionId: null,
         psvbFileData: e.target.result,
         filename: event.target.files[0],
       };

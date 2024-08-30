@@ -1,8 +1,9 @@
 import React from "react";
 import { eventString, DVEventString } from "../utils/DVWFile";
 import { getEventDescription } from "../utils/PSVBFile";
-import { QueueListIcon } from "@heroicons/react/20/solid";
+import { QueueListIcon, VideoCameraIcon } from "@heroicons/react/20/solid";
 import { getEventInfo, getEventStringColor } from "../utils/Utils";
+import { VideoCameraSlashIcon } from "@heroicons/react/24/outline";
 
 function EventItem({ event, isSelected, onEventSelected }) {
   const doEventSelect = () => {
@@ -99,13 +100,13 @@ function EventItem({ event, isSelected, onEventSelected }) {
               {event.OppositionScore} R{event.Row}
             </p>
             {event.playlist ? (
-              <QueueListIcon
-                className="w-4 h4 text-success mt-1"
+              <VideoCameraIcon
+                className="w-6 h6 text-warning mt-1"
                 onClick={() => togglePlaylist()}
               />
             ) : (
-              <QueueListIcon
-                className="w-4 h4 text-base-content mt-1"
+              <VideoCameraSlashIcon
+                className="w-6 h6 text-base-content mt-1"
                 onClick={() => togglePlaylist()}
               />
             )}

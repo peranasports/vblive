@@ -16,6 +16,9 @@ import {
   kOppositionServeError,
   kOppositionError,
   kOppositionHitError,
+  createStatsItem,
+  addStatsItem,
+  calculateAllStats,
 } from "../utils/StatsItem";
 
 export function zipBuffer(inputstr) {
@@ -429,4 +432,52 @@ export function getEventStringColor(e) {
   return s;
 };
 
-
+export function getMultiMatchesStatsItems(matches, team, selectedTeam) {
+  var st = {
+    teamAStatsItems: {},
+    teamBStatsItems: {},
+  };
+  for (var m of matches) {
+    for (var s of m.sets) {
+      const hometeamsi =
+        m.teamA.Name === team ? s.teamAStatsItems : s.teamBStatsItems;
+      const awayteamsi =
+        m.teamA.Name === team ? s.teamBStatsItems : s.teamAStatsItems;
+      for (var si of hometeamsi) {
+        const plkey = si.player
+          ? si.player.FirstName + "_" + si.player.LastName
+          : si.Name;
+        let plobj = st.teamAStatsItems[plkey];
+        if (plobj === undefined) {
+          plobj = createStatsItem(si.player, s);
+          st.teamAStatsItems[plkey] = plobj;
+        }
+        addStatsItem(si, plobj);
+        calculateAllStats(plobj);
+      }
+      for (var si of awayteamsi) {
+        const plkey = si.player
+          ? si.player.FirstName + "_" + si.player.LastName
+          : si.Name;
+        let plobj = st.teamBStatsItems[plkey];
+        if (plobj === undefined) {
+          plobj = createStatsItem(si.player, s);
+          st.teamBStatsItems[plkey] = plobj;
+        }
+        addStatsItem(si, plobj);
+        calculateAllStats(plobj);
+      }
+    }
+  }
+  var sis = [];
+  if (selectedTeam === 0) {
+    for (var key in st.teamAStatsItems) {
+      sis.push(st.teamAStatsItems[key]);
+    }
+  } else {
+    for (var key in st.teamBStatsItems) {
+      sis.push(st.teamBStatsItems[key]);
+    }
+  }
+  return sis;
+}

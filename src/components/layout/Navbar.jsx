@@ -15,6 +15,10 @@ function Navbar({ title }) {
     navigate("/signin");
   };
 
+  const doMatches = () => {
+    navigate("/matcheslist", { state: { currentUser: currentUser } });
+  };
+
   const getID = () => {
     return currentUser.email;
   };
@@ -35,6 +39,12 @@ function Navbar({ title }) {
             <Link to="/" className="btn btn-ghost btn-sm rounded-btn">
               Home
             </Link>
+            <button
+              className="btn btn-ghost btn-sm rounded-btn"
+              onClick={() => doMatches()}
+            >
+              Matches
+            </button>
             <Link to="/about" className="btn btn-ghost btn-sm rounded-btn">
               About
             </Link>

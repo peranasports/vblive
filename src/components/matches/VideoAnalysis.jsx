@@ -16,15 +16,18 @@ import {
 } from "../utils/Utils";
 import { myzip, myunzip } from "../utils/zip";
 import { DVEventString } from "../utils/DVWFile";
+import { storeSession } from "../../context/VBLiveAPI/VBLiveAPIAction";
+import { useAuthStatus } from "../hooks/useAuthStatus";
 
 function VideoAnalysis() {
   // function VideoAnalysis({ match, selectedGame }) {
   const location = useLocation();
-  const { match, selectedGame } = location.state;
+  const { matches, team, selectedGame } = location.state;
   const navigate = useNavigate();
   const playerRef = useRef();
   const dvRef = useRef();
   const radarRef = useRef();
+  const { currentUser } = useAuthStatus();
   const [showRadarFile, setShowRadarFile] = useState(false);
   const [radarFileName, setRadarFileName] = useState(null);
   const [cookies, setCookie] = useCookies(["videofile"]);
@@ -33,11 +36,13 @@ function VideoAnalysis() {
   const [videoFilePath, setVideoFilePath] = useState(null);
   const [videoFileName, setVideoFileName] = useState(null);
   const [videoFileObject, setVideoFileObject] = useState(null);
-  const videoUrl = process.env.REACT_APP_VIDEO_SERVER_URL + match.code + ".mp4";
+  // const videoUrl = process.env.REACT_APP_VIDEO_SERVER_URL + match.code + ".mp4";
   const [selectedSet, setSelectedSet] = useState(1);
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const [startVideoTime, setStartVideoTime] = useState(null);
+  const [currentMatch, setCurrentMatch] = useState(null);
+  const [startVideoTimeSeconds, setStartVideoTimeSeconds] = useState(null);
   const [videoOffset, setVideoOffset] = useState(0);
+  const [currentVideoTime, setCurrentVideoTime] = useState(null);
   const [isReady, setIsReady] = useState(false);
   const [, forceUpdate] = useState(0);
   const [allFilters, setAllFilters] = useState(null);
@@ -56,6 +61,7 @@ function VideoAnalysis() {
   const [leadTimes, setLeadTimes] = useState([0, 0, 3, 3, 3, 3]);
   const [durations, setDurations] = useState([8, 8, 8, 8, 8, 8]);
   const [filteredEvents, setFilteredEvents] = useState(null);
+  const [playlistEvents, setPlaylistEvents] = useState([]);
   const menuRef = useRef();
   const [menuOpen, setMenuOpen] = useState(false);
   const wref = useRef(null);
@@ -145,6 +151,15 @@ function VideoAnalysis() {
     if (isLeftSwipe || isRightSwipe)
       console.log("swipe", isLeftSwipe ? "left" : "right");
     // add your conditional logic here
+  };
+
+  const onSaveToDatabase = async () => {
+    const ret = await storeSession(matches[0], currentUser);
+    if (ret === true) {
+      toast.success("Session uploaded successfully");
+    } else {
+      toast.error("Error uploading session");
+    }
   };
 
   function handleSelectEventTypes(data) {
@@ -357,6 +372,7 @@ function VideoAnalysis() {
   }
 
   const onDoFilters = () => {
+    document.getElementById("modal-filters").checked = false;
     setAllFilters({
       teamAPlayers: selectedTeamAPlayers,
       teamBPlayers: selectedTeamBPlayers,
@@ -392,7 +408,12 @@ function VideoAnalysis() {
   const playerReady = () => {
     if (!isReady) {
       setIsReady(true);
-      playerRef.current.seekTo(0, "seconds");
+      let vt = currentVideoTime;
+      if (currentVideoTime !== null) {
+        vt = currentVideoTime;
+        setCurrentVideoTime(null);
+      }
+      playerRef.current.seekTo(vt, "seconds");
     }
   };
 
@@ -422,16 +443,48 @@ function VideoAnalysis() {
   };
 
   const doSelectEvent = (ev) => {
-    setSelectedEvent(ev);
-    const tm = getTimingForEvent(ev);
-    if (startVideoTime !== null && videoOffset !== null) {
-      const secondsSinceEpoch = Math.round(ev.TimeStamp.getTime() / 1000);
-      const loc =
-        secondsSinceEpoch - startVideoTime + videoOffset - tm.leadTime;
-      playerRef.current.seekTo(loc, "seconds");
+    if (matches.length === 1) {
+      setSelectedEvent(ev);
+      const tm = getTimingForEvent(ev);
+      if (startVideoTimeSeconds !== null && videoOffset !== null) {
+        const secondsSinceEpoch = Math.round(ev.TimeStamp.getTime() / 1000);
+        const loc =
+          secondsSinceEpoch - startVideoTimeSeconds + videoOffset - tm.leadTime;
+        playerRef.current.seekTo(loc, "seconds");
+      } else {
+        if (ev.VideoPosition !== undefined && ev.VideoPosition !== 0) {
+          playerRef.current.seekTo(ev.VideoPosition - tm.leadTime, "seconds");
+        }
+      }
     } else {
-      if (ev.VideoPosition !== undefined && ev.VideoPosition !== 0) {
-        playerRef.current.seekTo(ev.VideoPosition - tm.leadTime, "seconds");
+      setSelectedEvent(ev);
+      const match = ev.Drill.match;
+      let svts = startVideoTimeSeconds;
+      let vos = videoOffset;
+      let diffvideo = false;
+      if (match !== currentMatch) {
+        setCurrentMatch(match);
+        svts = match.videoStartTimeSeconds;
+        vos = match.videoOffset;
+        const yturl = convertYouTubeUrl(match.videoOnlineUrl);
+        setVideoFilePath(yturl);
+        setIsReady(false);
+        diffvideo = true;
+      }
+      const tm = getTimingForEvent(ev);
+      let vt = null;
+      if (svts !== null && vos !== null && vos >= 0) {
+        const secondsSinceEpoch = Math.round(ev.TimeStamp.getTime() / 1000);
+        vt = secondsSinceEpoch - svts + vos - tm.leadTime;
+      } else {
+        if (ev.VideoPosition !== undefined && ev.VideoPosition !== 0) {
+          vt = ev.VideoPosition - tm.leadTime;
+        }
+      }
+      if (diffvideo) {
+        setCurrentVideoTime(vt);
+      } else {
+        playerRef.current.seekTo(vt, "seconds");
       }
     }
   };
@@ -448,32 +501,38 @@ function VideoAnalysis() {
     const secondsSinceEpoch = Math.round(
       selectedEvent.TimeStamp.getTime() / 1000
     );
-    setStartVideoTime(secondsSinceEpoch);
+    setStartVideoTimeSeconds(secondsSinceEpoch);
     const voffset = playerRef.current.getCurrentTime();
     setVideoOffset(voffset);
-    const prefix = match.app === "VBStats" ? match.Guid : match.dvstring;
+    const prefix =
+      selectedEvent.Drill.match.app === "VBStats"
+        ? selectedEvent.Drill.match.Guid
+        : selectedEvent.Drill.match.dvstring;
     const obj = localStorage.getItem(prefix + "_videoInfo");
     if (vobj !== null) {
       var vobj = JSON.parse(obj);
       vobj.videoOffset = voffset;
-      vobj.startVideoTime = secondsSinceEpoch;
+      vobj.startVideoTimeSeconds = secondsSinceEpoch;
     }
     localStorage.setItem(prefix + "_videoInfo", JSON.stringify(vobj));
+    matches[0].videoOffset = voffset;
+    matches[0].videoStartTimeSeconds = secondsSinceEpoch;
     // localStorage.setItem(videoFileName + "_offset", voffset.toString());
     // localStorage.setItem(
     //   videoFileName + "_startVideoTime",
     //   secondsSinceEpoch.toString()
     // );
+    toast.success("Video synched with events!");
   };
 
   const doSaveFile = () => {
-    var a = match.buffer.split(/\r?\n/);
+    var a = matches[0].buffer.split(/\r?\n/);
     if (a.length == 0) {
       return;
     }
     var fn = "";
     var buffer = "";
-    if (match.app === "DataVolley") {
+    if (matches[0].app === "DataVolley") {
       if (a[0] !== "[3DATAVOLLEYSCOUT]") {
         return;
       }
@@ -487,7 +546,7 @@ function VideoAnalysis() {
           if (videoOffset && videoOffset > 0) {
             buffer += ";" + videoOnlineUrl + "\n";
             buffer += ";offset=" + videoOffset + "\n";
-            buffer += ";start=" + startVideoTime + "\n";
+            buffer += ";start=" + startVideoTimeSeconds + "\n";
           } else {
             buffer += ";" + videoOnlineUrl + "\n";
           }
@@ -503,7 +562,7 @@ function VideoAnalysis() {
         if (buffer.length > 0) buffer += "\n";
         buffer += s;
       }
-    } else if (match.app === "VBStats") {
+    } else if (matches[0].app === "VBStats") {
       if (a[0].includes("PSVB") === false) {
         return;
       }
@@ -515,7 +574,7 @@ function VideoAnalysis() {
           var m = JSON.parse(json[1]);
           m.videoOnlineUrl = videoOnlineUrl;
           m.videoOffset = videoOffset;
-          m.startVideoTime = startVideoTime;
+          m.startVideoTimeSeconds = startVideoTimeSeconds;
           buf += "M~" + JSON.stringify(m);
         } else {
           buf += s;
@@ -524,7 +583,7 @@ function VideoAnalysis() {
       buffer = myzip(buf);
     }
 
-    fn = makeFilename(match.filename.name, "vblive", "");
+    fn = makeFilename(matches[0].filename.name, "vblive", "");
     // if (match.filename.name.includes("_vblive")) {
     //   fn = match.filename.name;
     // } else {
@@ -541,20 +600,22 @@ function VideoAnalysis() {
 
   const showOnlineVideo = () => {
     const vinfo = {
-      matchDVString: match.dvstring,
+      matchDVString: matches[0].dvstring,
       videoOnlineUrl: videoOnlineUrl,
       videoFileName: null,
       videoFileObject: null,
       videoOffset: null,
-      startVideoTime: null,
+      startVideoTimeSeconds: null,
     };
-    const prefix = match.app === "VBStats" ? match.Guid : match.dvstring;
+    const prefix =
+      matches[0].app === "VBStats" ? matches[0].Guid : matches[0].dvstring;
     localStorage.setItem(prefix + "_videoInfo", JSON.stringify(vinfo));
     setVideoFileObject(null);
     setVideoFileName(null);
     setVideoOffset(null);
     const yturl = convertYouTubeUrl(videoOnlineUrl);
     setVideoFilePath(yturl);
+    matches[0].videoOnlineUrl = videoOnlineUrl;
     forceUpdate((n) => !n);
   };
 
@@ -569,14 +630,15 @@ function VideoAnalysis() {
     setVideoFileName(vfn);
     setVideoOnlineUrl("");
     const vinfo = {
-      matchDVString: match.dvstring,
+      matchDVString: matches[0].dvstring,
       videoOnlineUrl: null,
       videoFileName: vfn,
       videoFileObject: vfo,
       videoOffset: null,
-      startVideoTime: null,
+      startVideoTimeSeconds: null,
     };
-    const prefix = match.app === "VBStats" ? match.Guid : match.dvstring;
+    const prefix =
+      matches[0].app === "VBStats" ? matches[0].Guid : matches[0].dvstring;
     localStorage.setItem(prefix + "_videoInfo", JSON.stringify(vinfo));
     forceUpdate((n) => !n);
   };
@@ -621,7 +683,7 @@ function VideoAnalysis() {
     rds = sortBy(rds, "timestamp");
 
     var serves = [];
-    for (var e of match.events) {
+    for (var e of matches[0].events) {
       if (e.EventType === 1) {
         e.radar = null;
         serves.push(e);
@@ -701,6 +763,7 @@ function VideoAnalysis() {
     for (var ev of filteredEvents) {
       ev.playlist = true;
     }
+    setPlaylistEvents(filteredEvents);
     forceUpdate((n) => !n);
   };
 
@@ -709,23 +772,43 @@ function VideoAnalysis() {
     for (var ev of filteredEvents) {
       ev.playlist = false;
     }
+    setPlaylistEvents([]);
     forceUpdate((n) => !n);
   };
 
   const createPlaylist = () => {
     setMenuOpen(false);
-    if (videoOnlineUrl === null || videoOnlineUrl.length === 0) {
-      toast.error("Play lists can only be created with an online video.");
-      return;
+    for (var ev of filteredEvents) {
+      if (ev.playlist) {
+        if (!ev.Drill.match.videoOnlineUrl) {
+          toast.error(
+            "Play lists can only be created with events that have video online."
+          );
+          return;
+        }
+      }
     }
+
+    // if (videoOnlineUrl === null || videoOnlineUrl.length === 0) {
+    //   toast.error("Play lists can only be created with an online video.");
+    //   return;
+    // }
     var evs = [];
     for (var ev of filteredEvents) {
       if (ev.playlist) {
         var loc = 0;
         const tm = getTimingForEvent(ev);
-        if (startVideoTime !== null && videoOffset !== null) {
+        if (
+          ev.Drill.match.videoStartTimeSeconds &&
+          ev.Drill.match.videoOffset &&
+          ev.Drill.match.videoOffset >= 0
+        ) {
           const secondsSinceEpoch = Math.round(ev.TimeStamp.getTime() / 1000);
-          loc = secondsSinceEpoch - startVideoTime + videoOffset - tm.leadTime;
+          loc =
+            secondsSinceEpoch -
+            ev.Drill.match.videoStartTimeSeconds +
+            ev.Drill.match.videoOffset -
+            tm.leadTime;
         } else {
           if (ev.VideoPosition !== undefined && ev.VideoPosition !== 0) {
             loc = ev.VideoPosition - tm.leadTime;
@@ -756,8 +839,12 @@ function VideoAnalysis() {
             ev.OppositionScore +
             " R" +
             ev.Row,
-          videoOnlineUrl: videoOnlineUrl,
+          videoOnlineUrl: ev.Drill.match.videoOnlineUrl,
           videoPosition: loc,
+          eventId: ev.EventId,
+          matchVideo: ev.Drill.match.videoOnlineUrl
+            ? ev.Drill.match.videoOnlineUrl
+            : "",
         };
         evs.push(evx);
       }
@@ -765,10 +852,13 @@ function VideoAnalysis() {
     if (evs.length === 0) {
       toast.error("Play list is empty.");
     } else {
+      setPlaylistEvents(evs);
+      const evstr = JSON.stringify(evs);
+      localStorage.setItem("VBLivePlaylistEvents", evstr);
       const pl = {
         events: evs,
       };
-      const fn = makeFilename(match.filename.name, "vblive", "playlist");
+      const fn = makeFilename("playlist", "vblive", "playlist");
       const buffer = JSON.stringify(pl);
       const st = {
         sessionId: null,
@@ -831,81 +921,150 @@ function VideoAnalysis() {
   }, []);
 
   useEffect(() => {
-    setFilteredEvents(match.events);
-    const prefix = match.app === "VBStats" ? match.Guid : match.dvstring;
-    const vobj = localStorage.getItem(prefix + "_videoInfo");
-    if (vobj !== null) {
-      const vinfo = JSON.parse(vobj);
-      setVideoInfo(vobj);
-      if (vinfo.matchDVString === match.dvstring) {
-        setVideoOffset(vinfo.videoOffset);
-        setStartVideoTime(vinfo.startVideoTime);
-        if (vinfo.videoOnlineUrl !== null) {
-          const yturl = convertYouTubeUrl(vinfo.videoOnlineUrl);
-          setVideoOnlineUrl(yturl);
-          setVideoFilePath(yturl);
-        } else if (vinfo.videoFileObject !== null) {
-          const fobj = JSON.parse(vinfo.videoFileObject);
-          // const vfp = URL.createObjectURL(fobj)
-          // setVideoFilePath(vfp)
-          setVideoFileName(fobj.name);
-        }
-      }
-    } else {
-      if (match.videoUrl !== undefined) {
-        const yturl = convertYouTubeUrl(match.videoUrl);
+    if (matches.length === 1) {
+      if (matches[0].videoOnlineUrl) {
+        const yturl = convertYouTubeUrl(matches[0].videoOnlineUrl);
         setVideoOnlineUrl(yturl);
         setVideoFilePath(yturl);
+        setVideoOffset(matches[0].videoOffset ? matches[0].videoOffset : -1);
       } else {
+        const prefix =
+          matches[0].app === "VBStats" ? matches[0].Guid : matches[0].dvstring;
+        const vobj = localStorage.getItem(prefix + "_videoInfo");
+        if (vobj !== null) {
+          const vinfo = JSON.parse(vobj);
+          setVideoInfo(vobj);
+          if (vinfo.matchDVString === matches[0].dvstring) {
+            setVideoOffset(vinfo.videoOffset);
+            setStartVideoTimeSeconds(vinfo.startVideoTimeSeconds);
+            if (vinfo.videoOnlineUrl !== null) {
+              const yturl = convertYouTubeUrl(vinfo.videoOnlineUrl);
+              setVideoOnlineUrl(yturl);
+              setVideoFilePath(yturl);
+            } else if (vinfo.videoFileObject !== null) {
+              const fobj = JSON.parse(vinfo.videoFileObject);
+              // const vfp = URL.createObjectURL(fobj)
+              // setVideoFilePath(vfp)
+              setVideoFileName(fobj.name);
+            }
+          }
+        } else {
+          if (matches[0].videoUrl !== undefined) {
+            const yturl = convertYouTubeUrl(matches[0].videoUrl);
+            setVideoOnlineUrl(yturl);
+            setVideoFilePath(yturl);
+          } else {
+          }
+        }
       }
     }
-
-    const tapls = teamPlayersList(match.teamA);
-    setTeamAPlayers(tapls);
-    const tbpls = teamPlayersList(match.teamB);
-    setTeamBPlayers(tbpls);
-
+    var fevents = [];
     var natcbs = 0;
     var atcbs = [{ value: 0, label: "All Combos" }];
     var selatcbs = [{ value: 0, label: "All Combos" }];
-    if (match.attackCombos !== undefined) {
-      for (const atcb of match.attackCombos) {
-        natcbs++;
-        const xx = { value: natcbs, label: atcb.code, name: atcb.name };
-        atcbs.push(xx);
-      }
-    }
-    setAttackCombos(atcbs);
-    setSelectedAttackCombos(selatcbs);
-
+    var plas = [{ value: 0, label: "All Players" }];
+    var plbs = [{ value: 0, label: "All Players" }];
     var nscs = 0;
     var scs = [{ value: 0, label: "All Calls" }];
     var selscs = [{ value: 0, label: "All Calls" }];
-    if (match.setterCalls !== undefined) {
-      for (const sc of match.setterCalls) {
-        nscs++;
-        const xx = { value: nscs, label: sc.code, name: sc.name };
-        scs.push(xx);
+    var gms = [{ value: 0, label: "All Sets" }];
+
+    for (var match of matches) {
+      const tma = team === match.teamA.Name ? match.teamA : match.teamB;
+      const tmb = team === match.teamA.Name ? match.teamB : match.teamA;
+      for (var xpl of tma.players) {
+        if (
+          plas.filter(
+            (pl) =>
+              pl.FirstName + "_" + pl.LastName ===
+              xpl.FirstName + "_" + xpl.LastName
+          ).length === 0
+        ) {
+          const plname = xpl.FirstName + " " + xpl.LastName.toUpperCase();
+          plas.push({ value: plas.length, label: plname, guid: plname });
+        }
+      }
+      for (var xpl of tmb.players) {
+        if (
+          plbs.filter(
+            (pl) =>
+              pl.FirstName + "_" + pl.LastName ===
+              xpl.FirstName + "_" + xpl.LastName
+          ).length === 0
+        ) {
+          const plname = xpl.FirstName + " " + xpl.LastName.toUpperCase();
+          plbs.push({ value: plas.length, label: plname, guid: plname });
+        }
+      }
+      setTeamAPlayers(plas);
+      setTeamBPlayers(plbs);
+
+      if (match.attackCombos !== undefined) {
+        for (const atcb of match.attackCombos) {
+          if (atcbs.filter((at) => at.label === atcb.code).length === 0) {
+            natcbs++;
+            const xx = { value: natcbs, label: atcb.code, name: atcb.name };
+            atcbs.push(xx);
+          }
+        }
+      }
+
+      if (match.setterCalls !== undefined) {
+        for (const sc of match.setterCalls) {
+          if (scs.filter((at) => at.label === sc.code).length === 0) {
+            nscs++;
+            const xx = { value: nscs, label: sc.code, name: sc.name };
+            scs.push(xx);
+          }
+        }
+      }
+
+      for (var ng = 1; ng <= match.sets.length; ng++) {
+        if (gms.filter((at) => at.value === ng).length === 0) {
+          gms.push({ value: ng, label: "Set " + ng });
+        }
+      }
+
+      for (var game of match.sets) {
+        fevents.push(...game.events);
+      }
+
+      const playlistevstr = localStorage.getItem("VBLivePlaylistEvents");
+      var plevs = [];
+      if (playlistevstr !== null) {
+        const evs = JSON.parse(playlistevstr);
+        for (var evx of evs) {
+          const ff = fevents.filter(
+            (fev) =>
+              fev.EventId === evx.eventId &&
+              fev.Drill.match.videoOnlineUrl === evx.videoOnlineUrl
+          );
+          if (ff.length === 1) {
+            ff[0].playlist = true;
+            plevs.push(ff[0]);
+          }
+        }
       }
     }
+
+    setPlaylistEvents(plevs);
+    setFilteredEvents(fevents);
+    setAttackCombos(atcbs);
+    setSelectedAttackCombos(selatcbs);
     setSetterCalls(scs);
     setSelectedSetterCalls(selscs);
-
-    var gms = [{ value: 0, label: "All Sets" }];
-    for (var ng = 1; ng <= match.sets.length; ng++) {
-      gms.push({ value: ng, label: "Set " + ng });
-    }
     setGames(gms);
     setSelectedGames([{ value: 0, label: "All Sets" }]);
-
     const sins = [1, 6, 5, 4, 3, 2];
     var rts = [{ value: 0, label: "All Rotations" }];
     for (var nr = 1; nr <= 6; nr++) {
-      rts.push({ value: nr, label: "R" + nr + " - Setter in " + sins[nr - 1] });
+      rts.push({
+        value: nr,
+        label: "R" + nr + " - Setter in " + sins[nr - 1],
+      });
     }
     setRotations(rts);
     setSelectedRotations([{ value: 0, label: "All Rotations" }]);
-
     setSelectedTeamAPlayers([{ value: 0, label: "All Players" }]);
     setSelectedTeamBPlayers([{ value: 0, label: "All Players" }]);
     forceUpdate((n) => !n);
@@ -980,7 +1139,7 @@ function VideoAnalysis() {
     return { width: w, height: h };
   };
 
-  if (match === undefined) {
+  if (!matches) {
     return <></>;
   }
 
@@ -997,31 +1156,35 @@ function VideoAnalysis() {
                 >
                   Filters
                 </label>
-                <div className="dropdown">
-                  <label
-                    tabIndex={0}
-                    className="btn btn-sm bg-gray-600 hover:btn-gray-900 "
-                  >
-                    Set
-                  </label>
-                  <ul
-                    tabIndex={0}
-                    className="dropdown-content menu p-2 shadow bg-base-100 w-52"
-                  >
-                    {match.sets.map((vobj, idx) => (
-                      <li key={idx} onClick={() => onGameChanged(idx + 1)}>
-                        <a>Set {vobj.GameNumber}</a>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                {matches.length === 1 ? (
+                  <div className="dropdown">
+                    <label
+                      tabIndex={0}
+                      className="btn btn-sm bg-gray-600 hover:btn-gray-900 "
+                    >
+                      Set
+                    </label>
+                    <ul
+                      tabIndex={0}
+                      className="dropdown-content menu p-2 shadow bg-base-100 w-52"
+                    >
+                      {matches[0].sets.map((vobj, idx) => (
+                        <li key={idx} onClick={() => onGameChanged(idx + 1)}>
+                          <a>Set {vobj.GameNumber}</a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : (
+                  <></>
+                )}
                 <div className="dropdown" ref={menuRef}>
                   <label
                     tabIndex={0}
                     className="btn btn-sm bg-gray-600 hover:btn-gray-900 "
                     onClick={() => setMenuOpen(!menuOpen)}
                   >
-                    Playlist
+                    Playlist ({playlistEvents.length})
                   </label>
                   {menuOpen ? (
                     <ul
@@ -1044,12 +1207,16 @@ function VideoAnalysis() {
                 </div>
               </div>
               <div>
-                <button
-                  className="btn btn-sm bg-gray-600 hover:btn-gray-900 "
-                  onClick={() => setShowRadarFile(!showRadarFile)}
-                >
-                  Radar
-                </button>
+                {matches.length === 1 ? (
+                  <button
+                    className="btn btn-sm bg-gray-600 hover:btn-gray-900 "
+                    onClick={() => setShowRadarFile(!showRadarFile)}
+                  >
+                    Radar
+                  </button>
+                ) : (
+                  <></>
+                )}
               </div>
             </div>
             <div
@@ -1059,7 +1226,8 @@ function VideoAnalysis() {
             >
               <div className="">
                 <EventsList
-                  match={match}
+                  matches={matches}
+                  team={team}
                   filters={allFilters}
                   selectedSet={selectedSet}
                   doSelectEvent={(ev) => doSelectEvent(ev)}
@@ -1102,63 +1270,79 @@ function VideoAnalysis() {
                     </label>
                   </div>
                 )}
-                <div className="flex justify-between">
-                  <div className="flex my-2">
-                    <input
-                      type="file"
-                      id="selectedVideoFile"
-                      ref={dvRef}
-                      style={{ display: "none" }}
-                      onChange={handleVideoUpload}
-                      onClick={(event) => {
-                        event.target.value = null;
-                      }}
-                    />
-                    <input
-                      type="button"
-                      className="btn btn-sm w-60"
-                      value="Select Match Video..."
-                      onClick={() =>
-                        document.getElementById("selectedVideoFile").click()
-                      }
-                    />
-                    <label className="label ml-4">
-                      <span className="label-text">
-                        {videoFileName === null
-                          ? "match video not selected"
-                          : videoFileName}
-                      </span>
-                    </label>
+                {matches.length === 1 ? (
+                  <div>
+                    <div className="flex justify-between">
+                      <div className="flex my-2">
+                        <input
+                          type="file"
+                          id="selectedVideoFile"
+                          ref={dvRef}
+                          style={{ display: "none" }}
+                          onChange={handleVideoUpload}
+                          onClick={(event) => {
+                            event.target.value = null;
+                          }}
+                        />
+                        <input
+                          type="button"
+                          className="btn btn-sm w-60"
+                          value="Select Match Video..."
+                          onClick={() =>
+                            document.getElementById("selectedVideoFile").click()
+                          }
+                        />
+                        <label className="label ml-4">
+                          <span className="label-text">
+                            {videoFileName === null
+                              ? "match video not selected"
+                              : videoFileName}
+                          </span>
+                        </label>
+                      </div>
+                      <div className="flex">
+                        <button
+                          className="btn btn-primary btn-sm m-2"
+                          onClick={() => onSaveToDatabase()}
+                        >
+                          Save to Database
+                        </button>
+                        <button
+                          className="btn btn-primary btn-sm m-2"
+                          onClick={() => onBackClick()}
+                        >
+                          Back
+                        </button>
+                      </div>
+                    </div>
+                    <div className="flex gap-1 mx-2 my-2">
+                      <input
+                        type="text"
+                        className="w-full text-gray-500 bg-gray-200 input input-sm rounded-sm"
+                        id="onlineVideoUrl"
+                        value={videoOnlineUrl}
+                        placeholder="Online video URL"
+                        onChange={handleChange}
+                      />
+                      <button
+                        className="btn btn-sm"
+                        onClick={() => showOnlineVideo()}
+                      >
+                        Apply
+                      </button>
+                      <button
+                        className="btn btn-sm"
+                        onClick={() => onSynchVideo()}
+                      >
+                        Synch
+                      </button>
+                    </div>
                   </div>
-                  <button
-                    className="btn btn-primary btn-sm m-2"
-                    onClick={() => onBackClick()}
-                  >
-                    Back
-                  </button>
-                </div>
-                <div className="flex gap-1 mx-2 my-2">
-                  <input
-                    type="text"
-                    className="w-full text-gray-500 bg-gray-200 input input-sm rounded-sm"
-                    id="onlineVideoUrl"
-                    value={videoOnlineUrl}
-                    placeholder="Online video URL"
-                    onChange={handleChange}
-                  />
-                  <button
-                    className="btn btn-sm"
-                    onClick={() => showOnlineVideo()}
-                  >
-                    Apply
-                  </button>
-                  <button className="btn btn-sm" onClick={() => onSynchVideo()}>
-                    Synch
-                  </button>
-                </div>
-
+                ) : (
+                  <></>
+                )}
                 <div
-                  className="flex p-4 justify-center"
+                  className="flex p-4 justify-center bg-black"
                   onTouchStart={onTouchStart}
                   onTouchMove={onTouchMove}
                   onTouchEnd={onTouchEnd}
@@ -1197,55 +1381,32 @@ function VideoAnalysis() {
                       />
                     </>
                   )}
-
-                  {/* {videoFilePath && videoFilePath.includes("youtube") ? (
-                  <ReactPlayer
-                    ref={playerRef}
-                    url={videoFilePath}
-                    playing={true}
-                    // width="100%"
-                    controls={true}
-                    onReady={() => playerReady()}
-                    onTouchStart={onTouchStart}
-                    onTouchMove={onTouchMove}
-                    onTouchEnd={onTouchEnd}
-                  />
-                ) : (
-                  <ReactPlayer
-                    ref={playerRef}
-                    url={videoFilePath}
-                    playing={true}
-                    width="100%"
-                    height="100%"
-                    controls={true}
-                    onReady={() => playerReady()}
-                    onTouchStart={onTouchStart}
-                    onTouchMove={onTouchMove}
-                    onTouchEnd={onTouchEnd}
-                  />
-                )} */}
                 </div>
-                <div className="flex justify-between">
-                  <div className="flex gap-2">
-                    <label
-                      htmlFor="modal-timing"
-                      className="btn btn-sm bg-info text-white hover:btn-gray-900"
-                    >
-                      Timing
-                    </label>
-                    <button
-                      className="btn btn-sm btn-info text-white"
-                      onClick={() => doSaveFile()}
-                    >
-                      Save Video Settings to DVW File
-                    </button>
+                {matches.length === 1 ? (
+                  <div className="flex justify-between">
+                    <div className="flex gap-2">
+                      <label
+                        htmlFor="modal-timing"
+                        className="btn btn-sm bg-info text-white hover:btn-gray-900"
+                      >
+                        Timing
+                      </label>
+                      <button
+                        className="btn btn-sm btn-info text-white"
+                        onClick={() => doSaveFile()}
+                      >
+                        Save Video Settings to DVW File
+                      </button>
+                    </div>
+                    {videoOffset !== 0 ? (
+                      <p>Offset = {videoOffset} secs</p>
+                    ) : (
+                      <></>
+                    )}
                   </div>
-                  {videoOffset !== 0 ? (
-                    <p>Offset = {videoOffset} secs</p>
-                  ) : (
-                    <></>
-                  )}
-                </div>
+                ) : (
+                  <></>
+                )}
               </div>
             </div>
           </div>
@@ -1260,7 +1421,10 @@ function VideoAnalysis() {
             <div className="my-4">
               <div className="flex justify-between mt-4">
                 <div className="flex=col justify-between w-full mx-2">
-                  <p className="text-xs">{match.teamA.Name} Players</p>
+                  <p className="text-xs">
+                    {matches.length === 1 ? matches[0].teamA.Name : team}{" "}
+                    Players
+                  </p>
                   <Select
                     id="teamAPlayersSelect"
                     name="teamAPlayersSelect"
@@ -1272,7 +1436,10 @@ function VideoAnalysis() {
                   />
                 </div>
                 <div className="flex=col justify-between w-full mx-2">
-                  <p className="text-xs">{match.teamB.Name} Players</p>
+                  <p className="text-xs">
+                    {matches.length === 1 ? matches[0].teamB.Name : "Opponents"}{" "}
+                    Players
+                  </p>
                   <Select
                     id="teamBPlayersSelect"
                     name="teamBPlayersSelect"
@@ -1404,14 +1571,21 @@ function VideoAnalysis() {
               </div>
             </div>
           </div>
-          <div className="modal-action">
-            <label
-              htmlFor="modal-filters"
-              className="btn"
-              onClick={() => onDoFilters()}
-            >
-              Apply
-            </label>
+          <div className="flex gap-2 justify-end">
+            <div className="modal-action">
+              <label htmlFor="modal-filters" className="btn btn-info btn-sm">
+                Cancel
+              </label>
+            </div>
+            <div className="modal-action">
+              <button
+                htmlFor="modal-filters"
+                className="btn btn-info btn-sm"
+                onClick={() => onDoFilters()}
+              >
+                Apply
+              </button>
+            </div>
           </div>
         </div>
       </div>

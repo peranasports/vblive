@@ -17,6 +17,8 @@ import { CookiesProvider } from "react-cookie";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Analytics } from '@vercel/analytics/react';
+import MatchesList from "./pages/MatchesList";
+import MultiSessions from "./pages/MultiSessions";
 
 function App() {
   return (
@@ -32,9 +34,11 @@ function App() {
                   <Route path="/" element={<Home />} />
                   <Route path="/signin" element={<SignIn />} />
                   <Route path="/signup" element={<SignUp />} />
+                  <Route path="/matcheslist" element={<MatchesList />} />
                   <Route path="/forgotpassword" element={<ForgotPassword />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/session" element={<Session />} />
+                  <Route path="/multisessions" element={<MultiSessions />} />
                   <Route path="/playlist" element={<Playlist />} />
                   <Route path="/videoanalysis" element={<VideoAnalysis />} />
                   <Route path="/input" element={<Input />} />

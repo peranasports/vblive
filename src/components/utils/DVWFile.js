@@ -641,7 +641,7 @@ export function generateMatch(str) {
     match.teamA.Code +
     "vs" +
     match.teamB.Code;
-  console.log("match = ", match);
+  // console.log("match = ", match);
   return match;
 }
 
@@ -2000,6 +2000,8 @@ function processScoutLine(s) {
           ) {
             g.PrimarySetter.Positions.push(5);
           }
+        } else {
+          console.log(s);
         }
       } else if (code.substring(0, 1) === "a") {
         // home
@@ -2014,10 +2016,16 @@ function processScoutLine(s) {
             match.oppositionPlayers,
             awaySetter
           );
-          if (
-            g.oppPrimarySetter.Positions.filter((obj) => obj === 5).length === 0
-          ) {
-            g.oppPrimarySetter.Positions.push(5);
+          if (g.oppPrimarySetter) {
+            if (!g.oppPrimarySetter.Positions) {
+              g.oppPrimarySetter.Positions = [];
+            }
+            if (
+              g.oppPrimarySetter.Positions.filter((obj) => obj === 5).length ===
+              0
+            ) {
+              g.oppPrimarySetter.Positions.push(5);
+            }
           }
         }
       }

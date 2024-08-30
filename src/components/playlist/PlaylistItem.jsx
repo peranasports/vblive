@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ChatBubbleLeftEllipsisIcon } from "@heroicons/react/20/solid";
+import { ChatBubbleLeftIcon } from "@heroicons/react/24/outline";
 
 function PlaylistItem({ playlist, isSelected, onItemSelected, onCommentClicked }) {
 
@@ -20,7 +21,7 @@ function PlaylistItem({ playlist, isSelected, onItemSelected, onCommentClicked }
         <div
           className={
             isSelected
-              ? "bg-neutral text-neutral-content"
+              ? "bg-accent text-accent-content"
               : "bg-base-100 text-base-content"
           }
         >
@@ -44,11 +45,11 @@ function PlaylistItem({ playlist, isSelected, onItemSelected, onCommentClicked }
             </p>
             {playlist.comment !== undefined ? (
               <ChatBubbleLeftEllipsisIcon
-                className="w-6 h-6 text-success"
+                className="w-6 h-6 text-warning"
                 onClick={() => doComment()}
               />
             ) : (
-              <ChatBubbleLeftEllipsisIcon
+              <ChatBubbleLeftIcon
                 className="w-6 h-6 text-base-content"
                 onClick={() => doComment()}
               />

@@ -6,7 +6,7 @@ import AttackZoneChart from "./AttackZoneChart";
 import { allFilters } from "./AllFilters";
 import { kSkillSpike, kSkillSet, kSkillSettersCall } from "../utils/StatsItem";
 
-function HittingChartReport({ match, selectedGame, selectedTeam }) {
+function HittingChartReport({ matches, team, selectedGame, selectedTeam }) {
   const [drawMode, setDrawMode] = useState(0);
   const [allEvents, setAllEvents] = useState(null);
   const [events, setEvents] = useState(null);
@@ -21,11 +21,13 @@ function HittingChartReport({ match, selectedGame, selectedTeam }) {
   };
 
   const getAttackComboOfEvent = (code) => {
-    var acs = match.attackCombos.filter((ac) => {
-      return ac.code === code;
-    });
-    if (acs.length > 0) {
-      return acs[0];
+    for (var match of matches) {
+      var acs = match.attackCombos.filter((ac) => {
+        return ac.code === code;
+      });
+      if (acs.length > 0) {
+        return acs[0];
+      }
     }
     return null;
   };
@@ -60,109 +62,117 @@ function HittingChartReport({ match, selectedGame, selectedTeam }) {
       [[], [], [], [], [], [], [], [], []],
     ];
 
-    var team = selectedTeam === 0 ? match.teamA : match.teamB;
-    var xevs =
-      selectedGame === 0 ? match.events : match.sets[selectedGame - 1].events;
-    var setter = null;
-    var evs = [];
-    for (var ne = 0; ne < xevs.length; ne++) {
-      var e = xevs[ne];
-      if (
-        e.Player !== null &&
-        team.players.filter((obj) => obj.Guid === e.Player.Guid).length > 0
-      ) {
-        if (e.EventType == kSkillSpike) {
-          evs.push(e);
-        }
-      }
-    }
-
-    if (init === false) {
-      setAllEvents(evs);
-      setSpikerNames(evs);
-      if (match.app !== "VBStats") {
-        setSetterNames(evs);
-        setAttackCombos(evs);
-      }
-      setInit(true);
-    }
-
-    const egs = ["Errors", "In-play", "In-play", "Kill"];
-    const srcs = { F: "Front", B: "Back", C: "Centre" };
-
-    if (match.app === "VBStats") {
-      for (var ne = 0; ne < evs.length; ne++) {
-        var e = evs[ne];
-        var startZone = zoneFromString(e.BallStartString);
-        if (startZone > 0 && e.Row !== undefined && isNaN(e.Row) === false) {
-          xevents[e.Row - 1][startZone - 1].push(e);
-        }
-      }
-    } else {
-      for (var ne = 0; ne < evs.length; ne++) {
-        var e = evs[ne];
+    for (var match of matches) {
+      var tm = team === match.teamA.Name ? match.teamA : match.teamB;
+      var xevs =
+        selectedGame === 0 ? match.events : match.sets[selectedGame - 1].events;
+      var setter = null;
+      var evs = [];
+      for (var ne = 0; ne < xevs.length; ne++) {
+        var e = xevs[ne];
         if (
-          checkFilter("Stages", e.isSideOut ? "Side Out" : "Transition") ===
-          false
+          e.Player !== null &&
+          tm.players.filter((obj) => obj.Guid === e.Player.Guid).length > 0
         ) {
-          continue;
+          if (e.EventType == kSkillSpike) {
+            evs.push(e);
+          }
         }
-        if (checkFilter("Attackers", e.Player.LastName) === false) {
-          continue;
-        }
-        if (e.setter !== null && checkFilter("Setters", e.setter) === false) {
-          continue;
-        }
-        if (checkFilter("Results", egs[e.EventGrade]) === false) {
-          continue;
-        }
+      }
 
-        var nacs = match.attackCombos.length;
-        var ac = e.attackCombo === "~~" ? {code:"~~"} : getAttackComboOfEvent(e.attackCombo);
-        if (ac === null || ac.code === undefined) {
-          continue;
+      if (init === false) {
+        setAllEvents(evs);
+        setSpikerNames(evs);
+        if (match.app !== "VBStats") {
+          setSetterNames(evs);
+          setAttackCombos(evs);
         }
-        if (checkFilter("Attack Combos", ac.code) === false) {
-          continue;
+        setInit(true);
+      }
+
+      const egs = ["Errors", "In-play", "In-play", "Kill"];
+      const srcs = { F: "Front", B: "Back", C: "Centre" };
+
+      if (match.app === "VBStats") {
+        for (var ne = 0; ne < evs.length; ne++) {
+          var e = evs[ne];
+          var startZone = zoneFromString(e.BallStartString);
+          if (startZone > 0 && e.Row !== undefined && isNaN(e.Row) === false) {
+            xevents[e.Row - 1][startZone - 1].push(e);
+          }
         }
-        if (checkFilter("Source", srcs[ac.targetHitter]) === false) {
-          continue;
-        }
-        if ((nacs > 0 && ac != null && ac.targetHitter !== "-") || nacs == 0) {
-          var row = e.Row - 1;
-          var startZone = 0;
-          if (nacs > 0) {
-            if (ac.startZone !== undefined) {
-              startZone = Number.parseInt(ac.startZone);
-            } else {
-              if (ac.isBackcourt) {
-                if (ac.targetHitter === "B") {
-                  startZone = 9;
-                } else if (ac.targetHitter === "F") {
-                  startZone = 7;
-                } else {
-                  startZone = 8;
-                }
+      } else {
+        for (var ne = 0; ne < evs.length; ne++) {
+          var e = evs[ne];
+          if (
+            checkFilter("Stages", e.isSideOut ? "Side Out" : "Transition") ===
+            false
+          ) {
+            continue;
+          }
+          if (checkFilter("Attackers", e.Player.LastName) === false) {
+            continue;
+          }
+          if (e.setter !== null && checkFilter("Setters", e.setter) === false) {
+            continue;
+          }
+          if (checkFilter("Results", egs[e.EventGrade]) === false) {
+            continue;
+          }
+
+          var nacs = match.attackCombos.length;
+          var ac =
+            e.attackCombo === "~~"
+              ? { code: "~~" }
+              : getAttackComboOfEvent(e.attackCombo);
+          if (ac === null || ac.code === undefined) {
+            continue;
+          }
+          if (checkFilter("Attack Combos", ac.code) === false) {
+            continue;
+          }
+          if (checkFilter("Source", srcs[ac.targetHitter]) === false) {
+            continue;
+          }
+          if (
+            (nacs > 0 && ac != null && ac.targetHitter !== "-") ||
+            nacs == 0
+          ) {
+            var row = e.Row - 1;
+            var startZone = 0;
+            if (nacs > 0) {
+              if (ac.startZone !== undefined) {
+                startZone = Number.parseInt(ac.startZone);
               } else {
-                if (ac.targetHitter === "B") {
-                  startZone = 2;
-                } else if (ac.targetHitter === "F") {
-                  startZone = 4;
+                if (ac.isBackcourt) {
+                  if (ac.targetHitter === "B") {
+                    startZone = 9;
+                  } else if (ac.targetHitter === "F") {
+                    startZone = 7;
+                  } else {
+                    startZone = 8;
+                  }
                 } else {
-                  startZone = 3;
+                  if (ac.targetHitter === "B") {
+                    startZone = 2;
+                  } else if (ac.targetHitter === "F") {
+                    startZone = 4;
+                  } else {
+                    startZone = 3;
+                  }
                 }
               }
+            } else {
+              startZone = zoneFromString(e.BallStartString);
             }
-          } else {
-            startZone = zoneFromString(e.BallStartString);
-          }
-          if (startZone > 0) {
-            xevents[row][startZone - 1].push(e);
+            if (startZone > 0) {
+              xevents[row][startZone - 1].push(e);
+            } else {
+              // DLog(@"%@ %@", e.attackCombo, e.Player.LastName);
+            }
           } else {
             // DLog(@"%@ %@", e.attackCombo, e.Player.LastName);
           }
-        } else {
-          // DLog(@"%@ %@", e.attackCombo, e.Player.LastName);
         }
       }
     }
@@ -171,24 +181,27 @@ function HittingChartReport({ match, selectedGame, selectedTeam }) {
   };
 
   const setSpikerNames = (xevents) => {
-    if (match === null) {
+    if (matches === null) {
       return;
     }
-    for (var n = 0; n < allOptions.length; n++) {
-      var option = allOptions[n];
-      if (option.title === "Attackers") {
-        option.items = [];
-        for (var ne = 0; ne < xevents.length; ne++) {
-          var evx = xevents[ne];
-          var pl = evx.Player;
-          if (
-            option.items.filter((obj) => obj.name == pl.NickName).length === 0
-          ) {
-            option.items.push({
-              name: pl.NickName,
-              selected: true,
-              amount: 0,
-            });
+    for (var match of matches) {
+      var tm = team === match.teamA.Name ? match.teamA : match.teamB;
+      for (var n = 0; n < allOptions.length; n++) {
+        var option = allOptions[n];
+        if (option.title === "Attackers") {
+          option.items = [];
+          for (var ne = 0; ne < xevents.length; ne++) {
+            var evx = xevents[ne];
+            var pl = evx.Player;
+            if (
+              option.items.filter((obj) => obj.name == pl.NickName).length === 0
+            ) {
+              option.items.push({
+                name: pl.NickName,
+                selected: true,
+                amount: 0,
+              });
+            }
           }
         }
       }
@@ -196,34 +209,36 @@ function HittingChartReport({ match, selectedGame, selectedTeam }) {
   };
 
   const setSetterNames = (xevents) => {
-    if (match === null) {
+    if (matches === null) {
       return;
     }
-    for (var n = 0; n < allOptions.length; n++) {
-      var option = allOptions[n];
-      if (option.title === "Setters") {
-        var setters = [];
-        for (var ne = 0; ne < xevents.length; ne++) {
-          var evx = xevents[ne];
-          var sn = evx.setter;
-          if (setters.filter((obj) => obj == sn).length === 0) {
-            setters.push(sn);
+    for (var match of matches) {
+      for (var n = 0; n < allOptions.length; n++) {
+        var option = allOptions[n];
+        if (option.title === "Setters") {
+          var setters = [];
+          for (var ne = 0; ne < xevents.length; ne++) {
+            var evx = xevents[ne];
+            var sn = evx.setter;
+            if (setters.filter((obj) => obj == sn).length === 0) {
+              setters.push(sn);
+            }
           }
-        }
-        option.items = [];
-        for (var nn = 0; nn < setters.length; nn++) {
-          var pls =
-            selectedTeam === 0 ? match.teamA.players : match.teamB.players;
-          for (var np = 0; np < pls.length; np++) {
-            var pl = pls[np];
-            if (pl.shirtNumber === setters[nn]) {
-              option.items.push({
-                name: pl.NickName,
-                number: pl.shirtNumber,
-                selected: true,
-                amount: 0,
-              });
-              break;
+          option.items = [];
+          for (var nn = 0; nn < setters.length; nn++) {
+            var pls =
+              team === match.teamA.Name ? match.teamA.players : match.teamB.players;
+            for (var np = 0; np < pls.length; np++) {
+              var pl = pls[np];
+              if (pl.shirtNumber === setters[nn]) {
+                option.items.push({
+                  name: pl.NickName,
+                  number: pl.shirtNumber,
+                  selected: true,
+                  amount: 0,
+                });
+                break;
+              }
             }
           }
         }
@@ -232,7 +247,7 @@ function HittingChartReport({ match, selectedGame, selectedTeam }) {
   };
 
   const setAttackCombos = (xevents) => {
-    if (match === null) {
+    if (matches === null) {
       return;
     }
     for (var n = 0; n < allOptions.length; n++) {
@@ -288,7 +303,7 @@ function HittingChartReport({ match, selectedGame, selectedTeam }) {
         <div className="drawer-content">
           <div className="w-100 h-full">
             <HittingChart
-              match={match}
+              matches={matches}
               events={events}
               rows={selectedRows()}
               drawMode={drawMode}
@@ -300,7 +315,7 @@ function HittingChartReport({ match, selectedGame, selectedTeam }) {
           <div className="h-full bg-base-200">
             <AllFiltersPanel
               allOptions={allOptions}
-              match={match}
+              match={matches[0]}
               events={events}
               selectedTeam={selectedTeam}
               handleFilterOptionChanged={() => doUpdate()}

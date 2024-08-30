@@ -148,10 +148,10 @@ function Playlist() {
               <div className="flex justify-between bg-[#00000050]">
                 <button className="btn btn-sm btn-primary rounded-none" onClick={() => doSavePlaylist()}>Save Play List</button>
                 {/* <p className="text-sm p-2">{filename.name}</p> */}
-                <XMarkIcon
+                {/* <XMarkIcon
                   className="w-8 h-8 cursor-pointer"
                   onClick={() => toggleDrawerSide(false)}
-                />
+                /> */}
               </div>
               <div className="overflow-auto w-[260px] h-[70vh] mt-2">
                 <PlaylistList
