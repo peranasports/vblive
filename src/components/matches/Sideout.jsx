@@ -145,7 +145,7 @@ function Sideout({
     };
     setsideouts.push(setsideout);
     setSetSideouts(setsideouts);
-  }, [selectedGame, selectedRows]);
+  }, [selectedGame, selectedRows, selectedTeam, matches]);
 
   if (!matches) {
     return <></>;

@@ -1185,7 +1185,7 @@ function VideoAnalysis() {
                     className="btn btn-sm bg-gray-600 hover:btn-gray-900 "
                     onClick={() => setMenuOpen(!menuOpen)}
                   >
-                    Playlist ({playlistEvents.length})
+                    Play List
                   </label>
                   {menuOpen ? (
                     <ul
@@ -1349,7 +1349,7 @@ function VideoAnalysis() {
                   <></>
                 )}
                 <div
-                  className="flex p-4 justify-center bg-black"
+                  className="flex m-2 p-1 justify-center bg-black"
                   onTouchStart={onTouchStart}
                   onTouchMove={onTouchMove}
                   onTouchEnd={onTouchEnd}

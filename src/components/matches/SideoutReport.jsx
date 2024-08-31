@@ -92,6 +92,10 @@ function SideoutReport({
     setSideoutData(sodata);
   }, [selectedGame, selectedTeam, selectedRows, selectedRow]);
 
+  useEffect(() => {
+    console.log("SideoutReport useEffect", sideoutData);
+  }, [sideoutData]);
+
   if (sideoutData === null) {
     return <></>;
   }

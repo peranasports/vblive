@@ -303,9 +303,17 @@ function EventsList({
     return (
       <>
         {match.sets.map((set, sid) => (
-          <details key={sid} open={!isCollapse(match, set)} className="bg-base-200">
-            <summary className="font-medium text-sm p-1 ml-7">
-              Set {set.GameNumber} ({set.HomeScore} - {set.AwayScore})
+          <details
+            key={sid}
+            open={!isCollapse(match, set)}
+            className="bg-base-200"
+            id={sid + 1}
+          >
+            <summary className="font-bold text-md ml-7">
+              <a className="px-2">
+                {" "}
+                SET {set.GameNumber} ({set.HomeScore} - {set.AwayScore})
+              </a>
             </summary>
             <div>
               {set.filteredEvents.map((event, eid) => (
@@ -331,15 +339,22 @@ function EventsList({
           <>
             {matches &&
               matches.map((match, mid) => (
-                <details key={mid} open={!isCollapse(match, null)}>
-                  <summary className="font-medium text-sm p-1">
+                <details key={mid} open={!isCollapse(match, null)} className="">
+                  <summary className="font-bold text-md p-1 h-6">
                     {matchDesc(match)}
                     {/* <div className="">{matchDesc(match)}</div>
                     <div className="">
                       {match.HomeScore} - {match.AwayScore}
                     </div> */}
                   </summary>
-                  <div className="flex ml-5 text-sm">{match.TrainingDate.toLocaleDateString()} - {match.HomeScore} - {match.AwayScore}</div>
+                  <div className="flex justify-between h-6">
+                    <div className="flex ml-10 mb-1 font-medium text-md">
+                      {match.TrainingDate.toLocaleDateString()}
+                    </div>
+                    <div className="flex mr-1 mb-1 font-medium text-md">
+                      {match.HomeScore} - {match.AwayScore}
+                    </div>
+                  </div>
                   <div>{showSetEvents(match, mid)}</div>
                 </details>
               ))}

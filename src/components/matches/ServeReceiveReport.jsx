@@ -25,7 +25,19 @@ function ServeReceiveReport({ matches, team, selectedGame, selectedTeam }) {
     var mrcount = 0;
 
     for (var match of matches) {
-      var tm = team === match.teamA.Name ? match.teamA : match.teamB;
+      var tm = null;
+      if (matches.length === 1) {
+        tm = selectedTeam === 0 ? match.teamA : match.teamB;
+      } else {
+        tm =
+          selectedTeam === 0
+            ? team === match.teamA.Name
+              ? match.teamA
+              : match.teamB
+            : team === match.teamA.Name
+            ? match.teamB
+            : match.teamA;
+      }
       for (var player of tm.players) {
         if (
           players.filter(

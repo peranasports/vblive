@@ -8,6 +8,7 @@ import { kSkillSpike, kSkillSet, kSkillSettersCall } from "../utils/StatsItem";
 
 function HittingChartReport({ matches, team, selectedGame, selectedTeam }) {
   const [drawMode, setDrawMode] = useState(0);
+  const [currentTeam, setCurrentTeam] = useState(-1);
   const [allEvents, setAllEvents] = useState(null);
   const [events, setEvents] = useState(null);
   const [allOptions, setAllOptions] = useState(allFilters);
@@ -63,7 +64,18 @@ function HittingChartReport({ matches, team, selectedGame, selectedTeam }) {
     ];
 
     for (var match of matches) {
-      var tm = team === match.teamA.Name ? match.teamA : match.teamB;
+      var tm = null;
+      if (matches.length === 1) {
+        tm = selectedTeam === 0 ? match.teamA : match.teamB;
+      } else {
+        tm = selectedTeam === 0
+          ? team === match.teamA.Name
+            ? match.teamA
+            : match.teamB
+          : team === match.teamA.Name
+          ? match.teamB
+          : match.teamA;
+      }
       var xevs =
         selectedGame === 0 ? match.events : match.sets[selectedGame - 1].events;
       var setter = null;
@@ -80,14 +92,14 @@ function HittingChartReport({ matches, team, selectedGame, selectedTeam }) {
         }
       }
 
-      if (init === false) {
+      if (currentTeam !== selectedTeam) {
         setAllEvents(evs);
         setSpikerNames(evs);
         if (match.app !== "VBStats") {
           setSetterNames(evs);
           setAttackCombos(evs);
         }
-        setInit(true);
+        setCurrentTeam(selectedTeam);
       }
 
       const egs = ["Errors", "In-play", "In-play", "Kill"];
@@ -185,7 +197,14 @@ function HittingChartReport({ matches, team, selectedGame, selectedTeam }) {
       return;
     }
     for (var match of matches) {
-      var tm = team === match.teamA.Name ? match.teamA : match.teamB;
+      var tm =
+        selectedTeam === 0
+          ? team === match.teamA.Name
+            ? match.teamA
+            : match.teamB
+          : team === match.teamA.Name
+          ? match.teamB
+          : match.teamA;
       for (var n = 0; n < allOptions.length; n++) {
         var option = allOptions[n];
         if (option.title === "Attackers") {
@@ -226,8 +245,15 @@ function HittingChartReport({ matches, team, selectedGame, selectedTeam }) {
           }
           option.items = [];
           for (var nn = 0; nn < setters.length; nn++) {
-            var pls =
-              team === match.teamA.Name ? match.teamA.players : match.teamB.players;
+            var tm =
+            selectedTeam === 0
+              ? team === match.teamA.Name
+                ? match.teamA
+                : match.teamB
+              : team === match.teamA.Name
+              ? match.teamB
+              : match.teamA;
+            var pls = tm.players;
             for (var np = 0; np < pls.length; np++) {
               var pl = pls[np];
               if (pl.shirtNumber === setters[nn]) {

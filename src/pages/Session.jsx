@@ -101,9 +101,9 @@ function Session() {
       var mx = calculateDVWStats(m);
       mx.app = "DataVolley";
       mx = calculateSideoutStats(mx, "DataVolley");
-      mx.videoOnlineUrl = msession.videoOnlineUrl;
-      mx.videoStartTimeSeconds = msession.videoStartTimeSeconds;
-      mx.videoOffset = msession.videoOffset;
+      mx.videoOnlineUrl = msession && msession.videoOnlineUrl;
+      mx.videoStartTimeSeconds = msession && msession.videoStartTimeSeconds;
+      mx.videoOffset = msession && msession.videoOffset;
       if (!mx.guid) {
         mx.guid = generateUUID();
       }
@@ -116,9 +116,9 @@ function Session() {
       var mx = calculatePSVBStats(m);
       mx.app = "VBStats";
       mx = calculateSideoutStats(mx, "VBStats");
-      mx.videoOnlineUrl = msession.videoOnlineUrl;
-      mx.videoStartTimeSeconds = msession.videoStartTimeSeconds;
-      mx.videoOffset = msession.videoOffset;
+      mx.videoOnlineUrl = msession && msession.videoOnlineUrl;
+      mx.videoStartTimeSeconds = msession && msession.videoStartTimeSeconds;
+      mx.videoOffset = msession && msession.videoOffset;
       if (!mx.guid) {
         mx.guid = generateUUID();
       }
@@ -230,10 +230,8 @@ function Session() {
                 onGameSelected={(sgn) => setSelectedGame(sgn)}
                 teamSelected={selectedTeam}
                 onTeamSelected={(tmn) => setSelectedTeam(tmn)}
+                onSaveToDatabase={() => doUpload()}
               ></MatchSummary>
-              <button className="btn btn-primary" onClick={() => doUpload()}>
-                Save to Database
-              </button>
             </div>
           )}
           <div className="tabs tabs-boxed p-2">

@@ -9,6 +9,7 @@ function MatchSummary({
   onGameSelected,
   teamSelected,
   onTeamSelected,
+  onSaveToDatabase,
 }) {
   const [currentGame, setCurrentGame] = useState(0);
   const [currentTeam, setCurrentTeam] = useState(0);
@@ -24,29 +25,39 @@ function MatchSummary({
   return (
     matches && (
       <div className="flex-auto tabs-boxed">
-        <a
-          className={
-            teamSelected === 0
-              ? "tab text-xl text-primary font-medium tab-active"
-              : "tab text-xl font-medium"
-          }
-          onClick={() => doSelectTeam(0)}
-        >
-          {team.toUpperCase()}
-        </a>
-        <a> vs </a>
-        <a
-          className={
-            teamSelected === 1
-              ? "tab text-xl text-primary font-medium tab-active"
-              : "tab text-xl font-medium"
-          }
-          onClick={() => doSelectTeam(1)}
-        >
-          {matches.length === 1
-            ? matches[0].teamB.Name.toUpperCase()
-            : "OPPONENTS (" + matches.length + ")"}
-        </a>
+        <div className="flex justify-between">
+          <div className="flex gap-2">
+            <button
+              className={
+                teamSelected === 0
+                  ? "btn btn-sm text-xl btn-primary font-medium"
+                  : "btn btn-sm bg-base-300 text-base-content text-xl font-medium"
+              }
+              onClick={() => doSelectTeam(0)}
+            >
+              {team.toUpperCase()}
+            </button>
+            <div className="text-xl"> vs </div>
+            <button
+              className={
+                teamSelected === 1
+                  ? "btn btn-sm text-xl btn-primary font-medium"
+                  : "btn btn-sm bg-base-300 text-base-content text-xl font-medium"
+              }
+              onClick={() => doSelectTeam(1)}
+            >
+              {matches.length === 1
+                ? matches[0].teamB.Name.toUpperCase()
+                : "OPPONENTS (" + matches.length + ")"}
+            </button>
+          </div>
+          <button
+            className="btn btn-sm btn-primary"
+            onClick={() => onSaveToDatabase()}
+          >
+            Save to Database
+          </button>
+        </div>
         {matches.length === 1 ? (
           <p className="ml-4 my-1 text-sm text-base-700">
             {Moment(matches[0].TrainingDate).format("DD-MMM-yyyy")} -{" "}
