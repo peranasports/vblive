@@ -10,6 +10,9 @@ export const useAuthStatus = () => {
   const [loggedIn, setLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState(null)
   const [checkingStatus, setCheckingStatus] = useState(true);
+  const [currentTheme, setCurrentTheme] = useState(
+    localStorage.getItem("theme") ?? "garden"
+  );
 
   const isMounted = useRef(true);
 
@@ -74,6 +77,7 @@ export const useAuthStatus = () => {
         }
         setCheckingStatus(false);
       });
+      setCurrentTheme(localStorage.getItem("theme") ?? "garden");
     }
 
     return () => {
@@ -81,7 +85,7 @@ export const useAuthStatus = () => {
     }
   }, [isMounted]);
 
-  return { loggedIn, currentUser, checkingStatus };
+  return { loggedIn, currentUser, checkingStatus, currentTheme };
 };
 
 // Protected routes in V6

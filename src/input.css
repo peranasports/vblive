@@ -198,4 +198,27 @@
     .events-list-height {      
       height: calc(100vh - theme('spacing.80'));
     }
-  }
+    details>summary {
+      list-style-type: none;
+      outline: none;
+      cursor: pointer;
+      /* border: 1px solid #eee; */
+      padding: 5px;
+      border-radius: 0px;
+    }
+    
+    details>summary::-webkit-details-marker {
+      display: none;
+    }
+    
+    details>summary::before {
+      content: '+ ';
+    }
+    
+    details[open]>summary::before {
+      content: '-';
+    }
+    
+    details[open]>summary {
+      margin-bottom: 0.5rem;
+    }  }

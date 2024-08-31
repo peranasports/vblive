@@ -44,6 +44,7 @@ function VideoAnalysis() {
   const [videoOffset, setVideoOffset] = useState(0);
   const [currentVideoTime, setCurrentVideoTime] = useState(null);
   const [isReady, setIsReady] = useState(false);
+  const [isCollapseAll, setIsCollapseAll] = useState(true);
   const [, forceUpdate] = useState(0);
   const [allFilters, setAllFilters] = useState(null);
   const [teamAPlayers, setTeamAPlayers] = useState(null);
@@ -1093,7 +1094,7 @@ function VideoAnalysis() {
   useEffect(() => {
     setSelectedSet(selectedGame);
     forceUpdate((n) => !n);
-  }, [selectedGame]);
+  }, [selectedGame, isCollapseAll]);
 
   useEffect(() => {}, [selectedSet]);
 
@@ -1148,7 +1149,7 @@ function VideoAnalysis() {
       <div className="flex-col">
         <div className="flex h-full w-full" ref={refWindow}>
           <div className="flex-col">
-            <div className="flex justify-between py-2">
+            <div className="flex justify-between gap-1 py-2">
               <div className="flex gap-1">
                 <label
                   htmlFor="modal-filters"
@@ -1215,7 +1216,12 @@ function VideoAnalysis() {
                     Radar
                   </button>
                 ) : (
-                  <></>
+                  <button
+                    className="btn btn-sm bg-gray-600 hover:btn-gray-900 "
+                    onClick={() => setIsCollapseAll(!isCollapseAll)}
+                  >
+                    {isCollapseAll ? "Expand All" : "Collapse All"}
+                  </button>
                 )}
               </div>
             </div>
@@ -1232,6 +1238,7 @@ function VideoAnalysis() {
                   selectedSet={selectedSet}
                   doSelectEvent={(ev) => doSelectEvent(ev)}
                   onFilter={(fes) => onFilter(fes)}
+                  collapseAll={isCollapseAll}
                 />
               </div>
             </div>

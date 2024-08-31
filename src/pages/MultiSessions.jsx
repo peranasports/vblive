@@ -41,7 +41,7 @@ import AttackZones from "../components/matches/AttackZones";
 import HittingChartReport from "../components/matches/HittingChartReport";
 import ServeReceiveReport from "../components/matches/ServeReceiveReport";
 import VideoAnalysis from "../components/matches/VideoAnalysis";
-import { unzipBuffer } from "../components/utils/Utils";
+import { generateUUID, unzipBuffer } from "../components/utils/Utils";
 import { useAuthStatus } from "../components/hooks/useAuthStatus";
 import { myzip } from "../components/utils/zip";
 import { toast } from "react-toastify";
@@ -74,6 +74,9 @@ function MultiSessions() {
         mx.videoOnlineUrl = match.videoOnlineUrl;
         mx.videoStartTimeSeconds = match.videoStartTimeSeconds;
         mx.videoOffset = match.videoOffset;
+        if (!mx.guid) {
+          mx.guid = generateUUID();
+        }
         allms.push(mx);
       } else {
         var m = initWithPSVBCompressedBuffer(match.buffer);
@@ -83,6 +86,9 @@ function MultiSessions() {
         mx.videoOnlineUrl = match.videoOnlineUrl;
         mx.videoStartTimeSeconds = match.videoStartTimeSeconds;
         mx.videoOffset = match.videoOffset;
+        if (!mx.guid) {
+          mx.guid = generateUUID();
+        }
         allms.push(mx);
       }
     }
@@ -129,8 +135,8 @@ function MultiSessions() {
         <ServeReceiveReport
           matches={allMatches}
           team={team}
-        // match={allMatches[0]}
-        selectedGame={selectedGame}
+          // match={allMatches[0]}
+          selectedGame={selectedGame}
           selectedTeam={selectedTeam}
         />
       );
@@ -153,12 +159,14 @@ function MultiSessions() {
         />
       );
     } else if (currentReport === 6) {
-      return <VideoAnalysis match={allMatches[0]} selectedGame={selectedGame} />;
+      return (
+        <VideoAnalysis match={allMatches[0]} selectedGame={selectedGame} />
+      );
     }
   };
 
   const doVideoAnalysis = () => {
-    const st = { matches: allMatches, team:team, selectedGame: selectedGame };
+    const st = { matches: allMatches, team: team, selectedGame: selectedGame };
     navigate("/videoanalysis", { state: st });
     // return <VideoAnalysis allMatches[0]={allMatches[0]} selectedGame={selectedGame} />;
   };

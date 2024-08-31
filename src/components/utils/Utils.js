@@ -330,11 +330,11 @@ export function makeFilename(filename, suffix, ext) {
   if (filename.includes(suffix)) {
     return fn + "." + xx;
   } else {
-    return fn += "_" + suffix + "." + xx;
+    return (fn += "_" + suffix + "." + xx);
   }
 }
 
-export function getEventInfo(e){
+export function getEventInfo(e) {
   var subcolor = "text-warning";
   var sub = "";
   var pl = e.Player;
@@ -401,8 +401,8 @@ export function getEventInfo(e){
       sub = getEventDescription(e);
     }
   }
-  return {subcolor:subcolor, sub:sub };
-};
+  return { subcolor: subcolor, sub: sub };
+}
 
 export function getEventStringColor(e) {
   var s = "pl-2 pt-1 -mt-1 text-sm font-semibold";
@@ -430,7 +430,7 @@ export function getEventStringColor(e) {
     s += " text-warning";
   }
   return s;
-};
+}
 
 export function getMultiMatchesStatsItems(matches, team, selectedTeam) {
   var st = {

@@ -8,12 +8,14 @@ function EventsList({
   selectedSet,
   doSelectEvent,
   onFilter,
+  collapseAll,
 }) {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedPlayerNames, setSelectedPlayerNames] = useState(null);
   const [selectedEventTypes, setSelectedEventTypes] = useState(null);
   const [selectedEventResults, setSelectedEventResults] = useState(null);
   const [selectedJumpHeights, setSelectedJumpHeights] = useState(null);
+  const [collapseData, setCollapseData] = useState(null);
   const [, forceUpdate] = useState(0);
 
   const onEventSelected = (ev) => {
@@ -239,6 +241,25 @@ function EventsList({
   }, [filters, matches]);
 
   useEffect(() => {
+    var cd = {};
+    for (var match of matches) {
+      for (var ns = 0; ns < match.sets.length; ns++) {
+        var s = cd[match.guid];
+        if (!s) {
+          s = [false];
+          for (var i = 0; i < match.sets.length; i++) {
+            s.push(collapseAll);
+          }
+          cd[match.guid] = s;
+        }
+      }
+      setCollapseData(cd);
+    }
+  }, [collapseAll]);
+
+  useEffect(() => {}, [collapseData]);
+
+  useEffect(() => {
     const elem = document.activeElement;
     if (elem) {
       elem?.blur();
@@ -262,25 +283,31 @@ function EventsList({
     return <></>;
   }
 
+  const isCollapse = (match, set) => {
+    if (collapseData === null) return false;
+    if (!set) {
+      return collapseData[match.guid][0];
+    }
+    return collapseData[match.guid][set.GameNumber];
+  };
+
+  const matchDesc = (match) => {
+    if (team === match.teamA.Name) {
+      return "(H) " + match.teamB.Name;
+    } else {
+      return "(A) " + match.teamA.Name;
+    }
+  };
+
   const showSetEvents = (match, id) => {
     return (
       <>
-        {match.sets.map((set, id) => (
-          <div
-            key={id}
-            tabIndex={0}
-            className="collapse collapse-arrow border border-base-100 bg-base-300"
-          >
-            <input type="checkbox" className="peer" />
-            <div className="collapse-title">
-              <div className="flex justify-between">
-                <p>Set {id + 1}</p>
-                <p>
-                  {set.HomeScore} - {set.AwayScore}
-                </p>
-              </div>
-            </div>
-            <div className="collapse-content" id={set.GameNumber}>
+        {match.sets.map((set, sid) => (
+          <details key={sid} open={!isCollapse(match, set)} className="bg-base-200">
+            <summary className="font-medium text-sm p-1 ml-7">
+              Set {set.GameNumber} ({set.HomeScore} - {set.AwayScore})
+            </summary>
+            <div>
               {set.filteredEvents.map((event, eid) => (
                 <EventItem
                   key={eid}
@@ -290,7 +317,8 @@ function EventsList({
                 />
               ))}
             </div>
-          </div>
+            {/* </div> */}
+          </details>
         ))}
       </>
     );
@@ -303,26 +331,17 @@ function EventsList({
           <>
             {matches &&
               matches.map((match, mid) => (
-                <div
-                  key={mid}
-                  tabIndex={0}
-                  className="collapse collapse-arrow border border-base-300 bg-base-100"
-                >
-                  <input type="checkbox" className="peer" />
-                  <div className="collapse-title">
-                    <div className="flex justify-between">
-                      <p>
-                        {match.teamA.Name} vs {match.teamB.Name}
-                      </p>
-                      <p className="font-bold">
-                        {match.HomeScore} {match.AwayScore}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="collapse-content" id={match.Guid}>
-                    {showSetEvents(match, mid)}
-                  </div>
-                </div>
+                <details key={mid} open={!isCollapse(match, null)}>
+                  <summary className="font-medium text-sm p-1">
+                    {matchDesc(match)}
+                    {/* <div className="">{matchDesc(match)}</div>
+                    <div className="">
+                      {match.HomeScore} - {match.AwayScore}
+                    </div> */}
+                  </summary>
+                  <div className="flex ml-5 text-sm">{match.TrainingDate.toLocaleDateString()} - {match.HomeScore} - {match.AwayScore}</div>
+                  <div>{showSetEvents(match, mid)}</div>
+                </details>
               ))}
           </>
         ) : (

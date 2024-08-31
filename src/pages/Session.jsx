@@ -42,7 +42,7 @@ import AttackZones from "../components/matches/AttackZones";
 import HittingChartReport from "../components/matches/HittingChartReport";
 import ServeReceiveReport from "../components/matches/ServeReceiveReport";
 import VideoAnalysis from "../components/matches/VideoAnalysis";
-import { unzipBuffer } from "../components/utils/Utils";
+import { generateUUID, unzipBuffer } from "../components/utils/Utils";
 import { useAuthStatus } from "../components/hooks/useAuthStatus";
 import { myzip } from "../components/utils/zip";
 import { toast } from "react-toastify";
@@ -50,7 +50,8 @@ import { toast } from "react-toastify";
 function Session() {
   const { session, appName, loading, dispatch } = useContext(VBLiveAPIContext);
   const location = useLocation();
-  const { sessionId, dvwFileData, psvbFileData, filename, msession } = location.state;
+  const { sessionId, dvwFileData, psvbFileData, filename, msession } =
+    location.state;
   const { currentUser } = useAuthStatus();
   const params = useParams();
   const [match, setMatch] = useState(null);
@@ -103,7 +104,10 @@ function Session() {
       mx.videoOnlineUrl = msession.videoOnlineUrl;
       mx.videoStartTimeSeconds = msession.videoStartTimeSeconds;
       mx.videoOffset = msession.videoOffset;
-    setMatch(mx);
+      if (!mx.guid) {
+        mx.guid = generateUUID();
+      }
+      setMatch(mx);
       forceUpdate((n) => !n);
     } else if (psvbFileData !== undefined) {
       var m = initWithPSVBCompressedBuffer(psvbFileData);
@@ -115,6 +119,9 @@ function Session() {
       mx.videoOnlineUrl = msession.videoOnlineUrl;
       mx.videoStartTimeSeconds = msession.videoStartTimeSeconds;
       mx.videoOffset = msession.videoOffset;
+      if (!mx.guid) {
+        mx.guid = generateUUID();
+      }
       setMatch(mx);
       forceUpdate((n) => !n);
     } else {
@@ -190,7 +197,11 @@ function Session() {
   };
 
   const doVideoAnalysis = () => {
-    const st = { matches: [match], team:match.teamA.Name, selectedGame: selectedGame };
+    const st = {
+      matches: [match],
+      team: match.teamA.Name,
+      selectedGame: selectedGame,
+    };
     navigate("/videoanalysis", { state: st });
     // return <VideoAnalysis match={match} selectedGame={selectedGame} />;
   };

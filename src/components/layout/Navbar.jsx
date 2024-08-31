@@ -4,6 +4,7 @@ import PropsType from "prop-types";
 import { useAuthStatus } from "../hooks/useAuthStatus";
 import { useEffect } from "react";
 import { getAuth } from "firebase/auth";
+import ThemePicker from "./ThemePicker";
 
 function Navbar({ title }) {
   const navigate = useNavigate();
@@ -13,6 +14,14 @@ function Navbar({ title }) {
     var auth = getAuth();
     auth.signOut();
     navigate("/signin");
+  };
+
+  const doThemes = () => {
+    document.getElementById("my-modal-themes").checked = true;
+  };
+
+  const doThemeChange = (th) => {
+    document.getElementById("my-modal-themes").checked = false;
   };
 
   const doMatches = () => {
@@ -26,45 +35,52 @@ function Navbar({ title }) {
   useEffect(() => {}, [loggedIn]);
 
   return (
-    <nav className="navbar shadow-lg bg-neutral text-neutral-content">
-      <div className="container mx-auto h-[2px]">
-        <div className="flex px-2 mx-2 space-x-4">
-          <img className="pt-1 h-8 w-8" alt="" src={VBLiveLogo} />
-          <Link to="/" className="text-xl pt-1 font-bold align-middle">
-            {title}
-          </Link>
-        </div>
-        <div className="flex-1 px2 mx-2">
-          <div className="flex justify-end mt-4">
-            <Link to="/" className="btn btn-ghost btn-sm rounded-btn">
-              Home
-            </Link>
-            <button
-              className="btn btn-ghost btn-sm rounded-btn"
-              onClick={() => doMatches()}
-            >
-              Matches
-            </button>
-            <Link to="/about" className="btn btn-ghost btn-sm rounded-btn">
-              About
+    <>
+      <nav className="navbar shadow-lg bg-neutral text-neutral-content">
+        <div className="container mx-auto h-[2px]">
+          <div className="flex px-2 mx-2 space-x-4">
+            <img className="pt-1 h-8 w-8" alt="" src={VBLiveLogo} />
+            <Link to="/" className="text-xl pt-1 font-bold align-middle">
+              {title}
             </Link>
           </div>
-          {currentUser === null ? (
-            <></>
-          ) : (
-            <div className="flex justify-end">
-              <p className="mt-1 mr-4 text-md">{getID()}</p>
+          <div className="flex-1 px2 mx-2">
+            <div className="flex justify-end mt-4">
+              <Link to="/" className="btn btn-ghost btn-sm rounded-btn">
+                Home
+              </Link>
               <button
-                className="logoutButton mb-4 btn btn-sm"
-                onClick={doLogout}
+                className="btn btn-ghost btn-sm rounded-btn"
+                onClick={() => doMatches()}
               >
-                Log out
+                Matches
               </button>
+              <button
+                className="btn btn-ghost btn-sm rounded-btn"
+                onClick={() => doThemes()}
+              >
+                Themes
+              </button>
+              <Link to="/about" className="btn btn-ghost btn-sm rounded-btn">
+                About
+              </Link>
             </div>
-          )}
-        </div>
+            {currentUser === null ? (
+              <></>
+            ) : (
+              <div className="flex justify-end">
+                <p className="mt-1 mr-4 text-md">{getID()}</p>
+                <button
+                  className="logoutButton mb-4 btn btn-sm"
+                  onClick={doLogout}
+                >
+                  Log out
+                </button>
+              </div>
+            )}
+          </div>
 
-        {/* <div className='flex-1 px2 mx-2'>
+          {/* <div className='flex-1 px2 mx-2'>
                 <div className='flex justify-end'>
                     <Link to='/' className='btn btn-ghost btn-sm rounded-btn'>
                         Home
@@ -74,8 +90,22 @@ function Navbar({ title }) {
                     </Link>
                 </div>
             </div> */}
+        </div>
+      </nav>
+      <input type="checkbox" id="my-modal-themes" className="modal-toggle" />
+      <div className="modal">
+        <div className="modal-box rounded-none sm:w-9/12 w-8/10 max-w-5xl h-34">
+          <ThemePicker onThemeChange={(th) => doThemeChange(th)} />
+          <div className="flex gap-2 justify-end">
+            <div className="modal-action">
+              <label htmlFor="my-modal-themes" className="btn-ps-primary">
+                Close
+              </label>
+            </div>
+          </div>
+        </div>
       </div>
-    </nav>
+    </>
   );
 }
 
