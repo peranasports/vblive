@@ -33,7 +33,7 @@ function AttackZones({ matches, team, selectedGame, selectedTeam }) {
     ];
 
     for (var match of matches) {
-      var team = team === match.teamA.Name ? match.teamA : match.teamB;
+      var tm = team === match.teamA.Name ? match.teamA : match.teamB;
       var xevs =
         selectedGame === 0 ? match.events : match.sets[selectedGame - 1].events;
       var evs = [];
@@ -41,7 +41,7 @@ function AttackZones({ matches, team, selectedGame, selectedTeam }) {
         var e = xevs[ne];
         if (
           e.Player !== null &&
-          team.players.filter((obj) => obj.Guid === e.Player.Guid).length > 0
+          tm.players.filter((obj) => obj.Guid === e.Player.Guid).length > 0
         ) {
           if (e.EventType == kSkillSpike) {
             evs.push(e);

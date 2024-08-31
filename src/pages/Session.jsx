@@ -149,7 +149,7 @@ function Session() {
       return (
         <BoxScore
           matches={[match]}
-          team={match.teamA.Name}
+          team={selectedTeam === 0 ? match.teamA.Name : match.teamB.Name}
           selectedGame={selectedGame}
           selectedTeam={selectedTeam}
         />
@@ -158,7 +158,7 @@ function Session() {
       return (
         <SideoutReport
           matches={[match]}
-          team={match.teamA.Name}
+          team={selectedTeam === 0 ? match.teamA.Name : match.teamB.Name}
           selectedGame={selectedGame}
           selectedTeam={selectedTeam}
         />
@@ -168,7 +168,7 @@ function Session() {
       return (
         <ServeReceiveReport
           matches={[match]}
-          team={match.teamA.Name}
+          team={selectedTeam === 0 ? match.teamA.Name : match.teamB.Name}
           selectedGame={selectedGame}
           selectedTeam={selectedTeam}
         />
@@ -177,7 +177,7 @@ function Session() {
       return (
         <AttackZones
           matches={[match]}
-          team={match.teamA.Name}
+          team={selectedTeam === 0 ? match.teamA.Name : match.teamB.Name}
           selectedGame={selectedGame}
           selectedTeam={selectedTeam}
         />
@@ -186,7 +186,7 @@ function Session() {
       return (
         <HittingChartReport
           matches={[match]}
-          team={match.teamA.Name}
+          team={selectedTeam === 0 ? match.teamA.Name : match.teamB.Name}
           selectedGame={selectedGame}
           selectedTeam={selectedTeam}
         />
