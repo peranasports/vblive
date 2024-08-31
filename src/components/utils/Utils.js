@@ -439,10 +439,10 @@ export function getMultiMatchesStatsItems(matches, team, selectedTeam) {
   };
   for (var m of matches) {
     for (var s of m.sets) {
-      const hometeamsi =
-        m.teamA.Name === team ? s.teamAStatsItems : s.teamBStatsItems;
-      const awayteamsi =
-        m.teamA.Name === team ? s.teamBStatsItems : s.teamAStatsItems;
+      const hometeamsi = s.teamAStatsItems;
+        // m.teamA.Name === team ? s.teamAStatsItems : s.teamBStatsItems;
+      const awayteamsi = s.teamBStatsItems;
+        // m.teamA.Name === team ? s.teamBStatsItems : s.teamAStatsItems;
       for (var si of hometeamsi) {
         const plkey = si.player
           ? si.player.FirstName + "_" + si.player.LastName
