@@ -61,7 +61,7 @@ function MatchSummary({
         {matches.length === 1 ? (
           <p className="ml-4 my-1 text-sm text-base-700">
             {Moment(matches[0].TrainingDate).format("DD-MMM-yyyy")} -{" "}
-            {matches[0].tournament}
+            {matches[0].tournamentName}
           </p>
         ) : (
           <></>
