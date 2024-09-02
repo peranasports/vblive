@@ -52,7 +52,7 @@ function Share({ match, onShare }) {
       setIsPrivateDisabled(true);
       setSelectedUsers([]);
     }
-  }, [match, update]);
+  }, [match]);
 
   useEffect(() => {}, [selectedUsers]);
 
