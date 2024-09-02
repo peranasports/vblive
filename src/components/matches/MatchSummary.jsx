@@ -24,14 +24,14 @@ function MatchSummary({
 
   return (
     matches && (
-      <div className="flex-auto tabs-boxed">
+      <div className="flex-auto tabs-boxed rounded-none">
         <div className="flex justify-between">
           <div className="flex gap-2">
             <button
               className={
                 teamSelected === 0
-                  ? "btn btn-sm text-xl btn-primary font-medium"
-                  : "btn btn-sm bg-base-300 text-base-content text-xl font-medium"
+                  ? "btn btn-sm text-xl btn-primary rounded-none font-medium"
+                  : "btn btn-sm bg-base-300 text-base-content text-xl font-medium rounded-none"
               }
               onClick={() => doSelectTeam(0)}
             >
@@ -41,8 +41,8 @@ function MatchSummary({
             <button
               className={
                 teamSelected === 1
-                  ? "btn btn-sm text-xl btn-primary font-medium"
-                  : "btn btn-sm bg-base-300 text-base-content text-xl font-medium"
+                  ? "btn btn-sm text-xl btn-primary rounded-none font-medium"
+                  : "btn btn-sm bg-base-300 text-base-content text-xl font-medium rounded-none"
               }
               onClick={() => doSelectTeam(1)}
             >
@@ -52,7 +52,7 @@ function MatchSummary({
             </button>
           </div>
           <button
-            className="btn btn-sm btn-primary"
+            className="btn btn-sm btn-primary rounded-none"
             onClick={() => onSaveToDatabase()}
           >
             Save to Database
@@ -67,9 +67,9 @@ function MatchSummary({
           <></>
         )}
         {matches.length === 1 ? (
-          <div className="ml-2 tabs tabs-boxed">
+          <div className="ml-2 tabs tabs-boxed rounded-none">
             <a
-              className={gameSelected == 0 ? "tab tab-active" : "tab"}
+              className={gameSelected == 0 ? "tab tab-active rounded-none" : "tab rounded-none"}
               onClick={() => {
                 doSelectGame(0);
               }}
@@ -79,7 +79,7 @@ function MatchSummary({
             {sortBy(matches[0].sets, "GameNumber").map((game, i) => (
               <a
                 className={
-                  gameSelected === game.GameNumber ? "tab tab-active" : "tab"
+                  gameSelected === game.GameNumber ? "tab tab-active rounded-none" : "tab rounded-none"
                 }
                 key={game.GameNumber}
                 onClick={() => {

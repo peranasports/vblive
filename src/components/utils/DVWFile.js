@@ -13,6 +13,7 @@ import {
   calculateAllStats,
 } from "./StatsItem.js";
 import moment from "moment";
+import { toast } from "react-toastify";
 
 const kSkillServe = 1;
 const kSkillPass = 2;
@@ -73,7 +74,12 @@ var isSideOut = false;
 export function initWithDVWCompressedBuffer(buf) {
   var buffer = unzipBuffer(buf);
   // console.log(buffer)
-  return generateMatch(buffer);
+  if (!buffer) {
+    toast.error("Invalid DataVolley data.");
+    return;
+  } else {
+    return generateMatch(buffer);
+  }
 }
 
 var index = 1;

@@ -6,6 +6,7 @@ function EventsList({
   team,
   filters,
   selectedSet,
+  selectedMatchGuid,
   doSelectEvent,
   onFilter,
   collapseAll,
@@ -273,8 +274,17 @@ function EventsList({
         // inline: "start",
       });
     }
+    const melement = document.getElementById(selectedMatchGuid);
+    if (melement) {
+      // 👇 Will scroll smoothly to the top of the next section
+      melement.scrollIntoView({
+        behavior: "smooth",
+        // block: "nearest",
+        // inline: "start",
+      });
+    }
     forceUpdate((n) => !n);
-  }, [selectedSet]);
+  }, [selectedSet, selectedMatchGuid]);
 
   if (
     matches === undefined ||
@@ -339,7 +349,7 @@ function EventsList({
           <>
             {matches &&
               matches.map((match, mid) => (
-                <details key={mid} open={!isCollapse(match, null)} className="">
+                <details key={mid} open={!isCollapse(match, null)} className="" id={match.guid}>
                   <summary className="font-bold text-md p-1 h-6">
                     {matchDesc(match)}
                     {/* <div className="">{matchDesc(match)}</div>

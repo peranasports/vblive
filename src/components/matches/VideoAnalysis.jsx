@@ -2,6 +2,15 @@ import { useEffect, useState, useRef, useLayoutEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import { sortBy, sortedIndex } from "lodash";
+import playlistIcon from "../assets/passing_001.svg";
+import {
+  FunnelIcon,
+  ListBulletIcon,
+  VideoCameraIcon,
+  ChevronDoubleDownIcon,
+  ChevronDoubleUpIcon,
+  SignalIcon,
+} from "@heroicons/react/24/outline";
 import Select from "react-select";
 import ReactPlayer from "react-player/lazy";
 import EventsList from "./EventsList";
@@ -38,6 +47,7 @@ function VideoAnalysis() {
   const [videoFileObject, setVideoFileObject] = useState(null);
   // const videoUrl = process.env.REACT_APP_VIDEO_SERVER_URL + match.code + ".mp4";
   const [selectedSet, setSelectedSet] = useState(1);
+  const [selectedMatchGuid, setSelectedMatchGuid] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [currentMatch, setCurrentMatch] = useState(null);
   const [startVideoTimeSeconds, setStartVideoTimeSeconds] = useState(null);
@@ -755,6 +765,10 @@ function VideoAnalysis() {
     setSelectedSet(idx);
   };
 
+  const onMatchChanged = (match) => {
+    setSelectedMatchGuid(match.guid);
+  };
+
   const onFilter = (fes) => {
     setFilteredEvents(fes);
   };
@@ -1096,7 +1110,7 @@ function VideoAnalysis() {
     forceUpdate((n) => !n);
   }, [selectedGame, isCollapseAll]);
 
-  useEffect(() => {}, [selectedSet]);
+  useEffect(() => {}, [selectedSet, selectedMatchGuid]);
 
   useEffect(() => {
     // Bind the event listener
@@ -1148,23 +1162,31 @@ function VideoAnalysis() {
     <>
       <div className="flex-col">
         <div className="flex h-full w-full" ref={refWindow}>
-          <div className="flex-col">
-            <div className="flex justify-between gap-1 py-2">
+          <div className="flex-col min-w-[320px]">
+            <div className="flex justify-between gap-1 h-10 p-1 bg-base-300">
               <div className="flex gap-1">
-                <label
+                {/* <label
                   htmlFor="modal-filters"
                   className="btn btn-sm bg-gray-600 hover:btn-gray-900 "
                 >
                   Filters
-                </label>
+                </label> */}
+                <div className="tooltip" data-tip="Filters">
+                  <FunnelIcon
+                    className="w-8 h-8 p-1 bg-primary text-primary-content hover:bg-primary-focus cursor-pointer"
+                    onClick={() =>
+                      (document.getElementById("modal-filters").checked = true)
+                    }
+                  />
+                </div>
                 {matches.length === 1 ? (
                   <div className="dropdown">
-                    <label
-                      tabIndex={0}
-                      className="btn btn-sm bg-gray-600 hover:btn-gray-900 "
-                    >
-                      Set
-                    </label>
+                    <div className="tooltip" data-tip="Sets">
+                      <ListBulletIcon
+                        tabIndex={0}
+                        className="w-8 h-8 p-1 bg-primary text-primary-content hover:bg-primary-focus cursor-pointer"
+                      />
+                    </div>
                     <ul
                       tabIndex={0}
                       className="dropdown-content menu p-2 shadow bg-base-100 w-52"
@@ -1177,20 +1199,37 @@ function VideoAnalysis() {
                     </ul>
                   </div>
                 ) : (
-                  <></>
+                  <div className="dropdown">
+                    <div className="tooltip" data-tip="Sets">
+                      <ListBulletIcon
+                        tabIndex={0}
+                        className="w-8 h-8 p-1 bg-primary text-primary-content hover:bg-primary-focus cursor-pointer"
+                      />
+                    </div>
+                    <ul
+                      tabIndex={0}
+                      className="dropdown-content menu p-2 shadow bg-base-100 w-52"
+                    >
+                      {matches.map((match, idx) => (
+                        <li key={idx} onClick={() => onMatchChanged(match)}>
+                          <a>
+                            {match.teamA.Name} vs {match.teamB.Name}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 )}
                 <div className="dropdown" ref={menuRef}>
-                  <label
-                    tabIndex={0}
-                    className="btn btn-sm bg-gray-600 hover:btn-gray-900 "
-                    onClick={() => setMenuOpen(!menuOpen)}
-                  >
-                    Play List
-                  </label>
+                  <div tabIndex={0} onClick={() => setMenuOpen(!menuOpen)}>
+                    <div className="tooltip" data-tip="Play List">
+                      <VideoCameraIcon className="w-8 h-8 p-1 bg-primary text-primary-content hover:bg-primary-focus cursor-pointer" />
+                    </div>
+                  </div>
                   {menuOpen ? (
                     <ul
                       tabIndex={0}
-                      className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52"
+                      className="dropdown-content menu p-2 shadow bg-base-100 w-52"
                     >
                       <li onClick={() => selectAllItems()}>
                         <a>Select all items</a>
@@ -1208,20 +1247,33 @@ function VideoAnalysis() {
                 </div>
               </div>
               <div>
-                {matches.length === 1 ? (
-                  <button
-                    className="btn btn-sm bg-gray-600 hover:btn-gray-900 "
-                    onClick={() => setShowRadarFile(!showRadarFile)}
-                  >
-                    Radar
-                  </button>
+                {isCollapseAll ? (
+                  <div className="tooltip" data-tip="Expand All">
+                    <ChevronDoubleDownIcon
+                      className="w-8 h-8 p-1 bg-primary text-primary-content hover:bg-primary-focus cursor-pointer"
+                      onClick={() => setIsCollapseAll(false)}
+                    />
+                  </div>
                 ) : (
-                  <button
-                    className="btn btn-sm bg-gray-600 hover:btn-gray-900 "
-                    onClick={() => setIsCollapseAll(!isCollapseAll)}
-                  >
-                    {isCollapseAll ? "Expand All" : "Collapse All"}
-                  </button>
+                  <div className="tooltip" data-tip="Collapse All">
+                    <ChevronDoubleUpIcon
+                      className="w-8 h-8 p-1 bg-primary text-primary-content hover:bg-primary-focus cursor-pointer"
+                      onClick={() => setIsCollapseAll(true)}
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div>
+                {matches.length === 1 ? (
+                  <div className="tooltip" data-tip="Speed Radar">
+                    <SignalIcon
+                      className="w-8 h-8 p-1 bg-primary text-primary-content hover:bg-primary-focus cursor-pointer"
+                      onClick={() => setShowRadarFile(!showRadarFile)}
+                    />
+                  </div>
+                ) : (
+                  <></>
                 )}
               </div>
             </div>
@@ -1236,6 +1288,7 @@ function VideoAnalysis() {
                   team={team}
                   filters={allFilters}
                   selectedSet={selectedSet}
+                  selectedMatchGuid={selectedMatchGuid}
                   doSelectEvent={(ev) => doSelectEvent(ev)}
                   onFilter={(fes) => onFilter(fes)}
                   collapseAll={isCollapseAll}
@@ -1293,7 +1346,7 @@ function VideoAnalysis() {
                         />
                         <input
                           type="button"
-                          className="btn btn-sm w-60"
+                          className="btn btn-sm btn-info w-60 rounded-none"
                           value="Select Match Video..."
                           onClick={() =>
                             document.getElementById("selectedVideoFile").click()
@@ -1309,13 +1362,13 @@ function VideoAnalysis() {
                       </div>
                       <div className="flex">
                         <button
-                          className="btn btn-primary btn-sm m-2"
+                          className="btn btn-primary rounded-none btn-sm m-2"
                           onClick={() => onSaveToDatabase()}
                         >
                           Save to Database
                         </button>
                         <button
-                          className="btn btn-primary btn-sm m-2"
+                          className="btn btn-primary rounded-none btn-sm m-2"
                           onClick={() => onBackClick()}
                         >
                           Back
@@ -1332,13 +1385,13 @@ function VideoAnalysis() {
                         onChange={handleChange}
                       />
                       <button
-                        className="btn btn-sm"
+                        className="btn btn-sm btn-info rounded-none"
                         onClick={() => showOnlineVideo()}
                       >
                         Apply
                       </button>
                       <button
-                        className="btn btn-sm"
+                        className="btn btn-sm btn-info rounded-none"
                         onClick={() => onSynchVideo()}
                       >
                         Synch
@@ -1394,19 +1447,20 @@ function VideoAnalysis() {
                     <div className="flex gap-2">
                       <label
                         htmlFor="modal-timing"
-                        className="btn btn-sm bg-info text-white hover:btn-gray-900"
+                        className="btn btn-sm bg-info rounded-none hover:btn-gray-900"
                       >
                         Timing
                       </label>
                       <button
-                        className="btn btn-sm btn-info text-white"
+                        className="btn btn-sm btn-info rounded-none hover:btn-gray-900"
                         onClick={() => doSaveFile()}
                       >
                         Save Video Settings to DVW File
                       </button>
                     </div>
                     {videoOffset !== 0 ? (
-                      <p>Offset = {videoOffset} secs</p>
+                      <></>
+                      // <p>Offset = {videoOffset} secs</p>
                     ) : (
                       <></>
                     )}
@@ -1580,14 +1634,14 @@ function VideoAnalysis() {
           </div>
           <div className="flex gap-2 justify-end">
             <div className="modal-action">
-              <label htmlFor="modal-filters" className="btn btn-info btn-sm">
+              <label htmlFor="modal-filters" className="btn btn-info rounded-none btn-sm">
                 Cancel
               </label>
             </div>
             <div className="modal-action">
               <button
                 htmlFor="modal-filters"
-                className="btn btn-info btn-sm"
+                className="btn btn-info rounded-none btn-sm"
                 onClick={() => onDoFilters()}
               >
                 Apply

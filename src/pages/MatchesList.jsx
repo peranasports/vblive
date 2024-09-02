@@ -4,11 +4,20 @@ import {
   VideoCameraIcon,
   ArrowDownIcon,
   ArrowUpIcon,
+  ShareIcon,
+  TrashIcon,
 } from "@heroicons/react/24/outline";
-import { myunzip } from "../components/utils/zip";
+import selectnone from "../components/assets/selectnone.png";
+import selectall from "../components/assets/selectall.png";
+import { myunzip, myzip } from "../components/utils/zip";
 import Select from "react-select";
 import axios from "axios";
 import Spinner from "../components/layout/Spinner";
+import { shareSession } from "../context/VBLiveAPI/VBLiveAPIAction";
+import Share from "../components/matches/Share";
+import { functionTabSecondary } from "../components/utils/Utils";
+import { confirmAlert } from "react-confirm-alert";
+import 'react-confirm-alert/src/react-confirm-alert.css';
 
 function MatchesList() {
   const navigate = useNavigate();
@@ -21,18 +30,22 @@ function MatchesList() {
   const [selectedTeamOption, setSelectedTeamOption] = useState(null);
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [selectedTeamName, setSelectedTeamName] = useState("");
+  const [selectedScreen, setSelectedScreen] = useState(0);
+  const [selectedMatch, setSelectedMatch] = useState(null);
   const [searchText, setSearchText] = useState("");
   const [sortColumn, setSortColumn] = useState(0);
   const [sortAscending, setSortAscending] = useState(true);
   const [loading, setLoading] = useState(true);
   const [, forceUpdate] = useState(0);
 
-  const fetchAllMatches = async () => {
+  const fetchAllMyMatches = async () => {
     setLoading(true);
     let config = {
       method: "get",
       maxBodyLength: Infinity,
-      url: "https://vbliveapi.peranasports.com/api/Session/GetSessionInfoInServerForApp?serverName=leco3110%40gmail.com&appName=VBLive",
+      url:
+        process.env.REACT_APP_VBLIVE_API_URL +
+        "/Session/GetSessionInfoInServerForApp?serverName=leco3110%40gmail.com&appName=VBLive",
       headers: {},
     };
 
@@ -40,14 +53,89 @@ function MatchesList() {
     await axios
       .request(config)
       .then((response) => {
-        console.log(JSON.stringify(response.data));
+        // console.log(JSON.stringify(response.data));
         matches = response.data;
+        for (var m of matches) {
+          if (m.shared) {
+            const xshared = JSON.parse(m.shared.replace(/'/g, '"'));
+            m.shared = xshared;
+          }
+        }
         setLoading(false);
       })
       .catch((error) => {
         console.log(error);
       });
     return matches;
+  };
+
+  const fetchAllSharedMatches = async () => {
+    setLoading(true);
+    let config = {
+      method: "get",
+      maxBodyLength: Infinity,
+      url:
+        process.env.REACT_APP_VBLIVE_API_URL +
+        "/Session/GetSharedSessionsForServer?serverName=leco3110%40gmail.com&appName=VBLive",
+      headers: {},
+    };
+
+    var matches = [];
+    await axios
+      .request(config)
+      .then((response) => {
+        // console.log(JSON.stringify(response.data));
+        matches = response.data;
+        for (var m of matches) {
+          if (m.shared) {
+            const xshared = JSON.parse(m.shared.replace(/'/g, '"'));
+            m.shared = xshared;
+          }
+        }
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    return matches;
+  };
+
+  const doDeleteMatch = async (match) => {
+    confirmAlert({
+      title: "Delete Match",
+      message: "Are you sure you want to delete the selected match?",
+      buttons: [
+        {
+          label: "Yes",
+          onClick: async () => {
+            setLoading(true);
+            let config = {
+              method: "get",
+              maxBodyLength: Infinity,
+              url:
+                process.env.REACT_APP_VBLIVE_API_URL +
+                `/Session/DeleteSession?sessionId=${match.id}`,
+              headers: {},
+            };
+
+            await axios
+              .request(config)
+              .then((response) => {
+                // console.log(JSON.stringify(response.data));
+                setLoading(false);
+                doInit();
+              })
+              .catch((error) => {
+                console.log(error);
+              });
+          },
+        },
+        {
+          label: "No",
+          onClick: () => {},
+        },
+      ],
+    });
   };
 
   const doSelect = (sel) => () => {
@@ -112,11 +200,37 @@ function MatchesList() {
     navigate("/multisessions", { state: st });
   };
 
+  const doShareMatch = (match) => {
+    setSelectedMatch(match);
+    document.getElementById("modal-share").checked = true;
+  };
+
+  const doDoShare = async (share) => {
+    document.getElementById("modal-share").checked = false;
+    if (!share) {
+      return;
+    }
+    var ok = false;
+    for (var m of filteredMatches) {
+      if (m.selected && m.selected === true) {
+        ok = true;
+        m.shared = share;
+        await shareSession(m, share);
+      }
+    }
+    if (!ok) {
+      selectedMatch.shared = share;
+      await shareSession(selectedMatch, share);
+    }
+  };
+
   const getSessionById = async (sessionId) => {
     let config = {
       method: "get",
       maxBodyLength: Infinity,
-      url: `https://vbliveapi.peranasports.com/api/Session/GetSessionsById?sessionId=${sessionId}`,
+      url:
+        process.env.REACT_APP_VBLIVE_API_URL +
+        `/Session/GetSessionsById?sessionId=${sessionId}`,
       headers: {},
     };
 
@@ -124,7 +238,7 @@ function MatchesList() {
     await axios
       .request(config)
       .then((response) => {
-        console.log(JSON.stringify(response.data));
+        // console.log(JSON.stringify(response.data));
         session = response.data[0];
       })
       .catch((error) => {
@@ -230,7 +344,7 @@ function MatchesList() {
       setSelectedTeamName(e.label);
       setSelectedTeam(team);
       const fms = allMatches.filter(
-        (m) => m.player1Guid === team.name || m.teamB === team.name
+        (m) => m.teamA === team.name || m.teamB === team.name
       );
       setFilteredMatches(fms);
     }
@@ -247,7 +361,10 @@ function MatchesList() {
   );
 
   const doInit = async () => {
-    const ms = await fetchAllMatches();
+    const ms =
+      selectedScreen === 0
+        ? await fetchAllMyMatches()
+        : await fetchAllSharedMatches();
     var pls = {};
     for (var m of ms) {
       if (!pls[m.teamA]) {
@@ -294,7 +411,7 @@ function MatchesList() {
         setSelectedTeamName(team.name);
         setSelectedTeam(team);
         const fms = ms.filter(
-          (m) => m.player1Guid === team.name || m.teamB === team.name
+          (m) => m.teamA === team.name || m.teamB === team.name
         );
         setFilteredMatches(fms);
       } else {
@@ -306,6 +423,22 @@ function MatchesList() {
   useEffect(() => {
     doInit();
   }, []);
+
+  useEffect(() => {
+    doInit();
+  }, [selectedScreen]);
+
+  const getSharedColour = (match) => {
+    if (match.shared) {
+      if (match.shared.isPublic) {
+        return "mr-1.5 h-5 w-5 flex-shrink-0 text-success";
+      } else {
+        return "mr-1.5 h-5 w-5 flex-shrink-0 text-warning";
+      }
+    } else {
+      return "mr-1.5 h-5 w-5 flex-shrink-0";
+    }
+  };
 
   // const getFlag = (countrycode) => {
   //   if (countrycode) {
@@ -321,23 +454,31 @@ function MatchesList() {
   //   }
   // };
 
+  const onMatchesScreenChanged = async (screen) => {
+    setSelectedScreen(screen);
+  };
+
   return (
     <>
       <div className="flex-col h-[88vh] mt-4">
         <div className="flex justify-between">
           <div className="flex gap-2">
-            <button
-              className="btn btn-sm btn-info rounded-none w-28"
-              onClick={doSelect(true)}
-            >
-              Select All
-            </button>
-            <button
-              className="btn btn-sm btn-info rounded-none w-32"
-              onClick={doSelect(false)}
-            >
-              Select None
-            </button>
+            <div className="tooltip" data-tip="Select All">
+              <div
+                className="bg-info p-1 cursor-pointer"
+                onClick={doSelect(true)}
+              >
+                <img src={selectall} alt="Select All" className="w-6 h-6" />
+              </div>
+            </div>
+            <div className="tooltip" data-tip="Unselect All">
+              <div
+                className="bg-info p-1 cursor-pointer"
+                onClick={doSelect(false)}
+              >
+                <img src={selectnone} alt="Select None" className="w-6 h-6" />
+              </div>
+            </div>
             <div className="flex gap-2 w-72 -mt-0.5">
               {/* <div className="mt-1.5 text-sm text-base-content">Team:</div> */}
               <Select
@@ -401,92 +542,166 @@ function MatchesList() {
         {loading ? (
           <Spinner />
         ) : (
-          <div className="overflow-x-auto">
-            <div className="inline-block min-w-full py-2 align-middle">
-              <div className="table-div">
-                <table className="min-w-full divide-y divide-gray-300 text-sm">
-                  <thead className="table-header">
-                    <tr>
-                      <th
-                        scope="col"
-                        className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
-                      ></th>
-                      {columnHeader(0, "Team 1")}
-                      {columnHeader(1, "Team 2")}
-                      {columnHeader(2, "Tournament")}
-                      {columnHeader(3, "Scores")}
-                      {columnHeader(4, "Date")}
-                      <th
-                        scope="col"
-                        className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
-                      ></th>
-                      {/* <th
-                      scope="col"
-                      className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
-                    ></th> */}
-                    </tr>
-                  </thead>
-                  <tbody className="table-body">
-                    {filteredMatches &&
-                      filteredMatches.map((match, i) => (
-                        <tr
-                          key={i}
-                          className={i % 2 ? "bg-base-100" : "bg-base-200"}
-                        >
-                          <td className="table-cell">
-                            <input
-                              type="checkbox"
-                              checked={
-                                match.selected && match.selected === true
-                              }
-                              className="checkbox checkbox-sm mt-1 rounded-none"
-                              onChange={() => doToggleSelect(match)}
-                            />
-                          </td>
-                          <td className="table-cell">
-                            <div className="flex gap-1">
-                              {/* {getFlag(match.player1CountryCode, 7, 5)} */}
-                              <div className="">{match.teamA}</div>
-                            </div>
-                          </td>
-                          <td className="table-cell">
-                            <div className="flex gap-1">
-                              {/* {getFlag(match.player2CountryCode, 7, 5)} */}
-                              <div className="">{match.teamB}</div>
-                            </div>
-                          </td>
-                          <td className="table-cell">{match.tournament}</td>
-                          <td className="table-cell">{match.scores}</td>
-                          <td className="table-cell">
-                            {match.sessionDateString}
-                            {/* {convertSecondsToDate(match.seconds / 1000)} */}
-                          </td>
-                          <td className="table-cell">
-                            <p className="cursor-pointer flex items-center text-sm text-gray-500">
-                              <VideoCameraIcon
-                                className="mr-1.5 h-5 w-5 flex-shrink-0"
-                                aria-hidden="true"
-                                onClick={() => doMatch(match)}
-                              />
-                            </p>
-                          </td>
-                          {/* <td className="table-cell">
-                          <p className="cursor-pointer flex items-center text-sm text-gray-500">
-                            <TrashIcon
-                              className="mr-1.5 h-5 w-5 flex-shrink-0"
-                              aria-hidden="true"
-                              onClick={() => doDeleteUser(match)}
-                            />
-                          </p>
-                        </td> */}
+          <>
+            <div className="flex-col">
+              <div className="flex gap-2 my-2">
+                {functionTabSecondary(
+                  selectedScreen === 0,
+                  0,
+                  "My Matches",
+                  onMatchesScreenChanged
+                )}
+                {functionTabSecondary(
+                  selectedScreen === 1,
+                  1,
+                  "Shared Matches",
+                  onMatchesScreenChanged
+                )}
+              </div>
+              <div className="overflow-x-auto">
+                <div className="inline-block min-w-full py-2 align-middle">
+                  <div className="table-div">
+                    <table className="min-w-full divide-y divide-gray-300 text-sm">
+                      <thead className="table-header">
+                        <tr>
+                          <th
+                            scope="col"
+                            className="px-3 py-2 text-left text-sm font-semibold text-base-content"
+                          ></th>
+                          {columnHeader(0, "Team 1")}
+                          {columnHeader(1, "Team 2")}
+                          {columnHeader(2, "Tournament")}
+                          {columnHeader(3, "Scores")}
+                          {columnHeader(4, "Date")}
+                          {selectedScreen === 0 ? (
+                            <>
+                              <th
+                                scope="col"
+                                className="px-3 py-2 text-left text-sm font-semibold text-base-content"
+                              ></th>
+                              <th
+                                scope="col"
+                                className="px-3 py-2 text-left text-sm font-semibold text-base-content"
+                              ></th>
+                            </>
+                          ) : (
+                            <></>
+                          )}
+                          <th
+                            scope="col"
+                            className="px-3 py-2 text-left text-sm font-semibold text-base-content"
+                          ></th>
                         </tr>
-                      ))}
-                  </tbody>
-                </table>
+                      </thead>
+                      <tbody className="table-body">
+                        {filteredMatches &&
+                          filteredMatches.map((match, i) => (
+                            <tr
+                              key={i}
+                              className={i % 2 ? "bg-base-100" : "bg-base-200"}
+                            >
+                              <td className="table-cell">
+                                <input
+                                  type="checkbox"
+                                  checked={
+                                    match.selected && match.selected === true
+                                  }
+                                  className="checkbox checkbox-sm mt-1 rounded-none"
+                                  onChange={() => doToggleSelect(match)}
+                                />
+                              </td>
+                              <td className="table-cell">
+                                <div className="flex gap-1">
+                                  {/* {getFlag(match.player1CountryCode, 7, 5)} */}
+                                  <div className="">{match.teamA}</div>
+                                </div>
+                              </td>
+                              <td className="table-cell">
+                                <div className="flex gap-1">
+                                  {/* {getFlag(match.player2CountryCode, 7, 5)} */}
+                                  <div className="">{match.teamB}</div>
+                                </div>
+                              </td>
+                              <td className="table-cell">{match.tournament}</td>
+                              <td className="table-cell">{match.scores}</td>
+                              <td className="table-cell">
+                                {match.sessionDateString}
+                                {/* {convertSecondsToDate(match.seconds / 1000)} */}
+                              </td>
+                              {selectedScreen === 0 ? (
+                                <>
+                                  <td className="table-cell">
+                                    <p className="cursor-pointer flex items-center text-sm text-gray-500">
+                                      <TrashIcon
+                                        className="mr-1.5 h-5 w-5 flex-shrink-0"
+                                        aria-hidden="true"
+                                        onClick={() => doDeleteMatch(match)}
+                                      />
+                                    </p>
+                                  </td>
+                                  <td className="table-cell">
+                                    <p className="cursor-pointer flex items-center text-sm text-gray-500">
+                                      <ShareIcon
+                                        className={getSharedColour(match)}
+                                        aria-hidden="true"
+                                        onClick={() => doShareMatch(match)}
+                                      />
+                                    </p>
+                                  </td>
+                                </>
+                              ) : (
+                                <></>
+                              )}
+                              <td className="table-cell">
+                                <p className="cursor-pointer flex items-center text-sm text-gray-500">
+                                  <VideoCameraIcon
+                                    className="mr-1.5 h-5 w-5 flex-shrink-0"
+                                    aria-hidden="true"
+                                    onClick={() => doMatch(match)}
+                                  />
+                                </p>
+                              </td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
+          </>
         )}
+      </div>
+
+      <input type="checkbox" id="modal-share" className="modal-toggle" />
+      <div className="modal">
+        <div className="modal-box sm:w-4/12 w-full max-w-5xl h-[70vh] shadow rounded-none">
+          <h3 className="mb-4 font-bold text-2xl">Share</h3>
+          <div className="flex flex-col">
+            <div>
+              <Share
+                match={selectedMatch}
+                onShare={(share) => doDoShare(share)}
+              />
+            </div>
+            {/* <div className="flex justify-end">
+              <div className="modal-action">
+                <label htmlFor="modal-share" className="btn btn-sm btn-info rounded-none">
+                  Close
+                </label>
+              </div>
+              <div className="modal-action">
+                <label
+                  htmlFor="modal-share"
+                  className="btn btn-sm btn-info ml-4 rounded-none"
+                  onClick={() => doDoShare()}
+                >
+                  Save
+                </label>
+              </div>
+            </div> */}
+          </div>
+        </div>
       </div>
     </>
   );

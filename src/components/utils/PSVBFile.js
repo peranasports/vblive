@@ -298,157 +298,162 @@ export function psvbParseLatestStats(str, match) {
       continue;
     }
     var json = lines[line].split("~");
-    if (json.length > 1) {
-      if (json[0] === "DTHP") {
-        try {
-          if (currentGame.teamAplayers === undefined) {
-            currentGame.teamAplayers = [];
-          }
-          var exists = false;
-          var tpl = null;
-          for (var nm = 0; nm < match.teamA.players.length; nm++) {
-            var pl = match.teamA.players[nm];
-            if (json[1] === pl.Guid) {
-              tpl = pl;
-              break;
+    try {
+      if (json.length > 1) {
+        if (json[0] === "DTHP") {
+          try {
+            if (currentGame.teamAplayers === undefined) {
+              currentGame.teamAplayers = [];
             }
-          }
-          if (tpl !== null) {
-            for (var tnm = 0; tnm < currentGame.teamAplayers.length; tnm++) {
-              var xtpl = currentGame.teamAplayers[tnm];
-              if (xtpl.Guid === tpl.Guid) {
-                exists = true;
+            var exists = false;
+            var tpl = null;
+            for (var nm = 0; nm < match.teamA.players.length; nm++) {
+              var pl = match.teamA.players[nm];
+              if (json[1] === pl.Guid) {
+                tpl = pl;
                 break;
               }
             }
-            if (exists === false) {
+            if (tpl !== null) {
+              for (var tnm = 0; tnm < currentGame.teamAplayers.length; tnm++) {
+                var xtpl = currentGame.teamAplayers[tnm];
+                if (xtpl.Guid === tpl.Guid) {
+                  exists = true;
+                  break;
+                }
+              }
+              if (exists === false) {
+                currentGame.teamAplayers.push(tpl);
+              }
+            } else {
               currentGame.teamAplayers.push(tpl);
             }
-          } else {
-            currentGame.teamAplayers.push(tpl);
+          } catch (error) {
+            console.log("psvbParseLatestStats DTHP", error);
           }
-        } catch (error) {
-          console.log("psvbParseLatestStats DTHP", error);
-        }
-      } else if (json[0] === "DTHP") {
-        try {
-          if (currentGame.teamBplayers === undefined) {
-            currentGame.teamBplayers = [];
-          }
-          var exists = false;
-          var tpl = null;
-          for (var nm = 0; nm < match.teamA.players.length; nm++) {
-            var pl = match.teamB.players[nm];
-            if (json[1] === pl.Guid) {
-              tpl = pl;
-              break;
+        } else if (json[0] === "DTHP") {
+          try {
+            if (currentGame.teamBplayers === undefined) {
+              currentGame.teamBplayers = [];
             }
-          }
-          if (tpl !== null) {
-            for (var tnm = 0; tnm < currentGame.teamBplayers.length; tnm++) {
-              var xtpl = currentGame.teamBplayers[tnm];
-              if (xtpl.Guid === tpl.Guid) {
-                exists = true;
+            var exists = false;
+            var tpl = null;
+            for (var nm = 0; nm < match.teamA.players.length; nm++) {
+              var pl = match.teamB.players[nm];
+              if (json[1] === pl.Guid) {
+                tpl = pl;
                 break;
               }
             }
-            if (exists === false) {
+            if (tpl !== null) {
+              for (var tnm = 0; tnm < currentGame.teamBplayers.length; tnm++) {
+                var xtpl = currentGame.teamBplayers[tnm];
+                if (xtpl.Guid === tpl.Guid) {
+                  exists = true;
+                  break;
+                }
+              }
+              if (exists === false) {
+                currentGame.teamBplayers.push(tpl);
+              }
+            } else {
               currentGame.teamBplayers.push(tpl);
             }
-          } else {
-            currentGame.teamBplayers.push(tpl);
+          } catch (error) {
+            console.log("psvbParseLatestStats DTAP", error);
           }
-        } catch (error) {
-          console.log("psvbParseLatestStats DTAP", error);
-        }
-      } else if (json[0] === "Q") {
-        try {
-          if (json[1] === "(null)") {
-            continue;
-          }
-          var game = JSON.parse(json[1]);
-          game.match = match;
-          if (match.sets === undefined) {
-            match.sets = [];
-          }
-          if (game.GameNumber === 0) {
-            if (currentGame === null) {
-              game.GameNumber = match.sets.length + 1;
-            } else {
-              game.GameNumber = currentGame.GameNumber;
+        } else if (json[0] === "Q") {
+          try {
+            if (json[1] === "(null)") {
+              continue;
             }
+            var game = JSON.parse(json[1]);
+            game.match = match;
+            if (match.sets === undefined) {
+              match.sets = [];
+            }
+            if (game.GameNumber === 0) {
+              if (currentGame === null) {
+                game.GameNumber = match.sets.length + 1;
+              } else {
+                game.GameNumber = currentGame.GameNumber;
+              }
+            }
+            var xgame = match.sets[game.GameNumber - 1];
+            if (xgame !== undefined) {
+              game.events = xgame.events;
+              game.teamAplayers = xgame.teamAplayers;
+              game.teamBplayers = xgame.teamBplayers;
+              game.statsItems = xgame.statsItems;
+            }
+            match.sets[game.GameNumber - 1] = game;
+            currentGame = game;
+          } catch (error) {
+            console.log("psvbParseLatestStats Q", error);
           }
-          var xgame = match.sets[game.GameNumber - 1];
-          if (xgame !== undefined) {
-            game.events = xgame.events;
-            game.teamAplayers = xgame.teamAplayers;
-            game.teamBplayers = xgame.teamBplayers;
-            game.statsItems = xgame.statsItems;
-          }
-          match.sets[game.GameNumber - 1] = game;
-          currentGame = game;
-        } catch (error) {
-          console.log("psvbParseLatestStats Q", error);
-        }
-      } else if (json[0] === "E" || json[0] === "MODE") {
-        try {
-          if (currentGame.events === undefined) {
-            currentGame.events = [];
-          }
-          var ev = JSON.parse(json[1]);
-          // console.log(ev.TeamScore, ev.OppositionScore)
-          var pls = match.teamA.players.filter(
-            (obj) => obj.Guid === ev.PlayerGuid
-          );
-          if (pls.length > 0) {
-            ev.Player = pls[0];
-            ev.homePlayer = true;
-          } else {
-            pls = match.teamB.players.filter(
+        } else if (json[0] === "E" || json[0] === "MODE") {
+          try {
+            if (currentGame.events === undefined) {
+              currentGame.events = [];
+            }
+            var ev = JSON.parse(json[1]);
+            // console.log(ev.TeamScore, ev.OppositionScore)
+            var pls = match.teamA.players.filter(
               (obj) => obj.Guid === ev.PlayerGuid
             );
             if (pls.length > 0) {
               ev.Player = pls[0];
-              ev.homePlayer = false;
+              ev.homePlayer = true;
             } else {
-              ev.Player = null;
+              pls = match.teamB.players.filter(
+                (obj) => obj.Guid === ev.PlayerGuid
+              );
+              if (pls.length > 0) {
+                ev.Player = pls[0];
+                ev.homePlayer = false;
+              } else {
+                ev.Player = null;
+              }
             }
-          }
-          ev.TimeStamp = new Date(ev.TimeStamp);
-          if (match.videoStartTime !== undefined)
-          {
-            const mvst = match.videoStartTime.getTime();
-            const ets = ev.TimeStamp.getTime();
-            ev.VideoPosition = (ets - mvst) / 1000;
-          }
-
-          ev.Drill = currentGame;
-          currentGame.events.push(ev);
-          match.events.push(ev);
-        } catch (error) {
-          console.log("psvbParseLatestStats E", error);
-        }
-      } else if (json[0] === "SS") {
-        try {
-          if (match.ss === undefined) {
-            match.ss = [];
-          }
-          var ss = JSON.parse(json[1]);
-          var exist = false;
-          for (var ns = 0; ns < match.ss.length; ns++) {
-            if (ss.PlayerGuid === match.ss[ns].PlayerGuid) {
-              match.ss[ns] = ss;
-              exist = true;
-              break;
+            ev.TimeStamp = new Date(ev.TimeStamp);
+            if (match.videoStartTime !== undefined)
+            {
+              const mvst = match.videoStartTime.getTime();
+              const ets = ev.TimeStamp.getTime();
+              ev.VideoPosition = (ets - mvst) / 1000;
             }
+  
+            ev.Drill = currentGame;
+            currentGame.events.push(ev);
+            match.events.push(ev);
+          } catch (error) {
+            console.log("psvbParseLatestStats E", error);
           }
-          if (exist === false) {
-            match.ss.push(ss);
+        } else if (json[0] === "SS") {
+          try {
+            if (match.ss === undefined) {
+              match.ss = [];
+            }
+            var ss = JSON.parse(json[1]);
+            var exist = false;
+            for (var ns = 0; ns < match.ss.length; ns++) {
+              if (ss.PlayerGuid === match.ss[ns].PlayerGuid) {
+                match.ss[ns] = ss;
+                exist = true;
+                break;
+              }
+            }
+            if (exist === false) {
+              match.ss.push(ss);
+            }
+          } catch (error) {
+            console.log("psvbParseLatestStats SS", error);
           }
-        } catch (error) {
-          console.log("psvbParseLatestStats SS", error);
         }
       }
+        
+    } catch (error) {
+      console.log(error.message);      
     }
   }
   return match;

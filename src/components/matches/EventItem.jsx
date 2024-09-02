@@ -12,9 +12,9 @@ function EventItem({ event, isSelected, onEventSelected }) {
 
   const background = () => {
     if (isSelected === false) {
-      return "mb-2 rounded-none card-compact p-1 border border-base-100 text-base-content bg-base-100 hover:bg-base-100 hover:opacity-75 cursor-pointer";
+      return "rounded-none card-compact p-1 border border-base-300 text-base-content bg-base-100 hover:bg-base-200 hover:opacity-75 cursor-pointer";
     } else {
-      return "mb-2 rounded-none card-compact p-1 border border-base-100 text-accent-content bg-accent hover:bg-accent hover:opacity-75 cursor-pointer";
+      return "rounded-none card-compact p-1 border border-base-300 text-accent-content bg-accent hover:bg-accent-focus hover:opacity-75 cursor-pointer";
     }
   };
 

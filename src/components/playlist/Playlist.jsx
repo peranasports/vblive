@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
-import { saveToPC } from "../utils/Utils";
+import { dayTimeCode, saveToPC } from "../utils/Utils";
 import {
   XMarkIcon,
   Bars3Icon,
@@ -109,8 +109,17 @@ function Playlist() {
   };
 
   const doSavePlaylist = () => {
-    saveToPC(JSON.stringify({events:playlists}), filename);
-  }
+    const fn = dayTimeCode() + filename;
+    saveToPC(JSON.stringify({ events: playlists }), fn);
+  };
+
+  const getEventString = (item) => {
+    if (item.eventStringColor) {
+      return item.eventStringColor + " font-bold mt-1";
+    } else {
+      return "font-bold mt-1";
+    }
+  };
 
   useEffect(() => {
     if (playlistFileData !== null && playlists === null) {
@@ -145,15 +154,20 @@ function Playlist() {
         <div className="flex gap-2">
           {showPlaylist ? (
             <div className="flex flex-col">
-              <div className="flex justify-between bg-[#00000050]">
-                <button className="btn btn-sm btn-primary rounded-none" onClick={() => doSavePlaylist()}>Save Play List</button>
+              <div className="flex justify-between bg-base-300 p-1 h-10">
+                <button
+                  className="btn btn-sm btn-primary rounded-none"
+                  onClick={() => doSavePlaylist()}
+                >
+                  Save Play List
+                </button>
                 {/* <p className="text-sm p-2">{filename.name}</p> */}
                 {/* <XMarkIcon
                   className="w-8 h-8 cursor-pointer"
                   onClick={() => toggleDrawerSide(false)}
                 /> */}
               </div>
-              <div className="overflow-auto w-[260px] h-[70vh] mt-2">
+              <div className="overflow-auto min-w-[320px] h-[70vh] mt-2">
                 <PlaylistList
                   playlists={playlists}
                   selItem={selectedItem}
@@ -167,7 +181,7 @@ function Playlist() {
           )}
 
           <div className="flex flex-col w-full" ref={videoref}>
-            <div className="flex justify-between h-8 bg-[#00000050]">
+            <div className="flex justify-between bg-base-200 h-10">
               {showPlaylist ? (
                 <></>
               ) : (
@@ -178,21 +192,15 @@ function Playlist() {
               )}
               {selectedItem ? (
                 <div className="flex gap-2">
-                  <p className="text-sm font-bold px-2 mt-1">
+                  <p className="text-md font-bold px-2 mt-2">
                     {selectedItem.playerName}
                   </p>
-                  <div className="mt-1">
-                    <p
-                      className={
-                        selectedItem.eventStringColor !== ""
-                          ? selectedItem.eventStringColor
-                          : "text-sm"
-                      }
-                    >
+                  <div className="mt-1 text-md font-bold">
+                    <p className={getEventString(selectedItem)}>
                       {selectedItem.eventString}
                     </p>
                   </div>
-                  <p className="text-sm font-light px-2 mt-1">
+                  <p className="text-md font-light px-2 mt-2">
                     {selectedItem.eventSubstring}
                   </p>
                 </div>
@@ -211,13 +219,18 @@ function Playlist() {
                 />
               </div>
             </div>
-            <div className="flex gap-2 h-6">
-              {selectedItem && selectedItem.comment ? (
-                <ChatBubbleLeftEllipsisIcon className="w-6 h6 text-success" />
-              ) : (
-                <ChatBubbleLeftEllipsisIcon className="w-6 h6 text-base-content" />
-              )}
-              <p className="text-sm font-medium">
+            <div className="flex gap-2 h-16 overflow-auto">
+              <div className="">
+                {selectedItem && selectedItem.comment ? (
+                  <ChatBubbleLeftEllipsisIcon className="w-6 h6 text-success" />
+                ) : (
+                  <ChatBubbleLeftEllipsisIcon className="w-6 h6 text-base-content" />
+                )}
+              </div>
+              <p
+                className="text-sm font-medium"
+                style={{ whiteSpace: "pre-line" }}
+              >
                 {selectedItem && selectedItem.comment}
               </p>
             </div>

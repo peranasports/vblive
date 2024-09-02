@@ -405,7 +405,7 @@ export function getEventInfo(e) {
 }
 
 export function getEventStringColor(e) {
-  var s = "pl-2 pt-1 -mt-1 text-sm font-semibold";
+  var s = "";
   if (e.EventType === 20 || e.EventType === 250) {
     s += " text-base-content";
   }
@@ -442,7 +442,7 @@ export function getMultiMatchesStatsItems(matches, team, selectedTeam) {
       const hometeamsi = s.teamAStatsItems;
         // m.teamA.Name === team ? s.teamAStatsItems : s.teamBStatsItems;
       const awayteamsi = s.teamBStatsItems;
-        // m.teamA.Name === team ? s.teamBStatsItems : s.teamAStatsItems;
+        // m.teamA.Name === team ? s.teamBStatstems : s.teamAStatsItems;
       for (var si of hometeamsi) {
         const plkey = si.player
           ? si.player.FirstName + "_" + si.player.LastName
@@ -481,3 +481,39 @@ export function getMultiMatchesStatsItems(matches, team, selectedTeam) {
   }
   return sis;
 }
+
+export function dayTimeCode() {
+  var d = new Date();
+  const s = `${d.getFullYear()}${pad(d.getMonth() + 1, 2)}${pad(d.getDate(), 2)}${pad(d.getHours(), 2)}${pad(d.getMinutes(), 2)}${pad(d.getSeconds(), 2)}`;
+  return s;
+}
+
+export function functionTabSecondary(selected, rn, name, func) {
+  return (
+    <>
+      <div
+        className={
+          selected ? "px-2 py-1 bg-secondary text-secondary-content cursor-pointer" : "px-2 py-1 bg-transparent text-base-content cursor-pointer"
+        }
+        onClick={() => func(rn)}
+      >
+        {name}
+      </div>
+    </>
+  );
+};
+
+export function functionTabPrimary(selected, rn, name, func) {
+  return (
+    <>
+      <div
+        className={
+          selected ? "px-2 py-1 bg-primary text-secondary-content cursor-pointer" : "px-2 py-1 bg-transparent text-base-content cursor-pointer"
+        }
+        onClick={() => func(rn)}
+      >
+        {name}
+      </div>
+    </>
+  );
+};

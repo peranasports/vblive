@@ -100,3 +100,32 @@ export const storeSession = async (match, currentUser) => {
     });
     return ret;
 }
+
+export const shareSession = async (match, share) => {
+  let data = JSON.stringify(share).replace(/"/g, '\'');
+  const VBLIVE_API_URL = process.env.REACT_APP_VBLIVE_API_URL;
+  let config = {
+    method: "post",
+    maxBodyLength: Infinity,
+    url: `${VBLIVE_API_URL}/Session/ShareSession?matchId=${match.id}`,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: data,
+  };
+
+  var ret = false;
+  await axios
+    .request(config)
+    .then((response) => {
+      ret = response.data;
+      // console.log(JSON.stringify(response.data));
+      // toast.success("Uploaded match data successfully!");
+    })
+    .catch((error) => {
+      ret = false;
+      // toast.error("Error uploading match data");
+      // console.log(error);
+    });
+    return ret;
+}

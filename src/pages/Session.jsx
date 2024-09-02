@@ -116,9 +116,9 @@ function Session() {
       var mx = calculatePSVBStats(m);
       mx.app = "VBStats";
       mx = calculateSideoutStats(mx, "VBStats");
-      mx.videoOnlineUrl = msession && msession.videoOnlineUrl;
-      mx.videoStartTimeSeconds = msession && msession.videoStartTimeSeconds;
-      mx.videoOffset = msession && msession.videoOffset;
+      mx.videoOnlineUrl = msession && msession.videoOnlineUrl ? msession.videoOnlineUrl : null;
+      mx.videoStartTimeSeconds = msession && msession.videoStartTimeSeconds ? msession.videoStartTimeSeconds : -1;
+      mx.videoOffset = msession && msession.videoOffset ? msession.videoOffset : -1;
       if (!mx.guid) {
         mx.guid = generateUUID();
       }
@@ -234,10 +234,10 @@ function Session() {
               ></MatchSummary>
             </div>
           )}
-          <div className="tabs tabs-boxed p-2">
+          <div className="tabs tabs-boxed p-2 rounded-none">
             <a
               className={
-                currentReport == 0 ? "tab tab-active bg-secondary" : "tab "
+                currentReport == 0 ? "tab tab-active bg-secondary rounded-none" : "tab rounded-none"
               }
               onClick={() => {
                 setCurrentReport(0);
