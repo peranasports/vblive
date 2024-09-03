@@ -3,11 +3,13 @@ import { useState, useContext } from 'react'
 import AlertContext from '../../context/Alert/AlertContext'
 import VBLiveAPIContext from '../../context/VBLiveAPI/VBLiveAPIContext'
 import { getSessionInfoForServer } from '../../context/VBLiveAPI/VBLiveAPIAction'
+import { useNavigate } from 'react-router-dom'
 
 function SessionSearch() {
+  const navigate = useNavigate();
   const [text, setText] = useState('')
   const [app, setApp] = useState(0)
-  const { sessions, dispatch } = useContext(VBLiveAPIContext)
+  const { sessions, dispatch, currentUser } = useContext(VBLiveAPIContext)
   const { setAlert } = useContext(AlertContext)
 
   const handleChange = (e) => setText(e.target.value)
@@ -22,7 +24,7 @@ function SessionSearch() {
       // var appname = app === 0 ? 'VBStats' : 'DVMate'
       const sessionsData = await getSessionInfoForServer(text)
       dispatch({ type: 'GET_SESSION_INFO_FOR_SERVER', payload: sessionsData })
-      // setText('')
+      // navigate("/matcheslist", { state: { liveMatches: sessionsData.sessions, currentUser:currentUser } });
     }
   }
 

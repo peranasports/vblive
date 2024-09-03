@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   VideoCameraIcon,
@@ -15,16 +15,20 @@ import axios from "axios";
 import Spinner from "../components/layout/Spinner";
 import { shareSession } from "../context/VBLiveAPI/VBLiveAPIAction";
 import Share from "../components/matches/Share";
-import { functionTabSecondary } from "../components/utils/Utils";
+import VBLiveAPIContext from "../context/VBLiveAPI/VBLiveAPIContext";
+import { functionTabSecondary, unzipBuffer } from "../components/utils/Utils";
 import { confirmAlert } from "react-confirm-alert";
-import 'react-confirm-alert/src/react-confirm-alert.css';
+import "react-confirm-alert/src/react-confirm-alert.css";
 
 function MatchesList() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { liveMatches, userEmail } = location.state;
+  // const { currentUser } = useContext(VBLiveAPIContext)
   // const { currentUser } = location.state;
   const [allMatches, setAllMatches] = useState([]);
   const [filteredMatches, setFilteredMatches] = useState([]);
+  const [allLiveMatches, setAllLiveMatches] = useState(null);
   const [allTeams, setAllTeams] = useState([]);
   const [allTeamOptions, setAllTeamOptions] = useState([]);
   const [selectedTeamOption, setSelectedTeamOption] = useState(null);
@@ -45,7 +49,7 @@ function MatchesList() {
       maxBodyLength: Infinity,
       url:
         process.env.REACT_APP_VBLIVE_API_URL +
-        "/Session/GetSessionInfoInServerForApp?serverName=leco3110%40gmail.com&appName=VBLive",
+        `/Session/GetSessionInfoInServerForApp?serverName=${userEmail}&appName=VBLive`,
       headers: {},
     };
 
@@ -181,7 +185,11 @@ function MatchesList() {
     var xms = [];
     for (var m of ms) {
       const xm = await getSessionById(m.id);
-      xm.buffer = myunzip(xm.stats);
+      var buffer = myunzip(xm.stats);
+      if (!buffer) {
+        buffer = unzipBuffer(xm.stats);
+      }
+      xm.buffer = buffer;
       // if (m.videoFilePath) {
       //   for (var sm of xm.sets) {
       //     for (var ev of sm.events) {
@@ -249,7 +257,10 @@ function MatchesList() {
 
   const doMatch = async (match) => {
     const session = await getSessionById(match.id);
-    const uz = myunzip(session.stats);
+    var uz = myunzip(session.stats);
+    if (!uz || uz.length === 0) {
+      uz = unzipBuffer(session.stats);
+    }
     const st = {
       msession: session,
       dvwFileData: uz,
@@ -275,10 +286,10 @@ function MatchesList() {
     } else if (sc === 4) {
       xx = sa
         ? aschs.sort(
-            (a, b) => a.TrainingDate.getTime() - b.TrainingDate.getTime()
+            (a, b) => a.sessionDateTimeInSeconds - b.sessionDateTimeInSeconds
           )
         : aschs.sort(
-            (a, b) => b.TrainingDate.getTime() - a.TrainingDate.getTime()
+            (a, b) => b.sessionDateTimeInSeconds - a.sessionDateTimeInSeconds
           );
     } else {
       return;
@@ -311,12 +322,12 @@ function MatchesList() {
             <div>
               {sortAscending ? (
                 <ArrowDownIcon
-                  className="ml-1.5 h-4 w-4 flex-shrink-0"
+                  className="ml-1 mt-0.5 h-4 w-4 flex-shrink-0"
                   aria-hidden="true"
                 />
               ) : (
                 <ArrowUpIcon
-                  className="ml-1.5 h-4 w-4 flex-shrink-0"
+                  className="ml-1 mt-0.5 h-4 w-4 flex-shrink-0"
                   aria-hidden="true"
                 />
               )}
@@ -360,11 +371,39 @@ function MatchesList() {
     </div>
   );
 
+  // const monitorFile = (file) => {
+  //   const fs = require("fs");
+  //   fs.watch("/path/to/file", (eventType, filename) => {
+  //     console.log(`Event type: ${eventType}`);
+  //     console.log(`Filename: ${filename}`);
+  //   });
+  // };
+
   const doInit = async () => {
-    const ms =
-      selectedScreen === 0
-        ? await fetchAllMyMatches()
-        : await fetchAllSharedMatches();
+    var ms = [];
+    if (liveMatches && liveMatches.length > 0) {
+      for (var m of liveMatches) {
+        if (!m.teamA || !m.teamB) {
+          const tokens = m.description.split(" vs ");
+          if (tokens.length === 2) {
+            m.teamA = tokens[0];
+            m.teamB = tokens[1];
+          } else {
+            m.teamA = "";
+            m.teamB = "";
+          }
+        }
+        ms.push(m);
+      }
+      setAllLiveMatches(ms);
+      setSelectedScreen(2);
+      setLoading(false);
+    } else {
+      ms =
+        selectedScreen === 0
+          ? await fetchAllMyMatches()
+          : await fetchAllSharedMatches();
+    }
     var pls = {};
     for (var m of ms) {
       if (!pls[m.teamA]) {
@@ -556,6 +595,18 @@ function MatchesList() {
                   1,
                   "Shared Matches",
                   onMatchesScreenChanged
+                )}
+                {allLiveMatches ? (
+                  <>
+                    {functionTabSecondary(
+                      selectedScreen === 2,
+                      1,
+                      "Live Matches",
+                      onMatchesScreenChanged
+                    )}
+                  </>
+                ) : (
+                  <></>
                 )}
               </div>
               <div className="overflow-x-auto">

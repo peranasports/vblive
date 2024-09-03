@@ -44,7 +44,7 @@ import ServeReceiveReport from "../components/matches/ServeReceiveReport";
 import VideoAnalysis from "../components/matches/VideoAnalysis";
 import { generateUUID, unzipBuffer } from "../components/utils/Utils";
 import { useAuthStatus } from "../components/hooks/useAuthStatus";
-import { myzip } from "../components/utils/zip";
+import { myunzip, myzip } from "../components/utils/zip";
 import { toast } from "react-toastify";
 
 function Session() {
@@ -68,14 +68,26 @@ function Session() {
 
     const sessionData = await getSession(sessionId);
     dispatch({ type: "GET_SESSION", payload: sessionData });
-    // console.log('appName', sessionData.appName)
-    var m =
-      sessionData.appName === "VBStats"
-        ? initWithPSVBCompressedBuffer(sessionData.stats)
-        : initWithDVWCompressedBuffer(sessionData.stats);
-
+    var m = null;
+    var appname = null;
+    if (sessionData.appName === "VBLive") {
+      var buffer = myunzip(sessionData.stats);
+      if (buffer.includes("DATAVOLLEY")) {
+        appname = "DataVolley";
+        m = initWithDVWCompressedBuffer(sessionData.stats);
+      } else {
+        appname = "VBStats";
+        m = initWithPSVBCompressedBuffer(sessionData.stats);
+      }
+    } else {
+      m =
+        sessionData.appName === "VBStats"
+          ? initWithPSVBCompressedBuffer(sessionData.stats)
+          : initWithDVWCompressedBuffer(sessionData.stats);
+    }
     var mx = null;
     if (sessionData.appName === "VBStats") {
+      appname = "VBStats";
       const latestData = await getLatestStats(sessionId, 0);
       dispatch({ type: "GET_LATEST", payload: latestData });
       setLatest(latestData);
@@ -85,9 +97,10 @@ function Session() {
           : parseLatestDVWStats(latestData, m);
       mx = calculatePSVBStats(mx);
     } else {
+      appname = "DataVolley";
       mx = calculateDVWStats(m);
     }
-    mx.app = sessionData.appName;
+    mx.app = appname;
     mx = calculateSideoutStats(mx, sessionData.appName);
     // console.log('sessionId, match=', params.sessionId, mx)
     setMatch(mx);
@@ -116,9 +129,14 @@ function Session() {
       var mx = calculatePSVBStats(m);
       mx.app = "VBStats";
       mx = calculateSideoutStats(mx, "VBStats");
-      mx.videoOnlineUrl = msession && msession.videoOnlineUrl ? msession.videoOnlineUrl : null;
-      mx.videoStartTimeSeconds = msession && msession.videoStartTimeSeconds ? msession.videoStartTimeSeconds : -1;
-      mx.videoOffset = msession && msession.videoOffset ? msession.videoOffset : -1;
+      mx.videoOnlineUrl =
+        msession && msession.videoOnlineUrl ? msession.videoOnlineUrl : null;
+      mx.videoStartTimeSeconds =
+        msession && msession.videoStartTimeSeconds
+          ? msession.videoStartTimeSeconds
+          : -1;
+      mx.videoOffset =
+        msession && msession.videoOffset ? msession.videoOffset : -1;
       if (!mx.guid) {
         mx.guid = generateUUID();
       }
@@ -237,7 +255,9 @@ function Session() {
           <div className="tabs tabs-boxed p-2 rounded-none">
             <a
               className={
-                currentReport == 0 ? "tab tab-active bg-secondary rounded-none" : "tab rounded-none"
+                currentReport == 0
+                  ? "tab tab-active bg-secondary rounded-none"
+                  : "tab rounded-none"
               }
               onClick={() => {
                 setCurrentReport(0);

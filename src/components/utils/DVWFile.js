@@ -14,6 +14,7 @@ import {
 } from "./StatsItem.js";
 import moment from "moment";
 import { toast } from "react-toastify";
+import { myunzip } from "./zip.js";
 
 const kSkillServe = 1;
 const kSkillPass = 2;
@@ -73,6 +74,9 @@ var isSideOut = false;
 
 export function initWithDVWCompressedBuffer(buf) {
   var buffer = unzipBuffer(buf);
+  if (!buffer) {
+    buffer = myunzip(buf);
+  }
   // console.log(buffer)
   if (!buffer) {
     toast.error("Invalid DataVolley data.");

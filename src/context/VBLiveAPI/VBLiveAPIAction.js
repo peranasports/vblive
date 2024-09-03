@@ -58,6 +58,7 @@ export const getLatestStats = async (sessionId, lastTime) => {
 
 export const storeSession = async (match, currentUser) => {
   const desc = match.teamA.Name + " vs " + match.teamB.Name;
+  const seconds = match.TrainingDate.getTime() / 1000;
   const voffset = match.videoOffset ? match.videoOffset : -1;
   const vstarttime = match.videoStartTimeSeconds ? match.videoStartTimeSeconds : -1;
   const vurl = match.videoOnlineUrl ? match.videoOnlineUrl : "";
@@ -71,7 +72,7 @@ export const storeSession = async (match, currentUser) => {
     currentUser.email
   }|${desc}|${match.TrainingDate.toLocaleDateString()}|${match.teamA.Name}|${
     match.teamB.Name
-  }|${match.tournamentName}|${sc}|${vurl}|${voffset}|${vstarttime}`;
+  }|${match.tournamentName}|${sc}|${vurl}|${voffset}|${vstarttime}|${seconds}`;
   const qs = require("qs");
   let data = JSON.stringify(buffer);
   const VBLIVE_API_URL = process.env.REACT_APP_VBLIVE_API_URL;

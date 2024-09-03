@@ -25,7 +25,8 @@ function Navbar({ title }) {
   };
 
   const doMatches = () => {
-    navigate("/matcheslist", { state: { currentUser: currentUser } });
+    const st = { liveMatches: [], userEmail: currentUser.email };
+    navigate("/matcheslist", { state: st });
   };
 
   const getID = () => {
