@@ -42,10 +42,20 @@ import AttackZones from "../components/matches/AttackZones";
 import HittingChartReport from "../components/matches/HittingChartReport";
 import ServeReceiveReport from "../components/matches/ServeReceiveReport";
 import VideoAnalysis from "../components/matches/VideoAnalysis";
-import { generateUUID, unzipBuffer } from "../components/utils/Utils";
+import {
+  convertSecondsToMMSS,
+  generateUUID,
+  unzipBuffer,
+} from "../components/utils/Utils";
 import { useAuthStatus } from "../components/hooks/useAuthStatus";
 import { myunzip, myzip } from "../components/utils/zip";
 import { toast } from "react-toastify";
+import {
+  ArrowPathIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+} from "@heroicons/react/24/outline";
+import { unzip } from "lodash";
 
 function Session() {
   const { session, appName, loading, dispatch } = useContext(VBLiveAPIContext);
@@ -63,6 +73,11 @@ function Session() {
   const [showingVideo, setShowingVideo] = useState(false);
   const [, forceUpdate] = useState(0);
   const navigate = useNavigate();
+  const countRef = useRef(counter);
+  const refreshInterval = 30; //refresh every 1 minutes
+  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [isLiveSession, setIsLiveSession] = useState(false);
+
   const getLatest = useCallback(async () => {
     dispatch({ type: "SET_LOADING" });
 
@@ -103,6 +118,7 @@ function Session() {
     mx.app = appname;
     mx = calculateSideoutStats(mx, sessionData.appName);
     // console.log('sessionId, match=', params.sessionId, mx)
+    mx.buffer = unzipBuffer(sessionData.stats);
     setMatch(mx);
   }, [sessionId, selectedTeam]);
 
@@ -121,6 +137,8 @@ function Session() {
         mx.guid = generateUUID();
       }
       setMatch(mx);
+      setAutoRefresh(false);
+      setIsLiveSession(false);
       forceUpdate((n) => !n);
     } else if (psvbFileData !== undefined) {
       var m = initWithPSVBCompressedBuffer(psvbFileData);
@@ -141,14 +159,35 @@ function Session() {
         mx.guid = generateUUID();
       }
       setMatch(mx);
+      setAutoRefresh(false);
+      setIsLiveSession(false);
       forceUpdate((n) => !n);
     } else {
+      setIsLiveSession(true);
       getLatest();
-      // setTimeout(() => setCounter(!counter), 30000)
     }
-  }, [getLatest, counter, selectedGame, selectedTeam]);
+  }, [getLatest, selectedGame, selectedTeam]);
 
-  // }, [dispatch, params.sessionId], selectedGame, counter)
+  useEffect(() => {
+    const timerId = schedule();
+    return () => clearTimeout(timerId);
+  }, [counter]);
+
+  const schedule = () => {
+    const timerId = setTimeout(() => {
+      let currCount = countRef.current;
+      setCounter((currCount) => currCount + 1);
+      // console.log(counter);
+      if (counter >= refreshInterval - 1) {
+        if (isLiveSession && autoRefresh) {
+          getLatest();
+        }
+        setCounter(0);
+      }
+    }, 1000);
+
+    return timerId;
+  };
 
   if (loading) {
     return <Spinner />;
@@ -314,7 +353,48 @@ function Session() {
               Video Analysis
             </a>
           </div>
-          <div className="">{renderReport()}</div>
+          <div className="flex-col">
+            {isLiveSession ? (
+              <div className="flex gap-2">
+                {autoRefresh ? (
+                  <label className="text-sm">
+                    Auto-refresh in {refreshInterval - counter}s
+                  </label>
+                ) : (
+                  <label className="text-sm">Auto-refresh is off</label>
+                )}
+
+                {autoRefresh ? (
+                  <div className="">
+                    <div className="tooltip" data-tip="Turn Auto-refresh Off">
+                      <XCircleIcon
+                        className="w-5 h-5 ml-2 text-base-content cursor-pointer"
+                        onClick={() => setAutoRefresh(false)}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="">
+                    <div className="tooltip" data-tip="Turn Auto-refresh On">
+                      <CheckCircleIcon
+                        className="w-5 h-5 ml-2 text-base-content cursor-pointer"
+                        onClick={() => setAutoRefresh(true)}
+                      />
+                    </div>
+                  </div>
+                )}
+                <div className="tooltip" data-tip="Refresh Now">
+                  <ArrowPathIcon
+                    className="w-5 h-5 ml-2 text-base-content cursor-pointer"
+                    onClick={() => getLatest()}
+                  />
+                </div>
+              </div>
+            ) : (
+              <></>
+            )}
+            <div className="">{renderReport()}</div>
+          </div>
         </div>
       </>
     )

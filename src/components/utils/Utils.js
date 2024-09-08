@@ -517,3 +517,9 @@ export function functionTabPrimary(selected, rn, name, func) {
     </>
   );
 };
+
+export function convertSecondsToMMSS(secs) {
+  const minutes = Math.floor(secs / 60);
+  const seconds = secs - minutes * 60;
+  return pad(minutes, 2) + ":" + pad(seconds, 2);
+}
