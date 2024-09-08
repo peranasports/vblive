@@ -16,7 +16,11 @@ import Spinner from "../components/layout/Spinner";
 import { shareSession } from "../context/VBLiveAPI/VBLiveAPIAction";
 import Share from "../components/matches/Share";
 import VBLiveAPIContext from "../context/VBLiveAPI/VBLiveAPIContext";
-import { functionTabSecondary, unzipBuffer } from "../components/utils/Utils";
+import {
+  dayTimeCode,
+  functionTabSecondary,
+  unzipBuffer,
+} from "../components/utils/Utils";
 import { confirmAlert } from "react-confirm-alert";
 import "react-confirm-alert/src/react-confirm-alert.css";
 
@@ -39,6 +43,7 @@ function MatchesList() {
   const [searchText, setSearchText] = useState("");
   const [sortColumn, setSortColumn] = useState(0);
   const [sortAscending, setSortAscending] = useState(true);
+  const [thisDayTimeCode, setThisDayTimeCode] = useState(dayTimeCode());
   const [loading, setLoading] = useState(true);
   const [, forceUpdate] = useState(0);
 
@@ -57,14 +62,7 @@ function MatchesList() {
     await axios
       .request(config)
       .then((response) => {
-        // console.log(JSON.stringify(response.data));
         matches = response.data;
-        for (var m of matches) {
-          if (m.shared) {
-            const xshared = JSON.parse(m.shared.replace(/'/g, '"'));
-            m.shared = xshared;
-          }
-        }
         setLoading(false);
       })
       .catch((error) => {
@@ -80,7 +78,7 @@ function MatchesList() {
       maxBodyLength: Infinity,
       url:
         process.env.REACT_APP_VBLIVE_API_URL +
-        "/Session/GetSharedSessionsForServer?serverName=leco3110%40gmail.com&appName=VBLive",
+        `/Session/GetSharedSessionsForServer?serverName=${userEmail}&appName=VBLive`,
       headers: {},
     };
 
@@ -90,12 +88,6 @@ function MatchesList() {
       .then((response) => {
         // console.log(JSON.stringify(response.data));
         matches = response.data;
-        for (var m of matches) {
-          if (m.shared) {
-            const xshared = JSON.parse(m.shared.replace(/'/g, '"'));
-            m.shared = xshared;
-          }
-        }
         setLoading(false);
       })
       .catch((error) => {
@@ -209,6 +201,7 @@ function MatchesList() {
   };
 
   const doShareMatch = (match) => {
+    setThisDayTimeCode(dayTimeCode());
     setSelectedMatch(match);
     document.getElementById("modal-share").checked = true;
   };
@@ -222,14 +215,17 @@ function MatchesList() {
     for (var m of filteredMatches) {
       if (m.selected && m.selected === true) {
         ok = true;
-        m.shared = share;
+        m.shareStatus = share.shareStatus;
+        m.shareUsers = share.shareUsers;
         await shareSession(m, share);
       }
     }
     if (!ok) {
-      selectedMatch.shared = share;
-      await shareSession(selectedMatch, share);
+      selectedMatch.shareStatus = share.shareStatus;
+      selectedMatch.shareUsers = share.shareUsers;
+      await shareSession(selectedMatch);
     }
+    forceUpdate((n) => !n);
   };
 
   const getSessionById = async (sessionId) => {
@@ -371,14 +367,6 @@ function MatchesList() {
     </div>
   );
 
-  // const monitorFile = (file) => {
-  //   const fs = require("fs");
-  //   fs.watch("/path/to/file", (eventType, filename) => {
-  //     console.log(`Event type: ${eventType}`);
-  //     console.log(`Filename: ${filename}`);
-  //   });
-  // };
-
   const doInit = async () => {
     var ms = [];
     if (liveMatches && liveMatches.length > 0) {
@@ -468,14 +456,20 @@ function MatchesList() {
   }, [selectedScreen]);
 
   const getSharedColour = (match) => {
-    if (match.shared) {
-      if (match.shared.isPublic) {
+    if (match.shareStatus === undefined || match.shareStatus === null) {
+      if (match.shareStatus === 1) {
         return "mr-1.5 h-5 w-5 flex-shrink-0 text-success";
       } else {
         return "mr-1.5 h-5 w-5 flex-shrink-0 text-warning";
       }
     } else {
-      return "mr-1.5 h-5 w-5 flex-shrink-0";
+      if (match.shareStatus === 1) {
+        return "mr-1.5 h-5 w-5 flex-shrink-0 text-success";
+      } else if (match.shareStatus === 2) {
+        return "mr-1.5 h-5 w-5 flex-shrink-0 text-warning";
+      } else {
+        return "mr-1.5 h-5 w-5 flex-shrink-0 text-error";
+      }
     }
   };
 
@@ -726,12 +720,14 @@ function MatchesList() {
 
       <input type="checkbox" id="modal-share" className="modal-toggle" />
       <div className="modal">
-        <div className="modal-box sm:w-4/12 w-full max-w-5xl h-[70vh] shadow rounded-none">
+        <div className="modal-box sm:w-4/12 w-full max-w-5xl min-w-[480px] h-[70vh] shadow rounded-none">
           <h3 className="mb-4 font-bold text-2xl">Share</h3>
           <div className="flex flex-col">
             <div>
               <Share
-                match={selectedMatch}
+                shareStatus={selectedMatch && selectedMatch.shareStatus}
+                shareUsers={selectedMatch && selectedMatch.shareUsers}
+                currentTime={thisDayTimeCode}
                 onShare={(share) => doDoShare(share)}
               />
             </div>

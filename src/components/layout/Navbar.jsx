@@ -29,6 +29,11 @@ function Navbar({ title }) {
     navigate("/matcheslist", { state: st });
   };
 
+  const doPlaylists = () => {
+    const st = { userEmail: currentUser.email };
+    navigate("/playlistslist", { state: st });
+  };
+
   const getID = () => {
     return currentUser.email;
   };
@@ -55,6 +60,12 @@ function Navbar({ title }) {
                 onClick={() => doMatches()}
               >
                 Matches
+              </button>
+              <button
+                className="btn btn-ghost btn-sm rounded-btn"
+                onClick={() => doPlaylists()}
+              >
+                Play Lists
               </button>
               <button
                 className="btn btn-ghost btn-sm rounded-btn"

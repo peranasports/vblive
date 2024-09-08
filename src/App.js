@@ -19,6 +19,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { Analytics } from '@vercel/analytics/react';
 import MatchesList from "./pages/MatchesList";
 import MultiSessions from "./pages/MultiSessions";
+import PlaylistsList from "./pages/PlaylistsList";
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
                   <Route path="/signin" element={<SignIn />} />
                   <Route path="/signup" element={<SignUp />} />
                   <Route path="/matcheslist" element={<MatchesList />} />
+                  <Route path="/playlistslist" element={<PlaylistsList />} />
                   <Route path="/forgotpassword" element={<ForgotPassword />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/session" element={<Session />} />

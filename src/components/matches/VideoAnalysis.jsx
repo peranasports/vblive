@@ -876,9 +876,10 @@ function VideoAnalysis() {
       const fn = makeFilename("playlist", "vblive", "playlist");
       const buffer = JSON.stringify(pl);
       const st = {
-        sessionId: null,
         playlistFileData: buffer,
-        filename: fn,
+        filename: null,
+        playlists: null,
+        serverName: currentUser.email,
       };
       navigate("/playlist", { state: st });
 
@@ -1163,7 +1164,7 @@ function VideoAnalysis() {
       <div className="flex-col">
         <div className="flex h-full w-full" ref={refWindow}>
           <div className="flex-col min-w-[320px]">
-            <div className="flex justify-between gap-1 h-10 p-1 bg-base-300">
+            <div className="flex justify-between gap-1 h-10 p-1 bg-base-300 mt-1">
               <div className="flex gap-1">
                 {/* <label
                   htmlFor="modal-filters"
@@ -1173,7 +1174,7 @@ function VideoAnalysis() {
                 </label> */}
                 <div className="tooltip" data-tip="Filters">
                   <FunnelIcon
-                    className="w-8 h-8 p-1 bg-primary text-primary-content hover:bg-primary-focus cursor-pointer"
+                    className="w-8 h-8 p-1 bg-info text-info-content hover:bg-info-focus cursor-pointer"
                     onClick={() =>
                       (document.getElementById("modal-filters").checked = true)
                     }
@@ -1184,7 +1185,7 @@ function VideoAnalysis() {
                     <div className="tooltip" data-tip="Sets">
                       <ListBulletIcon
                         tabIndex={0}
-                        className="w-8 h-8 p-1 bg-primary text-primary-content hover:bg-primary-focus cursor-pointer"
+                        className="w-8 h-8 p-1 bg-info text-info-content hover:bg-info-focus cursor-pointer"
                       />
                     </div>
                     <ul
@@ -1203,7 +1204,7 @@ function VideoAnalysis() {
                     <div className="tooltip" data-tip="Sets">
                       <ListBulletIcon
                         tabIndex={0}
-                        className="w-8 h-8 p-1 bg-primary text-primary-content hover:bg-primary-focus cursor-pointer"
+                        className="w-8 h-8 p-1 bg-info text-info-content hover:bg-info-focus cursor-pointer"
                       />
                     </div>
                     <ul
@@ -1223,7 +1224,7 @@ function VideoAnalysis() {
                 <div className="dropdown" ref={menuRef}>
                   <div tabIndex={0} onClick={() => setMenuOpen(!menuOpen)}>
                     <div className="tooltip" data-tip="Play List">
-                      <VideoCameraIcon className="w-8 h-8 p-1 bg-primary text-primary-content hover:bg-primary-focus cursor-pointer" />
+                      <VideoCameraIcon className="w-8 h-8 p-1 bg-info text-info-content hover:bg-info-focus cursor-pointer" />
                     </div>
                   </div>
                   {menuOpen ? (
@@ -1250,14 +1251,14 @@ function VideoAnalysis() {
                 {isCollapseAll ? (
                   <div className="tooltip" data-tip="Expand All">
                     <ChevronDoubleDownIcon
-                      className="w-8 h-8 p-1 bg-primary text-primary-content hover:bg-primary-focus cursor-pointer"
+                      className="w-8 h-8 p-1 bg-info text-info-content hover:bg-info-focus cursor-pointer"
                       onClick={() => setIsCollapseAll(false)}
                     />
                   </div>
                 ) : (
                   <div className="tooltip" data-tip="Collapse All">
                     <ChevronDoubleUpIcon
-                      className="w-8 h-8 p-1 bg-primary text-primary-content hover:bg-primary-focus cursor-pointer"
+                      className="w-8 h-8 p-1 bg-info text-info-content hover:bg-info-focus cursor-pointer"
                       onClick={() => setIsCollapseAll(true)}
                     />
                   </div>
@@ -1268,7 +1269,7 @@ function VideoAnalysis() {
                 {matches.length === 1 ? (
                   <div className="tooltip" data-tip="Speed Radar">
                     <SignalIcon
-                      className="w-8 h-8 p-1 bg-primary text-primary-content hover:bg-primary-focus cursor-pointer"
+                      className="w-8 h-8 p-1 bg-info text-info-content hover:bg-info-focus cursor-pointer"
                       onClick={() => setShowRadarFile(!showRadarFile)}
                     />
                   </div>
@@ -1447,16 +1448,16 @@ function VideoAnalysis() {
                     <div className="flex gap-2">
                       <label
                         htmlFor="modal-timing"
-                        className="btn btn-sm bg-info rounded-none hover:btn-gray-900"
+                        className="btn btn-sm bg-info text-info-content rounded-none"
                       >
                         Timing
                       </label>
-                      <button
-                        className="btn btn-sm btn-info rounded-none hover:btn-gray-900"
+                      {/* <button
+                        className="btn btn-sm btn-info rounded-none"
                         onClick={() => doSaveFile()}
                       >
                         Save Video Settings to DVW File
-                      </button>
+                      </button> */}
                     </div>
                     {videoOffset !== 0 ? (
                       <></>
