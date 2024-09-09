@@ -10,6 +10,7 @@ function MatchSummary({
   teamSelected,
   onTeamSelected,
   onSaveToDatabase,
+  inDatabase,
 }) {
   const [currentGame, setCurrentGame] = useState(0);
   const [currentTeam, setCurrentTeam] = useState(0);
@@ -51,12 +52,16 @@ function MatchSummary({
                 : "OPPONENTS (" + matches.length + ")"}
             </button>
           </div>
-          <button
-            className="btn btn-sm btn-primary rounded-none"
-            onClick={() => onSaveToDatabase()}
-          >
-            Save to Database
-          </button>
+          {inDatabase === false ? (
+            <button
+              className="btn btn-sm btn-primary rounded-none"
+              onClick={() => onSaveToDatabase()}
+            >
+              Save to Database
+            </button>
+          ) : (
+            <></>
+          )}
         </div>
         {matches.length === 1 ? (
           <p className="ml-4 my-1 text-sm text-base-700">
@@ -69,7 +74,11 @@ function MatchSummary({
         {matches.length === 1 ? (
           <div className="ml-2 tabs tabs-boxed rounded-none">
             <a
-              className={gameSelected == 0 ? "tab tab-active rounded-none" : "tab rounded-none"}
+              className={
+                gameSelected == 0
+                  ? "tab tab-active rounded-none"
+                  : "tab rounded-none"
+              }
               onClick={() => {
                 doSelectGame(0);
               }}
@@ -79,7 +88,9 @@ function MatchSummary({
             {sortBy(matches[0].sets, "GameNumber").map((game, i) => (
               <a
                 className={
-                  gameSelected === game.GameNumber ? "tab tab-active rounded-none" : "tab rounded-none"
+                  gameSelected === game.GameNumber
+                    ? "tab tab-active rounded-none"
+                    : "tab rounded-none"
                 }
                 key={game.GameNumber}
                 onClick={() => {

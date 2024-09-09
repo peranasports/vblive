@@ -700,7 +700,7 @@ function MatchesList() {
                               <td className="table-cell">
                                 <p className="cursor-pointer flex items-center text-sm text-gray-500">
                                   <VideoCameraIcon
-                                    className="mr-1.5 h-5 w-5 flex-shrink-0"
+                                    className={match.videoOnlineUrl ? "mr-1.5 h-5 w-5 text-success flex-shrink-0" : "mr-1.5 h-5 w-5 text-base-content flex-shrink-0"}
                                     aria-hidden="true"
                                     onClick={() => doMatch(match)}
                                   />

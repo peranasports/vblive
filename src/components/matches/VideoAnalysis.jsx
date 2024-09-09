@@ -166,10 +166,10 @@ function VideoAnalysis() {
 
   const onSaveToDatabase = async () => {
     const ret = await storeSession(matches[0], currentUser);
-    if (ret === true) {
-      toast.success("Session uploaded successfully");
-    } else {
+    if (ret === 0) {
       toast.error("Error uploading session");
+    } else {
+      toast.success("Session uploaded successfully");
     }
   };
 

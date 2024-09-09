@@ -77,6 +77,7 @@ function Session() {
   const refreshInterval = 30; //refresh every 1 minutes
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [isLiveSession, setIsLiveSession] = useState(false);
+  const [inDatabase, setInDatabase] = useState(false);
 
   const getLatest = useCallback(async () => {
     dispatch({ type: "SET_LOADING" });
@@ -123,6 +124,7 @@ function Session() {
   }, [sessionId, selectedTeam]);
 
   useEffect(() => {
+    const indb = msession && msession.id ? true : false;
     if (dvwFileData !== undefined && dvwFileData !== null) {
       var m = generateMatch(dvwFileData);
       m.filename = filename;
@@ -133,6 +135,7 @@ function Session() {
       mx.videoOnlineUrl = msession && msession.videoOnlineUrl;
       mx.videoStartTimeSeconds = msession && msession.videoStartTimeSeconds;
       mx.videoOffset = msession && msession.videoOffset;
+      setInDatabase(indb);
       if (!mx.guid) {
         mx.guid = generateUUID();
       }
@@ -155,6 +158,7 @@ function Session() {
           : -1;
       mx.videoOffset =
         msession && msession.videoOffset ? msession.videoOffset : -1;
+      setInDatabase(indb);
       if (!mx.guid) {
         mx.guid = generateUUID();
       }
@@ -265,10 +269,10 @@ function Session() {
 
   const doUpload = async () => {
     const ret = await storeSession(match, currentUser);
-    if (ret === true) {
-      toast.success("Session uploaded successfully");
-    } else {
+    if (ret === 0) {
       toast.error("Error uploading session");
+    } else {
+      toast.success("Session uploaded successfully");
     }
   };
 
@@ -288,6 +292,7 @@ function Session() {
                 teamSelected={selectedTeam}
                 onTeamSelected={(tmn) => setSelectedTeam(tmn)}
                 onSaveToDatabase={() => doUpload()}
+                inDatabase={inDatabase}
               ></MatchSummary>
             </div>
           )}
