@@ -21,26 +21,25 @@ function Sideout({
 
   useEffect(() => {
     var sis = null;
-    // if (matches.length === 0) {
-    //   if (selectedGame === 0) {
-    //     sis =
-    //       selectedTeam === 0
-    //         ? matches[0].teamA.statsItems[0]
-    //         : matches[0].teamB.statsItems[0];
-    //   } else {
-    //     sis =
-    //       selectedTeam === 0
-    //         ? matches[0].sets[selectedGame - 1].teamAStatsItems[0]
-    //         : matches[0].sets[selectedGame - 1].teamBStatsItems[0];
-    //   }
-    // } else if (matches.length > 1) {
-    //   const allsis = getMultiMatchesStatsItems(matches, team, selectedTeam);
-    //   sis = allsis[0];
-    // }
-
-    const allsis = getMultiMatchesStatsItems(matches, team, selectedTeam);
-    sis = allsis[0];
-
+    if (matches.length === 1) {
+      if (selectedGame === 0) {
+        sis =
+          selectedTeam === 0
+            ? matches[0].teamA.statsItems[0]
+            : matches[0].teamB.statsItems[0];
+      } else {
+        sis =
+          selectedTeam === 0
+            ? matches[0].sets[selectedGame - 1].teamAStatsItems[0]
+            : matches[0].sets[selectedGame - 1].teamBStatsItems[0];
+      }
+    } else if (matches.length > 1) {
+      const allsis = getMultiMatchesStatsItems(matches, team, selectedTeam);
+      sis = allsis[0];
+    } else {
+      const allsis = getMultiMatchesStatsItems(matches, team, selectedTeam);
+      sis = allsis[0];
+    }
     var rotsideouts = [];
     for (var nr = 1; nr < 7; nr++) {
       var rotsideout = {

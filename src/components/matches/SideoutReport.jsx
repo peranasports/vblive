@@ -2,7 +2,11 @@ import Sideout from "./Sideout";
 import { useState, useEffect } from "react";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { sortBy } from "lodash";
-import { addStatsItem, calculateAllStats, createStatsItem } from "../utils/StatsItem";
+import {
+  addStatsItem,
+  calculateAllStats,
+  createStatsItem,
+} from "../utils/StatsItem";
 import { getMultiMatchesStatsItems } from "../utils/Utils";
 
 function SideoutReport({
@@ -28,26 +32,25 @@ function SideoutReport({
 
   useEffect(() => {
     var sis = null;
-    // if (matches.length === 0) {
-    //   if (selectedGame === 0) {
-    //     sis =
-    //       selectedTeam === 0
-    //         ? matches[0].teamA.statsItems[0]
-    //         : matches[0].teamB.statsItems[0];
-    //   } else {
-    //     sis =
-    //       selectedTeam === 0
-    //         ? matches[0].sets[selectedGame - 1].teamAStatsItems[0]
-    //         : matches[0].sets[selectedGame - 1].teamBStatsItems[0];
-    //   }
-    // } else if (matches.length > 1) {
-    //     const allsis = getMultiMatchesStatsItems(matches, team, selectedTeam);
-    //     sis = allsis[0];
-    // }
-
-    const allsis = getMultiMatchesStatsItems(matches, team, selectedTeam);
-    sis = allsis[0];
-
+    if (matches.length === 1) {
+      if (selectedGame === 0) {
+        sis =
+          selectedTeam === 0
+            ? matches[0].teamA.statsItems[0]
+            : matches[0].teamB.statsItems[0];
+      } else {
+        sis =
+          selectedTeam === 0
+            ? matches[0].sets[selectedGame - 1].teamAStatsItems[0]
+            : matches[0].sets[selectedGame - 1].teamBStatsItems[0];
+      }
+    } else if (matches.length > 1) {
+      const allsis = getMultiMatchesStatsItems(matches, team, selectedTeam);
+      sis = allsis[0];
+    } else {
+      const allsis = getMultiMatchesStatsItems(matches, team, selectedTeam);
+      sis = allsis[0];
+    }
     var fbkills = 0;
     var fboppserveerrors = 0;
     var fbopperrors = 0;
@@ -118,12 +121,16 @@ function SideoutReport({
 
   const teamname = () => {
     if (matches.length === 0) {
-        return selectedTeam === 0 ? team.toUpperCase() : matches[0].teamB.Name.toUpperCase();
+      return selectedTeam === 0
+        ? team.toUpperCase()
+        : matches[0].teamB.Name.toUpperCase();
     } else if (matches.length > 1) {
-        return selectedTeam === 0 ? team.toUpperCase() : "OPPONENTS (" + matches.length + ")";
+      return selectedTeam === 0
+        ? team.toUpperCase()
+        : "OPPONENTS (" + matches.length + ")";
     }
     return "";
-  }
+  };
 
   return (
     <div>
@@ -133,9 +140,7 @@ function SideoutReport({
           <div className="flex space-x-2 justify-end"></div>
           <div className="h-full">
             <p className="mt-3"></p>
-            <p className="text-3xl font-bold">
-              {teamname}
-            </p>
+            <p className="text-3xl font-bold">{teamname}</p>
             <Sideout
               matches={matches}
               team={team}
