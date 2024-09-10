@@ -22,6 +22,7 @@ import Share from "../components/matches/Share";
 import VBLiveAPIContext from "../context/VBLiveAPI/VBLiveAPIContext";
 import {
   dayTimeCode,
+  decodeHtml,
   functionTabSecondary,
   unzipBuffer,
 } from "../components/utils/Utils";
@@ -61,6 +62,11 @@ function PlaylistsList() {
       .request(config)
       .then((response) => {
         playlists = response.data;
+        for (var pl of playlists) {
+          pl.description = decodeHtml(pl.description);
+          pl.comments = decodeHtml(pl.comments);
+          pl.tags = decodeHtml(pl.tags);
+        }
         setLoading(false);
       })
       .catch((error) => {
@@ -85,6 +91,11 @@ function PlaylistsList() {
       .request(config)
       .then((response) => {
         playlists = response.data;
+        for (var pl of playlists) {
+          pl.description = decodeHtml(pl.description);
+          pl.comments = decodeHtml(pl.comments);
+          pl.tags = decodeHtml(pl.tags);
+        }
         setLoading(false);
       })
       .catch((error) => {
@@ -467,7 +478,7 @@ function PlaylistsList() {
                               <td className="table-cell">
                                 {new Date(
                                   playlist.dateInSeconds * 1000
-                                ).toLocaleString()}
+                                ).toLocaleDateString()}
                               </td>
                               {selectedScreen === 0 ? (
                                 <>

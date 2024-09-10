@@ -440,9 +440,9 @@ export function getMultiMatchesStatsItems(matches, team, selectedTeam) {
   for (var m of matches) {
     for (var s of m.sets) {
       const hometeamsi = s.teamAStatsItems;
-        // m.teamA.Name === team ? s.teamAStatsItems : s.teamBStatsItems;
+      // m.teamA.Name === team ? s.teamAStatsItems : s.teamBStatsItems;
       const awayteamsi = s.teamBStatsItems;
-        // m.teamA.Name === team ? s.teamBStatstems : s.teamAStatsItems;
+      // m.teamA.Name === team ? s.teamBStatstems : s.teamAStatsItems;
       for (var si of hometeamsi) {
         const plkey = si.player
           ? si.player.FirstName + "_" + si.player.LastName
@@ -484,7 +484,10 @@ export function getMultiMatchesStatsItems(matches, team, selectedTeam) {
 
 export function dayTimeCode() {
   var d = new Date();
-  const s = `${d.getFullYear()}${pad(d.getMonth() + 1, 2)}${pad(d.getDate(), 2)}${pad(d.getHours(), 2)}${pad(d.getMinutes(), 2)}${pad(d.getSeconds(), 2)}`;
+  const s = `${d.getFullYear()}${pad(d.getMonth() + 1, 2)}${pad(
+    d.getDate(),
+    2
+  )}${pad(d.getHours(), 2)}${pad(d.getMinutes(), 2)}${pad(d.getSeconds(), 2)}`;
   return s;
 }
 
@@ -493,7 +496,9 @@ export function functionTabSecondary(selected, rn, name, func) {
     <>
       <div
         className={
-          selected ? "px-2 py-1 bg-secondary text-secondary-content cursor-pointer" : "px-2 py-1 bg-transparent text-base-content cursor-pointer"
+          selected
+            ? "px-2 py-1 bg-secondary text-secondary-content cursor-pointer"
+            : "px-2 py-1 bg-transparent text-base-content cursor-pointer"
         }
         onClick={() => func(rn)}
       >
@@ -501,14 +506,16 @@ export function functionTabSecondary(selected, rn, name, func) {
       </div>
     </>
   );
-};
+}
 
 export function functionTabPrimary(selected, rn, name, func) {
   return (
     <>
       <div
         className={
-          selected ? "px-2 py-1 bg-primary text-secondary-content cursor-pointer" : "px-2 py-1 bg-transparent text-base-content cursor-pointer"
+          selected
+            ? "px-2 py-1 bg-primary text-secondary-content cursor-pointer"
+            : "px-2 py-1 bg-transparent text-base-content cursor-pointer"
         }
         onClick={() => func(rn)}
       >
@@ -516,10 +523,36 @@ export function functionTabPrimary(selected, rn, name, func) {
       </div>
     </>
   );
-};
+}
 
 export function convertSecondsToMMSS(secs) {
   const minutes = Math.floor(secs / 60);
   const seconds = secs - minutes * 60;
   return pad(minutes, 2) + ":" + pad(seconds, 2);
+}
+
+export function escapeHtml(str) {
+  var map = {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;",
+  };
+  return str.replace(/[&<>"']/g, function (m) {
+    return map[m];
+  });
+}
+
+export function decodeHtml(str) {
+  var map = {
+    "&amp;": "&",
+    "&lt;": "<",
+    "&gt;": ">",
+    "&quot;": '"',
+    "&#039;": "'",
+  };
+  return str.replace(/&amp;|&lt;|&gt;|&quot;|&#039;/g, function (m) {
+    return map[m];
+  });
 }

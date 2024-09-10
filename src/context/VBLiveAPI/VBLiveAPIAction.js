@@ -1,5 +1,6 @@
 import axios from "axios";
 import { myzip } from "../../components/utils/zip";
+import { escapeHtml } from "../../components/utils/Utils";
 const VBLIVE_API_URL = process.env.REACT_APP_VBLIVE_API_URL;
 
 const vbliveapi = axios.create({
@@ -59,7 +60,14 @@ export const getLatestStats = async (sessionId, lastTime) => {
 };
 
 export const storeSession = async (match, currentUser) => {
-  const desc = match.teamA.Name + " vs " + match.teamB.Name;
+  const teamAName = escapeHtml(match.teamA.Name);
+  const teamBName = escapeHtml(match.teamB.Name);
+  const tournamentName = match.tournamentName
+    ? match.tournamentName.length === 0
+      ? "?"
+      : escapeHtml(match.tournamentName)
+    : "?";
+  const desc = teamAName + " vs " + teamBName;
   const seconds = match.TrainingDate.getTime() / 1000;
   const voffset = match.videoOffset ? match.videoOffset : -1;
   const vstarttime = match.videoStartTimeSeconds
@@ -72,36 +80,45 @@ export const storeSession = async (match, currentUser) => {
     sc += game.HomeScore + "-" + game.AwayScore;
   }
   const buffer = myzip(match.buffer);
-  const s = `VBLive|${
-    currentUser.email
-  }|${desc}|${match.TrainingDate.toLocaleDateString()}|${match.teamA.Name}|${
-    match.teamB.Name
-  }|${match.tournamentName}|${sc}|${vurl}|${voffset}|${vstarttime}|${seconds}`;
-  const qs = require("qs");
-  let data = JSON.stringify(buffer);
+
   const VBLIVE_API_URL = process.env.REACT_APP_VBLIVE_API_URL;
+  const qs = require("qs");
+  let data = qs.stringify({
+    appName: "VBLive",
+    serverName: currentUser.email,
+    scores: sc,
+    videoOnlineUrl: vurl,
+    teamA: teamAName,
+    teamB: teamBName,
+    sessionDateTimeInSeconds: seconds,
+    tournament: tournamentName,
+    videoStartTimeSeconds: vstarttime,
+    videoOffset: voffset,
+    sessionDateString: match.TrainingDate.toLocaleDateString(),
+    description: desc,
+    stats: buffer,
+  });
+
   let config = {
     method: "post",
     maxBodyLength: Infinity,
-    url: `${VBLIVE_API_URL}/Session/StoreSession?matchInfo=${s}`,
+    url: `${VBLIVE_API_URL}/Session/StoreSession`,
     headers: {
-      "Content-Type": "application/json",
+      "Content-Type": "application/x-www-form-urlencoded",
     },
     data: data,
   };
 
-  var ret = false;
+  var ret = 0;
   await axios
     .request(config)
     .then((response) => {
+      console.log(JSON.stringify(response.data));
       ret = response.data;
-      // console.log(JSON.stringify(response.data));
-      // toast.success("Uploaded match data successfully!");
     })
     .catch((error) => {
-      ret = false;
-      // toast.error("Error uploading match data");
-      // console.log(error);
+      console.log(error);
+      ret = 0;
     });
   return ret;
 };
@@ -140,13 +157,13 @@ export const storePlaylist = async (playlist) => {
   const VBLIVE_API_URL = process.env.REACT_APP_VBLIVE_API_URL;
   const qs = require("qs");
   let data = qs.stringify({
-    description: playlist.description,
-    comments: playlist.comments,
+    description: escapeHtml(playlist.description),
+    comments: escapeHtml(playlist.comments),
     playlists: playlist.playlists,
     appName: playlist.appName,
     serverName: playlist.serverName,
     dateInSeconds: Number.parseInt(playlist.dateInSeconds),
-    tags: playlist.tags,
+    tags: escapeHtml(playlist.tags),
     shareStatus: playlist.shareStatus,
     shareUsers: playlist.shareUsers.length > 0 ? playlist.shareUsers : "?",
   });
