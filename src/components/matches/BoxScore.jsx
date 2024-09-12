@@ -4,27 +4,34 @@ import {
   addStatsItem,
   calculateAllStats,
   createStatsItem,
+  hasStats,
 } from "../utils/StatsItem";
 
 function BoxScore({ matches, team, selectedGame, selectedTeam }) {
   const [loading, setLoading] = useState(false);
   const [shortHeader, setShortHeader] = useState(true);
   const [statsItems, setStatsItems] = useState([]);
+  const [filteredStatsItems, setFilteredStatsItems] = useState([]);
+  const [showAllPlayers, setShowAllPlayers] = useState(false);
 
   useEffect(() => {
     if (matches && matches.length === 1) {
+      var sis = null;
       if (selectedGame === 0) {
-        setStatsItems(
+        sis =
           selectedTeam === 0
             ? matches[0].teamA.statsItems
-            : matches[0].teamB.statsItems
-        );
+            : matches[0].teamB.statsItems;
       } else {
-        var sis =
+        sis =
           selectedTeam === 0
             ? matches[0].sets[selectedGame - 1].teamAStatsItems
             : matches[0].sets[selectedGame - 1].teamBStatsItems;
+      }
+      if (showAllPlayers) {
         setStatsItems(sis);
+      } else {
+        setStatsItems(sis.filter((si) => hasStats(si)));
       }
     } else if (matches && matches.length > 1) {
       var st = {
@@ -38,9 +45,10 @@ function BoxScore({ matches, team, selectedGame, selectedTeam }) {
           const awayteamsi =
             m.teamA.Name === team ? s.teamBStatsItems : s.teamAStatsItems;
           for (var si of hometeamsi) {
-            const plkey = si.player ? si.player.FirstName + "_" + si.player.LastName : si.Name;
-            let plobj =
-              st.teamAStatsItems[plkey];
+            const plkey = si.player
+              ? si.player.FirstName + "_" + si.player.LastName
+              : si.Name;
+            let plobj = st.teamAStatsItems[plkey];
             if (plobj === undefined) {
               plobj = createStatsItem(si.player, s);
               st.teamAStatsItems[plkey] = plobj;
@@ -49,9 +57,10 @@ function BoxScore({ matches, team, selectedGame, selectedTeam }) {
             calculateAllStats(plobj);
           }
           for (var si of awayteamsi) {
-            const plkey = si.player ? si.player.FirstName + "_" + si.player.LastName : si.Name;
-            let plobj =
-              st.teamBStatsItems[plkey];
+            const plkey = si.player
+              ? si.player.FirstName + "_" + si.player.LastName
+              : si.Name;
+            let plobj = st.teamBStatsItems[plkey];
             if (plobj === undefined) {
               plobj = createStatsItem(si.player, s);
               st.teamBStatsItems[plkey] = plobj;
@@ -71,9 +80,13 @@ function BoxScore({ matches, team, selectedGame, selectedTeam }) {
           sis.push(st.teamBStatsItems[key]);
         }
       }
-      setStatsItems(sis);
+      if (showAllPlayers) {
+        setStatsItems(sis);
+      } else {
+        setStatsItems(sis.filter((si) => hasStats(si)));
+      }
     }
-  }, [selectedGame, selectedTeam]);
+  }, [selectedGame, selectedTeam, showAllPlayers]);
 
   // if (loading) {
   //     return <Spinner />
@@ -96,6 +109,16 @@ function BoxScore({ matches, team, selectedGame, selectedTeam }) {
               className="btn btn-sm btn-secondary rounded-none my-1"
             >
               {shortHeader ? "Show Full Headers" : "Show Short Headers"}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setShowAllPlayers(!showAllPlayers);
+              }}
+              className="ml-2 btn btn-sm btn-secondary rounded-none my-1"
+            >
+              {showAllPlayers ? "Show Less Players" : "Show All Players"}
             </button>
             <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
               <table className="min-w-full divide-y divide-gray-300">

@@ -78,6 +78,7 @@ function Session() {
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [isLiveSession, setIsLiveSession] = useState(false);
   const [inDatabase, setInDatabase] = useState(false);
+  const [lastUtcLastUpdate, setLastUtcLastUpdate] = useState(null);
 
   const getLatest = useCallback(async () => {
     dispatch({ type: "SET_LOADING" });
@@ -86,10 +87,26 @@ function Session() {
     dispatch({ type: "GET_SESSION", payload: sessionData });
     var m = null;
     var appname = null;
-    if (sessionData.appName === "VBLive") {
-      var buffer = myunzip(sessionData.stats);
+    if (sessionData.utcLastUpdate)
+    {
+      var now = new Date();
+      var utc_timestamp =
+        Date.UTC(
+          now.getUTCFullYear(),
+          now.getUTCMonth(),
+          now.getUTCDate(),
+          now.getUTCHours(),
+          now.getUTCMinutes(),
+          now.getUTCSeconds(),
+          now.getUTCMilliseconds()
+        );
+      setIsLiveSession(utc_timestamp / 1000 - sessionData.utcLastUpdate < 300);
+      setLastUtcLastUpdate(sessionData.utcLastUpdate);
+    }
+    if (sessionData.appName === "DVMate") {
+      var buffer = unzipBuffer(sessionData.stats);
       if (buffer.includes("DATAVOLLEY")) {
-        appname = "DataVolley";
+        appname = "DVMate";
         m = initWithDVWCompressedBuffer(sessionData.stats);
       } else {
         appname = "VBStats";
@@ -113,7 +130,7 @@ function Session() {
           : parseLatestDVWStats(latestData, m);
       mx = calculatePSVBStats(mx);
     } else {
-      appname = "DataVolley";
+      appname = "DVMate";
       mx = calculateDVWStats(m);
     }
     mx.app = appname;
@@ -121,6 +138,7 @@ function Session() {
     // console.log('sessionId, match=', params.sessionId, mx)
     mx.buffer = unzipBuffer(sessionData.stats);
     setMatch(mx);
+    setCounter(0);
   }, [sessionId, selectedTeam]);
 
   useEffect(() => {
@@ -167,7 +185,7 @@ function Session() {
       setIsLiveSession(false);
       forceUpdate((n) => !n);
     } else {
-      setIsLiveSession(true);
+      // setIsLiveSession(true);
       getLatest();
     }
   }, [getLatest, selectedGame, selectedTeam]);
@@ -361,6 +379,7 @@ function Session() {
           <div className="flex-col">
             {isLiveSession ? (
               <div className="flex gap-2">
+                <div className="text-sm font-bold text-white bg-red-700 px-2 h-5">LIVE</div>
                 {autoRefresh ? (
                   <label className="text-sm">
                     Auto-refresh in {refreshInterval - counter}s

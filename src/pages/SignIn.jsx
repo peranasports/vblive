@@ -91,26 +91,9 @@ function SignIn() {
       );
 
       if (userCredential.user) {
-        navigate("/input");
-        // var user = await fetchUser(userCredential.user);
-        // console.log(user.role + " " + user.email);
-        // if (user.role === 1) {
-        //   navigate("/admin", { state: user });
-        // } else if (user.role === 2) {
-        //   if (user.active === false) {
-        //     toast.error("You are no longer an active user at ts-online");
-        //   } else {
-        //     navigate("/coach", { state: user.uid });
-        //   }
-        // } else if (user.role === 3) {
-        //   if (user.active === false) {
-        //     toast.error("You are no longer an active user at CRMS");
-        //   } else {
-        //     navigate("/student", { state: user.uid });
-        //   }
-        // } else if (user.role === 0) {
-        //   navigate("/import-psts", { state: user });
-        // }
+        // navigate("/input");
+        const st = { liveMatches: [], userEmail: email };
+        navigate("/matcheslist", { state: st });    
       }
     } catch (error) {
       toast.error("Error Signing In\n" + error.message);

@@ -360,10 +360,12 @@ export function addStatsItem(ssSource, ssDestination) {
       ssDestination.SideOutFirstBallSpikes[i] +=
         ssSource.SideOutFirstBallSpikes[i];
       ssDestination.SideOutOppErrors[i] += ssSource.SideOutOppErrors[i];
-      ssDestination.SideOutFirstBallOppServeError[i] += ssSource.SideOutFirstBallOppServeError[i];
-      ssDestination.SideOutFirstBallOppErrors[i] += ssSource.SideOutFirstBallOppErrors[i];
+      ssDestination.SideOutFirstBallOppServeError[i] +=
+        ssSource.SideOutFirstBallOppServeError[i];
+      ssDestination.SideOutFirstBallOppErrors[i] +=
+        ssSource.SideOutFirstBallOppErrors[i];
       ssDestination.SideOutKills[i] += ssSource.SideOutKills[i];
-      ssDestination.SideOutOppErrors[i] += ssSource.SideOutOppErrors[i];    
+      ssDestination.SideOutOppErrors[i] += ssSource.SideOutOppErrors[i];
     }
   }
 
@@ -479,7 +481,9 @@ export function calculateAllStats(si) {
     si.SideOutFirstBallPercent[i] =
       !tot || tot == 0 ? 0 : (si.SideOutFirstBalls[i] * 100) / tot;
     si.SideOutTransitionPercent[i] =
-      !tot || tot == 0 ? 0 : ((si.SideOuts[i] - si.SideOutFirstBalls[i]) * 100) / tot;
+      !tot || tot == 0
+        ? 0
+        : ((si.SideOuts[i] - si.SideOutFirstBalls[i]) * 100) / tot;
     si.SideOutOppErrorPercent[i] =
       !tot || tot == 0 ? 0 : (si.SideOutOppErrors[i] * 100) / tot;
     si.SideOutFirstBallKillPercent[i] =
@@ -1630,4 +1634,53 @@ function rotateLineup(pls) {
   var pl6 = pls[5];
 
   return [pl2, pl3, pl4, pl5, pl6, pl1];
+}
+
+export function hasStats(si) {
+  const total =
+    si.Pass0 +
+    si.Pass05 +
+    si.Pass1 +
+    si.Pass2 +
+    si.Pass3 +
+    si.PassTotal +
+    si.PassTotalPoints +
+    si.Serve0 +
+    si.Serve1 +
+    si.Serve2 +
+    si.Serve3 +
+    si.Serve4 +
+    si.ServeTotal +
+    si.ServeTotalSpeed +
+    si.ServeAverageSpeed +
+    si.Set0 +
+    si.Set1 +
+    si.Set2 +
+    si.Set3 +
+    si.Spike0 +
+    si.Spike1 +
+    si.Spike2 +
+    si.Spike3 +
+    si.SpikeTotal +
+    si.SpikeBlocked +
+    si.Blck0 +
+    si.Blck05 +
+    si.Blck1 +
+    si.Blck2 +
+    si.Blck3 +
+    si.Blck4 +
+    si.BlckSolo +
+    si.BlckAssist +
+    si.BHE +
+    si.Lift +
+    si.LiftServe +
+    si.LiftBlock +
+    si.LiftAttack +
+    si.Dig +
+    si.Dig0 +
+    si.Dig05 +
+    si.Dig1 +
+    si.Dig2 +
+    si.Dig3;
+  return total > 0;
 }

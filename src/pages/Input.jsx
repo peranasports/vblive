@@ -65,85 +65,91 @@ function Input() {
   };
 
   return (
-    <div>
-      <SessionSearch />
-      <div className="flex my-4">
-        <input
-          type="file"
-          id="selectedDVWFile"
-          ref={dvRef}
-          style={{ display: "none" }}
-          onChange={handleDVWFile}
-          onClick={(event) => {
-            event.target.value = null;
-          }}
-        />
-        <input
-          type="button"
-          className="btn btn-sm w-60"
-          value="Load DVW file..."
-          onClick={() => document.getElementById("selectedDVWFile").click()}
-        />
-        <label className="label ml-4">
-          <span className="label-text">
-            {dvwFileName === null
-              ? "load a local DataVolley file"
-              : dvwFileName}
-          </span>
-        </label>
-      </div>
+    <div className="flex min-h-full justify-center px-4 py-12">
+      <div className="flex-col">
+        {/* <SessionSearch /> */}
+        <div className="flex my-4">
+          <input
+            type="file"
+            id="selectedDVWFile"
+            ref={dvRef}
+            style={{ display: "none" }}
+            onChange={handleDVWFile}
+            onClick={(event) => {
+              event.target.value = null;
+            }}
+          />
+          <input
+            type="button"
+            className="btn btn-sm btn-info rounded-none w-60"
+            value="Load DVW file..."
+            onClick={() => document.getElementById("selectedDVWFile").click()}
+          />
+          <label className="label ml-4">
+            <span className="label-text">
+              {dvwFileName === null
+                ? "load a local DataVolley file"
+                : dvwFileName}
+            </span>
+          </label>
+        </div>
 
-      <div className="flex my-4">
-        <input
-          type="file"
-          id="selectedPSVBFile"
-          ref={psRef}
-          style={{ display: "none" }}
-          onChange={handlePSVBFile}
-          onClick={(event) => {
-            event.target.value = null;
-          }}
-        />
-        <input
-          type="button"
-          className="btn btn-sm w-60"
-          value="Load PSVB file..."
-          onClick={() => document.getElementById("selectedPSVBFile").click()}
-        />
-        <label className="label ml-4">
-          <span className="label-text">
-            {psvbFileName === null ? "load a local VBStats file" : psvbFileName}
-          </span>
-        </label>
-      </div>
+        <div className="flex my-4">
+          <input
+            type="file"
+            id="selectedPSVBFile"
+            ref={psRef}
+            style={{ display: "none" }}
+            onChange={handlePSVBFile}
+            onClick={(event) => {
+              event.target.value = null;
+            }}
+          />
+          <input
+            type="button"
+            className="btn btn-sm btn-info rounded-none w-60"
+            value="Load PSVB file..."
+            onClick={() => document.getElementById("selectedPSVBFile").click()}
+          />
+          <label className="label ml-4">
+            <span className="label-text">
+              {psvbFileName === null
+                ? "load a local VBStats file"
+                : psvbFileName}
+            </span>
+          </label>
+        </div>
 
-      <div className="flex my-4">
-        <input
-          type="file"
-          id="selectedPlaylistFile"
-          ref={plRef}
-          style={{ display: "none" }}
-          onChange={handlePlaylistFile}
-          onClick={(event) => {
-            event.target.value = null;
-          }}
-        />
-        <input
-          type="button"
-          className="btn btn-sm w-60"
-          value="Load play list file..."
-          onClick={() =>
-            document.getElementById("selectedPlaylistFile").click()
-          }
-        />
-        <label className="label ml-4">
-          <span className="label-text">
-            {playlistFileName === null ? "load a play list" : playlistFileName}
-          </span>
-        </label>
-      </div>
+        <div className="flex my-4">
+          <input
+            type="file"
+            id="selectedPlaylistFile"
+            ref={plRef}
+            style={{ display: "none" }}
+            onChange={handlePlaylistFile}
+            onClick={(event) => {
+              event.target.value = null;
+            }}
+          />
+          <input
+            type="button"
+            className="btn btn-sm btn-info rounded-none w-60"
+            value="Load play list file..."
+            onClick={() =>
+              document.getElementById("selectedPlaylistFile").click()
+            }
+          />
+          <label className="label ml-4">
+            <span className="label-text">
+              {playlistFileName === null
+                ? "load a play list"
+                : playlistFileName}
+            </span>
+          </label>
+        </div>
 
-      <SessionResults />
+        {/* <SessionResults /> */}
+      </div>
     </div>
   );
 }

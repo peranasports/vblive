@@ -267,6 +267,13 @@ function MatchesList() {
       .then((response) => {
         // console.log(JSON.stringify(response.data));
         session = response.data[0];
+        session.teamA = decodeHtml(session.teamA);
+        session.teamB = decodeHtml(session.teamB);
+        session.description = decodeHtml(session.description);
+        session.tournament = session.tournament
+          ? decodeHtml(session.tournament)
+          : "";
+
       })
       .catch((error) => {
         console.log(error);
@@ -572,6 +579,12 @@ function MatchesList() {
             />
           </div>
           <div className="flex gap-2">
+            <button
+              className="btn btn-sm btn-error rounded-none"
+              onClick={() => navigate("/live")}
+            >
+              Live
+            </button>
             <button
               className="btn btn-sm btn-info rounded-none"
               onClick={() => navigate("/input")}

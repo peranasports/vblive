@@ -181,15 +181,27 @@ export function generateMatch(str) {
             match.setterCalls = [];
             match.HomeScore = 0;
             match.AwayScore = 0;
-            match.TrainingDate = tryParseDateFromString(
-              matchdate + " " + matchtime.replace(".", ":"),
-              "mdy"
-            );
+            const datestr = matchdate + " " + matchtime.replace(/\./g, ":");
+            match.TrainingDate = tryParseDateFromString(datestr, "mdy");
             if (match.TrainingDate === undefined) {
-              match.TrainingDate = tryParseDateFromString(
-                matchdate + " " + matchtime.replace(".", ":"),
-                "ymd"
-              );
+              match.TrainingDate = tryParseDateFromString(datestr, "ymd");
+              if (match.TrainingDate === undefined) {
+                const tk1s = matchdate.split("/");
+                const day = Number.parseInt(tk1s[0]);
+                const month = Number.parseInt(tk1s[1]);
+                if (month > 12) {
+                  const temp = day;
+                  day = month;
+                  month = temp;
+                }
+                const year = Number.parseInt(tk1s[2]);
+                const tk2s = matchtime.split(".");
+                const hour = Number.parseInt(tk2s[0]);
+                const minute = Number.parseInt(tk2s[1]);
+                const second = Number.parseInt(tk2s[2]);
+                const dd = new Date(year, month - 1, day, hour, minute, second);
+                match.TrainingDate = dd;
+              }
             }
             match.tournamentName = sm[3];
             match.dvstring = s;

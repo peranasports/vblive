@@ -22,6 +22,20 @@ export const getSessions = async (appName, serverName) => {
   return sessionData;
 };
 
+export const getSessionsForServer = async (serverName) => {
+  const params = new URLSearchParams({
+    serverName: serverName,
+  });
+
+  vbliveapi.defaults.withCredentials = true;
+
+  const response = await vbliveapi.get(
+    `Session/GetSessionsForServer?${params}`
+  );
+  var sessionData = { sessions: response.data, serveName: serverName };
+  return sessionData;
+};
+
 export const getSessionInfoForServer = async (serverName) => {
   const params = new URLSearchParams({
     serverName: serverName,
@@ -102,7 +116,7 @@ export const storeSession = async (match, currentUser) => {
   let config = {
     method: "post",
     maxBodyLength: Infinity,
-    url: `${VBLIVE_API_URL}/Session/StoreSession`,
+    url: `${VBLIVE_API_URL}/Session/StoreSessionUsingForm`,
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
     },

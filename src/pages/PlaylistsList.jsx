@@ -216,17 +216,20 @@ function PlaylistsList() {
       headers: {},
     };
 
-    var session = null;
+    var pl = null;
     await axios
       .request(config)
       .then((response) => {
         // console.log(JSON.stringify(response.data));
-        session = response.data[0];
+        pl = response.data[0];
+        pl.description = decodeHtml(pl.description);
+        pl.comments = decodeHtml(pl.comments);
+        pl.tags = decodeHtml(pl.tags);
       })
       .catch((error) => {
         console.log(error);
       });
-    return session;
+    return pl;
   };
 
   const doPlaylist = async (playlist) => {

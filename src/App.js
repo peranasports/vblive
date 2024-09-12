@@ -20,6 +20,7 @@ import { Analytics } from '@vercel/analytics/react';
 import MatchesList from "./pages/MatchesList";
 import MultiSessions from "./pages/MultiSessions";
 import PlaylistsList from "./pages/PlaylistsList";
+import Live from "./pages/Live";
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
                   <Route path="/" element={<Home />} />
                   <Route path="/signin" element={<SignIn />} />
                   <Route path="/signup" element={<SignUp />} />
+                  <Route path="/live" element={<Live />} />
                   <Route path="/matcheslist" element={<MatchesList />} />
                   <Route path="/playlistslist" element={<PlaylistsList />} />
                   <Route path="/forgotpassword" element={<ForgotPassword />} />

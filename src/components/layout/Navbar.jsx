@@ -50,8 +50,11 @@ function Navbar({ title }) {
           </div>
           <div className="flex-col px2 mx-2 w-full">
             <div className="flex justify-end">
-              <Link to="/" className="btn btn-ghost btn-sm rounded-btn">
-                Home
+              <Link to="/live" className="btn btn-ghost btn-sm rounded-btn">
+                Live
+              </Link>
+              <Link to="/input" className="btn btn-ghost btn-sm rounded-btn">
+                Import
               </Link>
               <button
                 className="btn btn-ghost btn-sm rounded-btn"
