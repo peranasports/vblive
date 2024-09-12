@@ -73,7 +73,7 @@ export const storeSession = async (match, currentUser) => {
   const vstarttime = match.videoStartTimeSeconds
     ? match.videoStartTimeSeconds
     : -1;
-  const vurl = match.videoOnlineUrl ? match.videoOnlineUrl : "";
+  const vurl = match.videoOnlineUrl ? match.videoOnlineUrl : "?";
   var sc = "";
   for (var game of match.sets) {
     if (sc.length > 0) sc += ", ";

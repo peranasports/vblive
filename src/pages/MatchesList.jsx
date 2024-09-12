@@ -158,63 +158,69 @@ function MatchesList() {
     forceUpdate((n) => !n);
   };
 
+  const selectedMatches = () => {
+    const ms = filteredMatches.filter((m) => m.selected && m.selected === true);
+    return ms;
+  };
+
   const doMultiMatchReports = async () => {
-    setLoading(true);
-    var ms = filteredMatches.filter((m) => m.selected && m.selected === true);
+    var ms = selectedMatches();
     if (ms.length === 0) {
       alert("No matches selected.");
       return;
-    }
-    const mobjs = {};
-    for (var m of ms) {
-      var m1 = mobjs[m.teamA];
-      if (!m1) {
-        mobjs[m.teamA] = [];
+    } else {
+      setLoading(true);
+      const mobjs = {};
+      for (var m of ms) {
+        var m1 = mobjs[m.teamA];
+        if (!m1) {
+          mobjs[m.teamA] = [];
+        }
+        mobjs[m.teamA].push(m);
+        var m2 = mobjs[m.teamB];
+        if (!m2) {
+          mobjs[m.teamB] = [];
+        }
+        mobjs[m.teamB].push(m);
       }
-      mobjs[m.teamA].push(m);
-      var m2 = mobjs[m.teamB];
-      if (!m2) {
-        mobjs[m.teamB] = [];
+      var ok = false;
+      var team = null;
+      for (var key in mobjs) {
+        if (mobjs[key].length === ms.length) {
+          ok = true;
+          team = key;
+          break;
+        }
       }
-      mobjs[m.teamB].push(m);
-    }
-    var ok = false;
-    var team = null;
-    for (var key in mobjs) {
-      if (mobjs[key].length === ms.length) {
-        ok = true;
-        team = key;
-        break;
+      if (!ok) {
+        alert("Not all matches are selected are of the same team.");
+        return;
       }
-    }
-    if (!ok) {
-      alert("Not all matches are selected are of the same team.");
-      return;
-    }
-    var xms = [];
-    for (var m of ms) {
-      const xm = await getSessionById(m.id);
-      var buffer = myunzip(xm.stats);
-      if (!buffer) {
-        buffer = unzipBuffer(xm.stats);
+      var xms = [];
+      for (var m of ms) {
+        const xm = await getSessionById(m.id);
+        var buffer = myunzip(xm.stats);
+        if (!buffer) {
+          buffer = unzipBuffer(xm.stats);
+        }
+        xm.buffer = buffer;
+        // if (m.videoFilePath) {
+        //   for (var sm of xm.sets) {
+        //     for (var ev of sm.events) {
+        //       ev.videoTime = ev.timestamp - m.videoStartTime;
+        //       ev.videoFile = m.videoFilePath;
+        //     }
+        //   }
+        // }
+        xms.push(xm);
       }
-      xm.buffer = buffer;
-      // if (m.videoFilePath) {
-      //   for (var sm of xm.sets) {
-      //     for (var ev of sm.events) {
-      //       ev.videoTime = ev.timestamp - m.videoStartTime;
-      //       ev.videoFile = m.videoFilePath;
-      //     }
-      //   }
-      // }
-      xms.push(xm);
+      setLoading(false);
+      const st = {
+        matches: xms,
+        team: team,
+      };
+      navigate("/multisessions", { state: st });
     }
-    setLoading(false);
-    const st = {
-      matches: xms,
-      team: team,
-    };
-    navigate("/multisessions", { state: st });
   };
 
   const doShareMatch = (match) => {
@@ -452,12 +458,14 @@ function MatchesList() {
         const poption = apops.find((p) => p.value && p.value.name === teamname);
         setSelectedTeamOption(poption);
         const team = aps.find((p) => p.name === teamname);
-        setSelectedTeamName(team.name);
-        setSelectedTeam(team);
-        const fms = ms.filter(
-          (m) => m.teamA === team.name || m.teamB === team.name
-        );
-        setFilteredMatches(fms);
+        if (team) {
+          setSelectedTeamName(team.name);
+          setSelectedTeam(team);
+          const fms = ms.filter(
+            (m) => m.teamA === team.name || m.teamB === team.name
+          );
+          setFilteredMatches(fms);
+        }
       } else {
         setFilteredMatches(ms);
       }
@@ -563,12 +571,21 @@ function MatchesList() {
               }}
             />
           </div>
-          <button
-            className="btn btn-sm btn-info rounded-none"
-            onClick={() => doMultiMatchReports()}
-          >
-            Multi Match Reports
-          </button>
+          <div className="flex gap-2">
+            <button
+              className="btn btn-sm btn-info rounded-none"
+              onClick={() => navigate("/input")}
+            >
+              Import
+            </button>
+            <button
+              disabled={selectedMatches().length < 2}
+              className="btn btn-sm btn-info rounded-none"
+              onClick={() => doMultiMatchReports()}
+            >
+              Multi Match Reports
+            </button>
+          </div>
 
           {/* <div className="flex gap-2">
             <button

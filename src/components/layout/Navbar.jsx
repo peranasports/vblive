@@ -1,4 +1,5 @@
-import VBLiveLogo from "../assets/logo512.png";
+import VBLiveLogo from "../assets/VBLive_Logo_Horizontal.png";
+import PSLogo from "../assets/PeranaSportsLogoLong.png";
 import { Link, useNavigate } from "react-router-dom";
 import PropsType from "prop-types";
 import { useAuthStatus } from "../hooks/useAuthStatus";
@@ -42,16 +43,13 @@ function Navbar({ title }) {
 
   return (
     <>
-      <nav className="navbar shadow-lg bg-neutral text-neutral-content">
-        <div className="container mx-auto h-[2px]">
-          <div className="flex px-2 mx-2 space-x-4">
-            <img className="pt-1 h-8 w-8" alt="" src={VBLiveLogo} />
-            <Link to="/" className="text-xl pt-1 font-bold align-middle">
-              {title}
-            </Link>
+      <div className="shadow-lg bg-neutral text-neutral-content">
+        <div className="flex mx-4 h-14">
+          <div className="flex px-2 space-x-2">
+            <img className="mt-2 h-10 w-44 min-w-44 max-w-44" alt="" src={VBLiveLogo} />
           </div>
-          <div className="flex-1 px2 mx-2">
-            <div className="flex justify-end mt-4">
+          <div className="flex-col px2 mx-2 w-full">
+            <div className="flex justify-end">
               <Link to="/" className="btn btn-ghost btn-sm rounded-btn">
                 Home
               </Link>
@@ -76,21 +74,26 @@ function Navbar({ title }) {
               <Link to="/about" className="btn btn-ghost btn-sm rounded-btn">
                 About
               </Link>
+              {currentUser ? (
+                <button
+                className="btn btn-ghost btn-sm rounded-btn"
+                  onClick={doLogout}
+                >
+                  Log out
+                </button>
+              ) : (
+                <></>
+              )}
             </div>
             {currentUser === null ? (
               <></>
             ) : (
               <div className="flex justify-end">
-                <p className="mt-1 mr-4 text-md">{getID()}</p>
-                <button
-                  className="logoutButton mb-4 btn btn-sm"
-                  onClick={doLogout}
-                >
-                  Log out
-                </button>
+                <p className="mr-4 text-sm">{getID()}</p>
               </div>
             )}
           </div>
+          <img className="pt-1 h-12" alt="PSLogo" src={PSLogo} />
 
           {/* <div className='flex-1 px2 mx-2'>
                 <div className='flex justify-end'>
@@ -103,7 +106,7 @@ function Navbar({ title }) {
                 </div>
             </div> */}
         </div>
-      </nav>
+      </div>
       <input type="checkbox" id="my-modal-themes" className="modal-toggle" />
       <div className="modal">
         <div className="modal-box rounded-none sm:w-9/12 w-8/10 max-w-5xl h-34">

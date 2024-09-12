@@ -12,7 +12,10 @@ import {
   EyeIcon,
   EyeSlashIcon,
   ArrowRightIcon,
-} from "@heroicons/react/20/solid";
+} from "@heroicons/react/24/outline";
+import VBLiveLogo from "../components/assets/VBLive_Logo.png";
+import PSLogo from "../components/assets/PeranaSportsLogo.png";
+
 import { db } from "../firebase.config";
 
 // Icons
@@ -75,7 +78,7 @@ function SignIn() {
   //   return empl;
   // };
 
-  const onSubmit = async (e) => { 
+  const onSubmit = async (e) => {
     e.preventDefault();
 
     try {
@@ -116,28 +119,32 @@ function SignIn() {
 
   return (
     <>
-      <div className="pageContainer">
-        <header>
+      <div className="flex min-h-full flex-1 items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
+        {/* <header>
           <p className="pageHeader mt-10 text-xl">Welcome Back!</p>
-        </header>
+        </header> */}
 
         <main>
+          <div className="flex  justify-center">
+            <img src={VBLiveLogo} className="w-60" alt="VBLive" />
+          </div>
+
           <form className=" max-w-md" onSubmit={onSubmit}>
             <input
               type="email"
               id="email"
-              className="w-full mt-10 pr-40 bg-gray-200 input text-xl input-md text-black"
+              className="w-full mt-10 pr-40 bg-base-300 input input-sm text-base-content rounded-none"
               // className="emailInput"
               placeholder="Email"
               value={email}
               onChange={onChange}
             />
 
-            <div className="passwordInputDiv relative mt-10 mb-2">
+            <div className="passwordInputDiv relative mt-4 mb-2">
               <input
                 type={showPassword ? "text" : "password"}
                 id="password"
-                className="w-full pr-40 bg-gray-200 input text-xl input-md text-black"
+                className="w-full pr-40 bg-base-300 input input-sm text-base-content rounded-none"
                 // className="passwordInput"
                 placeholder="Password"
                 value={password}
@@ -151,13 +158,13 @@ function SignIn() {
 
               {showPassword ? (
                 <EyeSlashIcon
-                  className="showPassword absolute top-0 right-0 rounded-l-none w-16 btn btn-md text-gray-400"
+                  className="showPassword absolute top-0 right-0 rounded-none w-12 btn btn-sm bg-opacity-50 text-base-content hover:bg-opacity-20"
                   aria-hidden="true"
                   onClick={() => setShowPassword((prevState) => !prevState)}
                 />
               ) : (
                 <EyeIcon
-                  className="showPassword absolute top-0 right-0 rounded-l-none w-16 btn btn-md text-gray-400"
+                  className="showPassword absolute top-0 right-0 rounded-none w-12 btn btn-sm bg-opacity-50 text-base-content hover:bg-opacity-20"
                   aria-hidden="true"
                   onClick={() => setShowPassword((prevState) => !prevState)}
                 />
@@ -166,22 +173,28 @@ function SignIn() {
 
             <Link
               to="/forgot-password"
-              className="link link-error text-xl text-success mt-6"
+              className="link link-error text-sm text-base-content mt-4"
             >
               Forgot Password
             </Link>
 
             <div className="signInBar">
-              <button className="mt-10 w-40 btn btn-lg btn-primary">
+              <button className="mt-4 w-full btn btn-md btn-primary rounded-none">
                 Sign In
               </button>
             </div>
           </form>
-          <div className="flex gap-2 mt-6 text-xl">
-            <p>Don't have an account? </p>
-            <Link to="/signup" className="w-40 text-xl text-success">
+          <div className="flex gap-2 my-8 text-sm">
+            <p className="mt-1">Don't have an account? </p>
+            <Link
+              to="/signup"
+              className="px-8 py-1 text-center text-sm text-info-content bg-info"
+            >
               Sign up for free!
             </Link>
+          </div>
+          <div className="flex justify-center w-full bg-white">
+            <img src={PSLogo} className="w-60" alt="VBLive" />
           </div>
         </main>
       </div>
