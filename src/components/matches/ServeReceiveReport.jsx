@@ -347,6 +347,28 @@ function ServeReceiveReport({ matches, team, selectedGame, selectedTeam }) {
       .sort((a, b) => a.FBsideOutPC - b.FBsideOutPC);
   };
 
+  const passingLegend = (text, color, description) => {
+    var cln = "flex gap-2 mt-2 bg-[" + color + "]";
+    if (text === "=") {
+      cln = "flex gap-2 mt-2 bg-red-500";
+    }
+    return (
+      <div className="tooltip" data-tip={description}>
+        <div className="flex gap-2">
+          <div
+            className={cln}
+            style={{
+              width: "12px",
+              height: "12px",
+              borderRadius: "6px",
+              backgroundColor: color,
+            }}
+          ></div>
+          <div className="text-sm mt-1 text-gray-800">{text}</div>
+        </div>
+      </div>
+    );
+  };
   useEffect(() => {
     calculatePassingStats();
   }, [selectedGame, selectedTeam]);
@@ -450,10 +472,12 @@ function ServeReceiveReport({ matches, team, selectedGame, selectedTeam }) {
                     {statsItem.positivePassPC.toFixed(0)}
                   </td>
                   <td className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">
-                    {statsItem.sideOutPC.toFixed(0)}
+                    {statsItem.sideOutPC.toFixed(0)} ({statsItem.sideOuts}/
+                    {statsItem.numberOfPasses})
                   </td>
                   <td className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">
-                    {statsItem.FBsideOutPC.toFixed(0)}
+                    {statsItem.FBsideOutPC.toFixed(0)} ({statsItem.FBSideOuts}/
+                    {statsItem.numberOfPasses})
                   </td>
                   <td className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">
                     {statsItem.passHits.toFixed(0)}
@@ -488,6 +512,44 @@ function ServeReceiveReport({ matches, team, selectedGame, selectedTeam }) {
         >
           {showAttacks ? "Hide Attacks" : "Show Attacks"}
         </button>
+        <div className="flex gap-4 ml-4 mt-1 bg-gray-100 border px-4">
+          {passingLegend("Error Pass", "#ff0000", "=")}
+          {passingLegend("1 Pass", "#9b59b6", "/ and -")}
+          {passingLegend("2 Pass", "#16a085", "! and +")}
+          {passingLegend("Perfect Pass", "#00ff00", "#")}
+          <div className="tooltip" data-tip="Sideout successfully from pass">
+            <div className="flex gap-2">
+              <div
+                className="flex gap-2 mt-2"
+                style={{
+                  width: "12px",
+                  height: "12px",
+                  borderRadius: "6px",
+                  borderColor: "black",
+                  borderWidth: "1px",
+                  backgroundColor: "white",
+                }}
+              ></div>
+              <div className="text-sm mt-1 text-gray-800">Successful Sideout</div>
+            </div>
+          </div>
+          <div className="tooltip" data-tip="Sideout first ball from pass">
+            <div className="flex gap-2">
+              <div
+                className="flex gap-2 mt-2"
+                style={{
+                  width: "12px",
+                  height: "12px",
+                  borderRadius: "6px",
+                  borderColor: "magenta",
+                  borderWidth: "1px",
+                  backgroundColor: "white",
+                }}
+              ></div>
+              <div className="text-sm mt-1 text-gray-800">Sideout First Ball</div>
+            </div>
+          </div>
+        </div>
       </div>
       <div className="carousel w-full">
         {sortBy(currentStats(), "FBsideOutPC")

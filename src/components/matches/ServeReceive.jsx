@@ -290,7 +290,10 @@ function ServeReceive({ matches, team, stats, showPasses, showAttacks }) {
             var count = 0;
             for (var ne = 0; ne < a.length; ne++) {
               var e = a[ne];
-              if (e.Player.FirstName + "_" + e.Player.LastName === pl.FirstName + "_" + pl.LastName) {
+              if (
+                e.Player.FirstName + "_" + e.Player.LastName ===
+                pl.FirstName + "_" + pl.LastName
+              ) {
                 count++;
               }
             }
@@ -358,28 +361,40 @@ function ServeReceive({ matches, team, stats, showPasses, showAttacks }) {
         ctx.fillStyle = "#7f8c8d";
         if (e.DVGrade === "=") {
           ctx.fillStyle = "#ff0000";
+        } else if (e.DVGrade === "/") {
+          ctx.fillStyle = "#9b59b6";
         } else if (e.DVGrade === "-") {
           ctx.fillStyle = "#9b59b6";
+        } else if (e.DVGrade === "!") {
+          ctx.fillStyle = "#16a085";
         } else if (e.DVGrade === "+") {
           ctx.fillStyle = "#16a085";
         } else if (e.DVGrade === "#") {
           ctx.fillStyle = "#00ff00";
+        } else {
+          ctx.fillStyle = "#7f8c8d";
         }
 
         // ctx.fillRect(epx -3, epy-3, 6, 6)
-        var rad = 2;
+        var rad = 3;
         ctx.beginPath();
         ctx.arc(epx - rad, epy - rad, rad * 2, 0, 2 * Math.PI);
         ctx.closePath();
         ctx.fill();
-        if (mr.sideout) {
-          var rad = 2;
-          ctx.beginPath();
-          ctx.arc(epx - rad, epy - rad, rad * 2, 0, 2 * Math.PI);
-          ctx.closePath();
+        if (mr.sideout === true) {
+          ctx.lineWidth = 1.5;
+          ctx.strokeStyle = "#000000";
+        } else if (mr.sideoutFirstBall === true) {
+          ctx.lineWidth = 1.5;
+          ctx.strokeStyle = "#ff00ff";
+        } else {
           ctx.lineWidth = 1;
-          ctx.stroke();
+          ctx.strokeStyle = "#ffffff";
         }
+        ctx.beginPath();
+        ctx.arc(epx - rad, epy - rad, rad * 2, 0, 2 * Math.PI);
+        ctx.closePath();
+        ctx.stroke();
       }
     }
   };
