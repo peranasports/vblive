@@ -1480,7 +1480,7 @@ function VideoAnalysis() {
         <div className="modal-box w-7/12 max-w-5xl h-full">
           <h3 className="mb-4 font-bold text-2xl">Filters</h3>
           <div className="form">
-            <div className="my-4">
+            <div className="my-4 text-gray-800">
               <div className="flex justify-between mt-4">
                 <div className="flex=col justify-between w-full mx-2">
                   <p className="text-xs">
@@ -1491,7 +1491,7 @@ function VideoAnalysis() {
                     id="teamAPlayersSelect"
                     name="teamAPlayersSelect"
                     onChange={handleSelectTeamAPlayers}
-                    className="mt-2 block w-full border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500 text-lg sm:text-md"
+                    className="mt-2 block w-full border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500text-sm"
                     options={teamAPlayers}
                     value={selectedTeamAPlayers}
                     isMulti
@@ -1506,7 +1506,7 @@ function VideoAnalysis() {
                     id="teamBPlayersSelect"
                     name="teamBPlayersSelect"
                     onChange={handleSelectTeamBPlayers}
-                    className="mt-2 block w-full border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500 text-lg sm:text-md"
+                    className="mt-2 block w-full border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500text-sm"
                     options={teamBPlayers}
                     value={selectedTeamBPlayers}
                     isMulti
@@ -1521,7 +1521,7 @@ function VideoAnalysis() {
                     id="gamesSelect"
                     name="gamesSelect"
                     onChange={handleSelectGames}
-                    className="mt-2 block w-full border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500 text-lg sm:text-md"
+                    className="mt-2 block w-full border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500text-sm"
                     options={games}
                     value={selectedGames}
                     isMulti
@@ -1534,7 +1534,7 @@ function VideoAnalysis() {
                     id="rotationsSelect"
                     name="rotationsSelect"
                     onChange={handleSelectRotations}
-                    className="mt-2 block w-full border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500 text-lg sm:text-md"
+                    className="mt-2 block w-full border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500text-sm"
                     options={rotations}
                     value={selectedRotations}
                     isMulti
@@ -1548,7 +1548,7 @@ function VideoAnalysis() {
                     id="eventTypesSelect"
                     name="eventTypesSelect"
                     onChange={handleSelectEventTypes}
-                    className="mt-2 block w-full border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500 text-lg sm:text-md"
+                    className="mt-2 block w-full border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500text-sm"
                     options={eventTypes}
                     value={selectedEventTypes}
                     isMulti
@@ -1560,7 +1560,7 @@ function VideoAnalysis() {
                     id="eventResultsSelect"
                     name="eventResultsSelect"
                     onChange={handleSelectEventResults}
-                    className="mt-2 block w-full border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500 text-lg sm:text-md"
+                    className="mt-2 block w-full border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500text-sm"
                     options={eventResults}
                     value={selectedEventResults}
                     isMulti
@@ -1574,7 +1574,7 @@ function VideoAnalysis() {
                     id="attackTypesSelect"
                     name="attackTypesSelect"
                     onChange={handleSelectAttackTypes}
-                    className="mt-2 block w-full border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500 text-lg sm:text-md"
+                    className="mt-2 block w-full border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500text-sm"
                     options={attackTypes}
                     value={selectedAttackTypes}
                     isMulti
@@ -1586,7 +1586,7 @@ function VideoAnalysis() {
                     id="hitTypesSelect"
                     name="hitTypesSelect"
                     onChange={handleSelectHitTypes}
-                    className="mt-2 block w-full border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500 text-lg sm:text-md"
+                    className="mt-2 block w-full border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500text-sm"
                     options={hitTypes}
                     value={selectedHitTypes}
                     isMulti
@@ -1598,7 +1598,7 @@ function VideoAnalysis() {
                     id="blockTypesSelect"
                     name="blockTypesSelect"
                     onChange={handleSelectBlockTypes}
-                    className="mt-2 block w-full border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500 text-lg sm:text-md"
+                    className="mt-2 block w-full border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500text-sm"
                     options={blockTypes}
                     value={selectedBlockTypes}
                     isMulti
@@ -1612,7 +1612,7 @@ function VideoAnalysis() {
                     id="attackCombosSelect"
                     name="attackCombosSelect"
                     onChange={handleSelectAttackCombos}
-                    className="mt-2 block w-full border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500 text-lg sm:text-md"
+                    className="mt-2 block w-full border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500text-sm"
                     options={attackCombos}
                     value={selectedAttackCombos}
                     isMulti
@@ -1624,7 +1624,7 @@ function VideoAnalysis() {
                     id="setterCallsSelect"
                     name="setterCallsSelect"
                     onChange={handleSelectSetterCalls}
-                    className="mt-2 block w-full border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500 text-lg sm:text-md"
+                    className="mt-2 block w-full border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500text-sm"
                     options={setterCalls}
                     value={selectedSetterCalls}
                     isMulti
