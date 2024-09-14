@@ -319,7 +319,7 @@ function EventsList({
             className="bg-base-200"
             id={sid + 1}
           >
-            <summary className="font-bold text-md ml-7">
+            <summary className="font-bold text-sm ml-7 pt-3">
               <a className="px-2">
                 {" "}
                 SET {set.GameNumber} ({set.HomeScore} - {set.AwayScore})
@@ -350,7 +350,7 @@ function EventsList({
             {matches &&
               matches.map((match, mid) => (
                 <details key={mid} open={!isCollapse(match, null)} className="" id={match.guid}>
-                  <summary className="font-bold text-md p-1 h-6">
+                  <summary className="font-bold text-sm p-1">
                     {matchDesc(match)}
                     {/* <div className="">{matchDesc(match)}</div>
                     <div className="">
@@ -358,10 +358,10 @@ function EventsList({
                     </div> */}
                   </summary>
                   <div className="flex justify-between h-6">
-                    <div className="flex ml-10 mb-1 font-medium text-md">
+                    <div className="flex ml-10 mb-1 font-medium text-sm">
                       {match.TrainingDate.toLocaleDateString()}
                     </div>
-                    <div className="flex mr-1 mb-1 font-medium text-md">
+                    <div className="flex mr-1 mb-1 font-medium text-sm">
                       {match.HomeScore} - {match.AwayScore}
                     </div>
                   </div>

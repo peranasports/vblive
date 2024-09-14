@@ -1,11 +1,12 @@
 import React from "react";
 import { eventString, DVEventString } from "../utils/DVWFile";
 import { getEventDescription } from "../utils/PSVBFile";
-import { QueueListIcon, VideoCameraIcon } from "@heroicons/react/20/solid";
+import { QueueListIcon, DocumentMinusIcon } from "@heroicons/react/24/solid";
 import { getEventInfo, getEventStringColor } from "../utils/Utils";
-import { VideoCameraSlashIcon } from "@heroicons/react/24/outline";
-
+import { DocumentPlusIcon } from "@heroicons/react/24/outline";
 function EventItem({ event, isSelected, onEventSelected }) {
+  const [,forceUpdate] = React.useState(0);
+
   const doEventSelect = () => {
     onEventSelected(event);
   };
@@ -36,7 +37,7 @@ function EventItem({ event, isSelected, onEventSelected }) {
     const ss = getEventInfo(e);
     var stxt = "pl-2 pt-1 text-sm font-semibold " + ss.subcolor;
     return <p className={stxt}>{ss.sub}</p>;
-  }
+  };
 
   const isHomePlayer = (e) => {
     if (e.Player) {
@@ -52,21 +53,32 @@ function EventItem({ event, isSelected, onEventSelected }) {
 
   const togglePlaylist = () => {
     event.playlist = event.playlist ? false : true;
+    forceUpdate((n) => !n);
   };
 
   return (
     <div className={background()} onClick={() => doEventSelect()}>
       <div className="">
         {isHomePlayer(event) ? (
-          <div className="text-leftt">
-            <p className="pl-2 text-md font-semibold">
+          <div
+            className={
+              isSelected ? "text-left bg-accent-focus" : "text-left bg-base-200"
+            }
+          >
+            <p className="pl-2 text-sm font-semibold text-base-content">
               {event.Player.shirtNumber}. {event.Player.NickName.toUpperCase()}
             </p>
           </div>
         ) : (
-          <div className="text-right">
+          <div
+            className={
+              isSelected
+                ? "text-right bg-accent-focus"
+                : "text-left bg-base-200"
+            }
+          >
             {event.Player ? (
-              <p className="pr-2 text-md font-semibold">
+              <p className="pr-2 text-sm font-semibold text-base-content">
                 {event.Player.shirtNumber}.{" "}
                 {event.Player.NickName.toUpperCase()}
               </p>
@@ -76,11 +88,11 @@ function EventItem({ event, isSelected, onEventSelected }) {
           </div>
         )}
         <div className="flex justify-between">
-          <div className="flex gap-1">
+          <div className="flex gap-1 mt-1">
             {event.DVGrade === undefined ? (
               doGetEventInfo(event)
             ) : (
-              <div className="flex gap-1">
+              <div className="flex gap-1 text-sm">
                 <p className={getEventStringColor(event)}>
                   {DVEventString(event)}
                 </p>
@@ -94,21 +106,25 @@ function EventItem({ event, isSelected, onEventSelected }) {
               </div>
             )}
           </div>
-          <div className="flex gap-1 mr-1 -mt-1">
+          <div className="flex gap-1 mr-1">
             <p className="pr-2 pt-1 text-sm font-semibold">
-              ({event.Drill.GameNumber}) {event.TeamScore}-
+              [ {event.Drill.GameNumber} ] {event.TeamScore}-
               {event.OppositionScore} R{event.Row}
             </p>
             {event.playlist ? (
-              <VideoCameraIcon
-                className="w-6 h6 text-warning mt-1"
-                onClick={() => togglePlaylist()}
-              />
+              <div className="tooltip tooltip-left" data-tip="Remove from play list">
+                <DocumentMinusIcon
+                  className="w-6 h6 text-warning mt-1"
+                  onClick={() => togglePlaylist()}
+                />
+              </div>
             ) : (
-              <VideoCameraSlashIcon
-                className="w-6 h6 text-base-content mt-1"
-                onClick={() => togglePlaylist()}
-              />
+              <div className="tooltip tooltip-left" data-tip="Add to play list">
+                <DocumentPlusIcon
+                  className="w-6 h6 text-base-content mt-1"
+                  onClick={() => togglePlaylist()}
+                />
+              </div>
             )}
           </div>
         </div>

@@ -1155,6 +1155,18 @@ function VideoAnalysis() {
     return { width: w, height: h };
   };
 
+  const videoTitle = () => {
+    var title = "";
+    if (matches.length === 1) {
+      title = matches[0].teamA.Name.toUpperCase() + " vs " + matches[0].teamB.Name.toUpperCase();
+    }
+    else if (selectedEvent) {
+      const m = selectedEvent.Drill.match;
+      title = m.teamA.Name.toUpperCase() + " vs " + m.teamB.Name.toUpperCase();
+    }
+    return title;
+  }
+
   if (!matches) {
     return <></>;
   }
@@ -1402,6 +1414,9 @@ function VideoAnalysis() {
                 ) : (
                   <></>
                 )}
+                <div className="flex mt-2 ml-2 px-2 font-medium bg-base-300 text-base-content text-md">
+                  {videoTitle()}
+                </div>
                 <div
                   className="flex m-2 p-1 justify-center bg-black"
                   onTouchStart={onTouchStart}
@@ -1461,8 +1476,8 @@ function VideoAnalysis() {
                     </div>
                     {videoOffset !== 0 ? (
                       <></>
-                      // <p>Offset = {videoOffset} secs</p>
                     ) : (
+                      // <p>Offset = {videoOffset} secs</p>
                       <></>
                     )}
                   </div>
@@ -1635,7 +1650,10 @@ function VideoAnalysis() {
           </div>
           <div className="flex gap-2 justify-end">
             <div className="modal-action">
-              <label htmlFor="modal-filters" className="btn btn-info rounded-none btn-sm">
+              <label
+                htmlFor="modal-filters"
+                className="btn btn-info rounded-none btn-sm"
+              >
                 Cancel
               </label>
             </div>
