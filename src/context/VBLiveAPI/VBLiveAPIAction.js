@@ -97,7 +97,7 @@ export const storeSession = async (match, currentUser) => {
 
   const VBLIVE_API_URL = process.env.REACT_APP_VBLIVE_API_URL;
   const qs = require("qs");
-  let data = qs.stringify({
+  let dataobj = {
     appName: "VBLive",
     serverName: currentUser.email,
     scores: sc,
@@ -111,12 +111,13 @@ export const storeSession = async (match, currentUser) => {
     sessionDateString: match.TrainingDate.toLocaleDateString(),
     description: desc,
     stats: buffer,
-  });
+  }
+  let data = qs.stringify(dataobj);
 
   let config = {
     method: "post",
     maxBodyLength: Infinity,
-    url: `${VBLIVE_API_URL}/Session/StoreSessionUsingForm`,
+    url: `${VBLIVE_API_URL}/Session/StoreSession`,
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
     },
