@@ -192,7 +192,10 @@
     .check-primary {
         @apply checkbox checkbox-primary w-7 h-7 rounded-none
     }
-    .primary-bg {
+    .check-secondary {
+      @apply checkbox checked:checkbox-success w-7 h-7 rounded-none
+  }
+  .primary-bg {
       background-color: theme('colors.primary');
     }
     .events-list-height {      
@@ -228,4 +231,21 @@
       pointer-events: none;
       opacity: 0.5;
     }
+
+    .checkbox-red {
+      @include custom-checkbox(1 83% 50%);
+    }
+    
+    .checkbox-green {
+      @include custom-checkbox(120 97% 34%);
+    }
+    
+    .checkbox-pink {
+      @include custom-checkbox(311 100% 61%);
+    }
+    
+    .checkbox-blue {
+      @include custom-checkbox(198 100% 42%);
+    }
+    
   }

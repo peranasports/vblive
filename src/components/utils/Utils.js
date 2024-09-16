@@ -284,7 +284,7 @@ export function replaceItemInArray(a, oldItem, newItem) {
 
 export function getTimingForEvent(ev) {
   try {
-    var lts = [0, 0, 3, 3, 3, 3];
+    var lts = [3, 3, 3, 3, 3, 3];
     var ds = [8, 8, 8, 8, 8, 8];
     const obj = localStorage.getItem("vblive_timings");
     if (obj !== null) {

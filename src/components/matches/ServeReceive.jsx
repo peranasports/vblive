@@ -118,9 +118,9 @@ function ServeReceive({ matches, team, stats, showPasses, showAttacks }) {
     ctx.fillRect(0, 0, w + xmargin * 2, h + topmargin * 2);
 
     var y = topmargin;
-    ctx.fillStyle = "#f39c12";
+    ctx.fillStyle = "white";// "#f39c12";
     ctx.fillRect(xmargin, y, w, h);
-    ctx.fillStyle = "#e67e22";
+    ctx.fillStyle = "seashell"; // "#e67e22";
     ctx.fillRect(xmargin, y, w, h3);
 
     x = xmargin;
@@ -138,7 +138,7 @@ function ServeReceive({ matches, team, stats, showPasses, showAttacks }) {
       { textAlign: "left", fontSize: fontsize * 1.5 }
     );
 
-    ctx.strokeStyle = "#ffffff";
+    ctx.strokeStyle = "black"; //"#ffffff";
     ctx.lineWidth = 2;
     ctx.strokeRect(xmargin, topmargin, w, h);
     var x = xmargin;
@@ -147,7 +147,7 @@ function ServeReceive({ matches, team, stats, showPasses, showAttacks }) {
     ctx.beginPath();
     ctx.moveTo(x - 10, y);
     ctx.lineTo(x + w + 10, y);
-    ctx.strokeStyle = "#ffffff";
+    ctx.strokeStyle = "black"; //"#ffffff";
     ctx.lineWidth = 3;
     ctx.stroke();
 
@@ -360,15 +360,15 @@ function ServeReceive({ matches, team, stats, showPasses, showAttacks }) {
 
         ctx.fillStyle = "#7f8c8d";
         if (e.DVGrade === "=") {
-          ctx.fillStyle = "#ff0000";
+          ctx.fillStyle = "red";
         } else if (e.DVGrade === "/") {
-          ctx.fillStyle = "#9b59b6";
+          ctx.fillStyle = "orange";
         } else if (e.DVGrade === "-") {
-          ctx.fillStyle = "#9b59b6";
+          ctx.fillStyle = "orange";
         } else if (e.DVGrade === "!") {
-          ctx.fillStyle = "#16a085";
+          ctx.fillStyle = "green";
         } else if (e.DVGrade === "+") {
-          ctx.fillStyle = "#16a085";
+          ctx.fillStyle = "green";
         } else if (e.DVGrade === "#") {
           ctx.fillStyle = "#00ff00";
         } else {
@@ -381,15 +381,15 @@ function ServeReceive({ matches, team, stats, showPasses, showAttacks }) {
         ctx.arc(epx - rad, epy - rad, rad * 2, 0, 2 * Math.PI);
         ctx.closePath();
         ctx.fill();
-        if (mr.sideout === true) {
+        if (mr.sideoutFirstBall === true) {
           ctx.lineWidth = 1.5;
-          ctx.strokeStyle = "#000000";
-        } else if (mr.sideoutFirstBall === true) {
+          ctx.strokeStyle = "dodgerblue";
+        } else if (mr.sideout === true) {
           ctx.lineWidth = 1.5;
-          ctx.strokeStyle = "#ff00ff";
+          ctx.strokeStyle = "black";
         } else {
-          ctx.lineWidth = 1;
-          ctx.strokeStyle = "#ffffff";
+          ctx.lineWidth = 1.5;
+          ctx.strokeStyle = "red";
         }
         ctx.beginPath();
         ctx.arc(epx - rad, epy - rad, rad * 2, 0, 2 * Math.PI);

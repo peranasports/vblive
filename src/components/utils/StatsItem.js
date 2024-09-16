@@ -946,7 +946,7 @@ export function getDVRalliesInGameForTeam(g, tm) {
       r.homeScore = e.TeamScore;
       r.awayScore = e.OppositionScore;
       r.sideout = false;
-      r.sideoutType = -1;
+      r.sideoutType = kUnsuccessful;
       r.row = e.Row;
       r.events = evs;
       r.eventObjects = [];
@@ -1401,7 +1401,7 @@ export function getVBStatsRalliesInGameForTeam(g, tm) {
       r.lineup = lineupString(players);
       r.opplineup = lineupString(oppplayers);
       r.sideout = false;
-      r.sideoutType = -1;
+      r.sideoutType = kUnsuccessful;
 
       for (var xen = en + 1; xen < events.length; xen++) {
         var xe = events[xen];

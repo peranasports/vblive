@@ -2,7 +2,12 @@ import { useState, useEffect } from "react";
 import { sortBy } from "lodash";
 import { getDVRalliesInGameForTeam } from "../utils/StatsItem";
 import ServeReceive from "./ServeReceive";
+import { CheckIcon, XIcon } from "@heroicons/react/24/outline";
 import { psvbParseLatestStats } from "../utils/PSVBFile";
+import { useNavigate } from "react-router-dom";
+import { getEventInfo, getEventStringColor, getTimingForEvent, makeFilename } from "../utils/Utils";
+import { DVEventString } from "../utils/DVWFile";
+import { useAuthStatus } from "../hooks/useAuthStatus";
 
 const kFBKills = 0;
 const kFBOppServeErrors = 1;
@@ -13,9 +18,20 @@ const kUnsuccessful = 5;
 const kSkillSpike = 4;
 
 function ServeReceiveReport({ matches, team, selectedGame, selectedTeam }) {
+  const navigate = useNavigate();
+  const { currentUser } = useAuthStatus();
   const [passingStats, setPassingStats] = useState(null);
   const [showPasses, setShowPasses] = useState(true);
   const [showAttacks, setShowAttacks] = useState(true);
+  const [passSelection, sePassSelection] = useState([
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+  ]);
 
   const calculatePassingStats = () => {
     var players = [];
@@ -62,6 +78,56 @@ function ServeReceiveReport({ matches, team, selectedGame, selectedTeam }) {
           if (mr.passEvent === undefined || mr.passEvent.Player === undefined) {
             continue;
           }
+          if (
+            (passSelection[0] === false && mr.passEvent.DVGrade === "=") ||
+            (passSelection[1] === false &&
+              (mr.passEvent.DVGrade === "/" || mr.passEvent.DVGrade === "-")) ||
+            (passSelection[2] === false &&
+              (mr.passEvent.DVGrade === "!" || mr.passEvent.DVGrade === "+")) ||
+            (passSelection[3] === false && mr.passEvent.DVGrade === "#")
+          ) {
+            continue;
+          }
+          if (passSelection[6] === false && mr.sideoutType === kUnsuccessful) {
+            continue;
+          }
+          if (passSelection[4] === false && mr.sideout && mr.sideout === true) {
+            if (
+              passSelection[5] === true &&
+              mr.sideoutFirstBall &&
+              mr.sideoutFirstBall === true
+            ) {
+            } else {
+              continue;
+            }
+          }
+          if (passSelection[4] === true && mr.sideout && mr.sideout === true) {
+            if (
+              passSelection[5] === false &&
+              mr.sideoutFirstBall &&
+              mr.sideoutFirstBall === true
+            ) {
+              continue;
+            }
+          }
+
+          // if (passSelection[4] === false && passSelection[5] === false) {
+          //   if (mr.sideoutType !== kUnsuccessful) {
+          //     continue;
+          //   }
+          // } else if (passSelection[4] === true && passSelection[5] === false) {
+          //   if (
+          //     mr.sideoutType !== kUnsuccessful ||
+          //     (mr.sideoutFirstBall && mr.sideoutFirstBall === true)
+          //   ) {
+          //     continue;
+          //   }
+          // } else if (passSelection[4] === false && passSelection[5] === true) {
+          //   if (!mr.sideoutFirstBall || mr.sideoutFirstBall === false) {
+          //     continue;
+          //   }
+          // }
+
           if (mr.events[0].EventType === 1) {
             mr.passEvent.BallStartString = mr.events[0].BallEndString;
           }
@@ -336,6 +402,91 @@ function ServeReceiveReport({ matches, team, selectedGame, selectedTeam }) {
     setPassingStats(stats);
   };
 
+  const doPlayerVideo = (statsItem) => {
+    console.log(statsItem);
+    var filteredEvents = [];
+    for (var r of statsItem.rallies) {
+      if (r.passEvent) {
+        filteredEvents.push(r.passEvent);
+      }
+    }
+    var evs = [];
+    for (var ev of filteredEvents) {
+      var loc = 0;
+      const tm = getTimingForEvent(ev);
+      if (
+        ev.Drill.match.videoStartTimeSeconds &&
+        ev.Drill.match.videoOffset &&
+        ev.Drill.match.videoOffset >= 0
+      ) {
+        const secondsSinceEpoch = Math.round(ev.TimeStamp.getTime() / 1000);
+        loc =
+          secondsSinceEpoch -
+          ev.Drill.match.videoStartTimeSeconds +
+          ev.Drill.match.videoOffset -
+          tm.leadTime;
+      } else {
+        if (ev.VideoPosition !== undefined && ev.VideoPosition !== 0) {
+          loc = ev.VideoPosition - tm.leadTime;
+        }
+      }
+
+      var xx = "";
+      var col = "";
+      if (ev.DVGrade === undefined) {
+        const ss = getEventInfo(ev);
+        xx = ss.sub;
+        col = ss.subcolor;
+      } else {
+        xx = DVEventString(ev);
+        col = getEventStringColor(ev);
+      }
+      const evx = {
+        playerName:
+          ev.Player.shirtNumber + ". " + ev.Player.NickName.toUpperCase(),
+        eventString: xx,
+        eventStringColor: col,
+        eventSubstring:
+          "Set " +
+          ev.Drill.GameNumber +
+          " " +
+          ev.TeamScore +
+          "-" +
+          ev.OppositionScore +
+          " R" +
+          ev.Row,
+        videoOnlineUrl: ev.Drill.match.videoOnlineUrl,
+        videoPosition: loc,
+        eventId: ev.EventId,
+        matchVideo: ev.Drill.match.videoOnlineUrl
+          ? ev.Drill.match.videoOnlineUrl
+          : "",
+      };
+      evs.push(evx);
+    }
+    if (evs.length === 0) {
+      // toast.error("Play list is empty.");
+    } else {
+      // setPlaylistEvents(evs);
+      const evstr = JSON.stringify(evs);
+      localStorage.setItem("VBLivePlaylistEvents", evstr);
+      const pl = {
+        events: evs,
+      };
+      const fn = makeFilename("playlist", "vblive", "playlist");
+      const buffer = JSON.stringify(pl);
+      const st = {
+        playlistFileData: buffer,
+        filename: null,
+        playlists: null,
+        serverName: currentUser.email,
+      };
+      navigate("/playlist", { state: st });
+
+      // saveToPC(buffer, fn);
+    }
+  };
+
   const currentStats = () => {
     const xx = passingStats[selectedGame];
     var totalpasses = 0;
@@ -343,19 +494,59 @@ function ServeReceiveReport({ matches, team, selectedGame, selectedTeam }) {
       totalpasses += nx.numberOfPasses;
     }
     return passingStats[selectedGame]
-      .filter((obj) => obj.numberOfPasses / totalpasses > 0.05)
-      .sort((a, b) => a.FBsideOutPC - b.FBsideOutPC);
+      .sort((a, b) => a.Player.LastName.localeCompare(b.Player.LastName))
+      .filter((obj) => obj.numberOfPasses / totalpasses > 0.05);
   };
 
-  const passingLegend = (text, color, description) => {
-    var cln = "flex gap-2 mt-2 bg-[" + color + "]";
-    if (text === "=") {
-      cln = "flex gap-2 mt-2 bg-red-500";
+  const togglePassEvent = (index) => {
+    var newPassSections = [...passSelection];
+    newPassSections[index] = !newPassSections[index];
+    sePassSelection(newPassSections);
+  };
+
+  const passingLegend = (index, text, color, bordercolor, description) => {
+    var cln = "h-5 w-5 text-black";
+    if (passSelection[index] === true) {
+      cln = "h-5 w-5 text-white";
     }
+    // const bgcolor = passSelection[index] === true ? color : "white";
+    const bwidth = "2.5px";
     return (
       <div className="tooltip" data-tip={description}>
         <div className="flex gap-2">
           <div
+            className="min-w-[16px] mt-1 rounded-full"
+            style={{
+              width: "20px",
+              height: "20px",
+              backgroundColor: color,
+              borderColor: bordercolor,
+              borderWidth: bwidth,
+            }}
+            onClick={() => togglePassEvent(index)}
+          >
+            {passSelection[index] === true ? (
+              <CheckIcon
+                className={
+                  color === "white" || color === "#00ff00"
+                    ? "ml-0 mt-0 h-4 w-4 text-black"
+                    : "ml-0 mt-0 h-4 w-4 text-white"
+                }
+              />
+            ) : (
+              <></>
+            )}
+          </div>
+          {/* <div
+            className=""
+            style={{
+              width: "16px",
+              height: "16px",
+              // borderRadius: "6px",
+              backgroundColor: {color},
+            }}
+          /> */}
+          {/* <div
             className={cln}
             style={{
               width: "12px",
@@ -363,15 +554,16 @@ function ServeReceiveReport({ matches, team, selectedGame, selectedTeam }) {
               borderRadius: "6px",
               backgroundColor: color,
             }}
-          ></div>
+          /> */}
           <div className="text-sm mt-1 text-gray-800">{text}</div>
         </div>
       </div>
     );
   };
+
   useEffect(() => {
     calculatePassingStats();
-  }, [selectedGame, selectedTeam]);
+  }, [selectedGame, selectedTeam, passSelection]);
 
   if (passingStats === null) {
     return <></>;
@@ -513,11 +705,32 @@ function ServeReceiveReport({ matches, team, selectedGame, selectedTeam }) {
           {showAttacks ? "Hide Attacks" : "Show Attacks"}
         </button>
         <div className="flex gap-4 ml-4 mt-1 bg-gray-100 border px-4">
-          {passingLegend("Error Pass", "#ff0000", "=")}
-          {passingLegend("1 Pass", "#9b59b6", "/ and -")}
-          {passingLegend("2 Pass", "#16a085", "! and +")}
-          {passingLegend("Perfect Pass", "#00ff00", "#")}
-          <div className="tooltip" data-tip="Sideout successfully from pass">
+          {passingLegend(0, "Error Pass", "red", "red", "= passes")}
+          {passingLegend(1, "1 Pass", "orange", "orange", "/ and - passes")}
+          {passingLegend(2, "2 Pass", "green", "green", "! and + passes")}
+          {passingLegend(3, "Perfect Pass", "#00ff00", "#00ff00", "# passes")}
+          {passingLegend(
+            4,
+            "Successful Sideout",
+            "white",
+            "black",
+            "Successful sideouts from passes"
+          )}
+          {passingLegend(
+            5,
+            "FB Sideout",
+            "white",
+            "dodgerblue",
+            "First ball sideouts from passes"
+          )}
+          {passingLegend(
+            6,
+            "Unsuccessful Sideout",
+            "white",
+            "red",
+            "Unsuccessful sideouts from passes"
+          )}
+          {/* <div className="tooltip" data-tip="Sideout successfully from pass">
             <div className="flex gap-2">
               <div
                 className="flex gap-2 mt-2"
@@ -530,7 +743,9 @@ function ServeReceiveReport({ matches, team, selectedGame, selectedTeam }) {
                   backgroundColor: "white",
                 }}
               ></div>
-              <div className="text-sm mt-1 text-gray-800">Successful Sideout</div>
+              <div className="text-sm mt-1 text-gray-800">
+                Successful Sideout
+              </div>
             </div>
           </div>
           <div className="tooltip" data-tip="Sideout first ball from pass">
@@ -546,29 +761,32 @@ function ServeReceiveReport({ matches, team, selectedGame, selectedTeam }) {
                   backgroundColor: "white",
                 }}
               ></div>
-              <div className="text-sm mt-1 text-gray-800">Sideout First Ball</div>
+              <div className="text-sm mt-1 text-gray-800">
+                Sideout First Ball
+              </div>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
       <div className="carousel w-full">
-        {sortBy(currentStats(), "FBsideOutPC")
-          //   .filter((obj) => obj.frequency > 0.1)
-          .map((statsItem, i) => (
-            <div
-              className="carousel-item w-80 h-80 my-2"
-              key={statsItem.Player.FirstName + statsItem.Player.LastName}
-            >
-              {/* <img src="https://placeimg.com/400/300/arch" alt="Burger" /> */}
-              <ServeReceive
-                matches={matches}
-                team={team}
-                stats={statsItem}
-                showPasses={showPasses}
-                showAttacks={showAttacks}
-              />
-            </div>
-          ))}
+        {/* {sortBy(currentStats(), "FBsideOutPC")
+          .filter((obj) => obj.frequency > 0.1) */}
+        {currentStats().map((statsItem, i) => (
+          <div
+            className="carousel-item w-80 h-80 my-2 cursor-pointer"
+            key={statsItem.Player.FirstName + statsItem.Player.LastName}
+            onClick={() => doPlayerVideo(statsItem)}
+          >
+            {/* <img src="https://placeimg.com/400/300/arch" alt="Burger" /> */}
+            <ServeReceive
+              matches={matches}
+              team={team}
+              stats={statsItem}
+              showPasses={showPasses}
+              showAttacks={showAttacks}
+            />
+          </div>
+        ))}
       </div>
     </div>
   );
