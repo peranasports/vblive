@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import PlaylistItem from "./PlaylistItem";
 
-function PlaylistList({ playlists, selItem, onItemSelected, onCommentClicked }) {
+function PlaylistList({ playlists, selItem, onItemSelected, onCommentClicked, onItemRemoved }) {
   const [selectedItem, setSelectedItem] = useState(null);
   const [, forceUpdate] = useState(0);
 
@@ -14,6 +14,10 @@ function PlaylistList({ playlists, selItem, onItemSelected, onCommentClicked }) 
   const doCommentClicked = (pl) => {
     onCommentClicked(pl);
   }
+
+  const doRemoveItem = (pl) => {
+    onItemRemoved(pl);
+  };
 
   useEffect(() => {
     if (selItem !== null) {
@@ -47,6 +51,7 @@ function PlaylistList({ playlists, selItem, onItemSelected, onCommentClicked }) 
                 isSelected={pl === selectedItem}
                 onItemSelected={(pl) => doSelectItem(pl)}
                 onCommentClicked={(pl) => doCommentClicked(pl)}
+                onItemRemoved={(pl) => doRemoveItem(pl)}
               />
             </div>
           ))}

@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { ChatBubbleLeftEllipsisIcon } from "@heroicons/react/20/solid";
-import { ChatBubbleLeftIcon } from "@heroicons/react/24/outline";
+import { ChatBubbleLeftIcon, TrashIcon } from "@heroicons/react/24/outline";
 
-function PlaylistItem({ playlist, isSelected, onItemSelected, onCommentClicked }) {
-
+function PlaylistItem({
+  playlist,
+  isSelected,
+  onItemSelected,
+  onCommentClicked,
+  onItemRemoved,
+}) {
   const doSelect = () => {
     onItemSelected(playlist);
   };
@@ -12,8 +17,7 @@ function PlaylistItem({ playlist, isSelected, onItemSelected, onCommentClicked }
     onCommentClicked(playlist);
   };
 
-  useEffect(() => {
-  });
+  useEffect(() => {});
 
   return (
     <>
@@ -25,9 +29,7 @@ function PlaylistItem({ playlist, isSelected, onItemSelected, onCommentClicked }
               : "bg-base-100 text-base-content"
           }
         >
-          <p className="text-sm font-bold px-2">
-            {playlist.playerName}
-          </p>
+          <p className="text-sm font-bold px-2">{playlist.playerName}</p>
           <p
             className={
               playlist.eventStringColor !== ""
@@ -38,22 +40,27 @@ function PlaylistItem({ playlist, isSelected, onItemSelected, onCommentClicked }
             {playlist.eventString}
           </p>
           <div className="flex justify-between">
-            <p
-              className="text-xs font-light px-2 mb-2 w-full"
-            >
+            <p className="text-xs font-light px-2 mb-2 w-full">
               {playlist.eventSubstring}
             </p>
-            {playlist.comment !== undefined ? (
-              <ChatBubbleLeftEllipsisIcon
-                className="w-6 h-6 text-warning"
-                onClick={() => doComment()}
-              />
-            ) : (
-              <ChatBubbleLeftIcon
+            <div className="flex gap-2">
+              <TrashIcon
                 className="w-6 h-6 text-base-content"
-                onClick={() => doComment()}
+                onClick={() => onItemRemoved(playlist)}
               />
-            )}
+
+              {playlist.comment !== undefined ? (
+                <ChatBubbleLeftEllipsisIcon
+                  className="w-6 h-6 text-warning"
+                  onClick={() => doComment()}
+                />
+              ) : (
+                <ChatBubbleLeftIcon
+                  className="w-6 h-6 text-base-content"
+                  onClick={() => doComment()}
+                />
+              )}
+            </div>
           </div>
           <div className="bg-base-content h-0.5"></div>
         </div>

@@ -21,6 +21,8 @@ import { toast } from "react-toastify";
 import { myunzip, myzip } from "../utils/zip";
 import { storePlaylist } from "../../context/VBLiveAPI/VBLiveAPIAction";
 import Share from "../matches/Share";
+import { confirmAlert } from "react-confirm-alert";
+import "react-confirm-alert/src/react-confirm-alert.css";
 
 function Playlist() {
   const [showPlaylist, setShowPlaylist] = useState(true);
@@ -146,6 +148,30 @@ function Playlist() {
     const cm = pl.comment !== undefined ? pl.comment : "";
     setComment(cm);
     document.getElementById("modal-comment").checked = true;
+  };
+
+  const doRemoveItem = (pl) => {
+    confirmAlert({
+      title: "Remove Item",
+      message: "Do you really want to remove the selected item?",
+      buttons: [
+        {
+          label: "Yes",
+          onClick: () => {
+            const idx = playlists.indexOf(pl);
+            playlists.splice(idx, 1);
+            if (selectedItem === pl) {
+              setSelectedItem(null);
+            }
+            forceUpdate((n) => !n);
+          },
+        },
+        {
+          label: "No",
+          onClick: () => {},
+        },
+      ],
+    });
   };
 
   const doSavePlaylist = () => {
@@ -360,6 +386,7 @@ function Playlist() {
                   selItem={selectedItem}
                   onItemSelected={(pl) => doSelectItem(pl)}
                   onCommentClicked={(pl) => doCommentClicked(pl)}
+                  onItemRemoved={(pl) => doRemoveItem(pl)}
                 />
               </div>
             </div>
