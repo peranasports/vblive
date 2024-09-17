@@ -5,7 +5,7 @@ import ServeReceive from "./ServeReceive";
 import { CheckIcon, XIcon } from "@heroicons/react/24/outline";
 import { psvbParseLatestStats } from "../utils/PSVBFile";
 import { useNavigate } from "react-router-dom";
-import { getEventInfo, getEventStringColor, getTimingForEvent, makeFilename } from "../utils/Utils";
+import { getEventInfo, getEventStringColor, getTimingForEvent, makeFilename, makePlaylist } from "../utils/Utils";
 import { DVEventString } from "../utils/DVWFile";
 import { useAuthStatus } from "../hooks/useAuthStatus";
 
@@ -410,60 +410,62 @@ function ServeReceiveReport({ matches, team, selectedGame, selectedTeam }) {
         filteredEvents.push(r.passEvent);
       }
     }
-    var evs = [];
-    for (var ev of filteredEvents) {
-      var loc = 0;
-      const tm = getTimingForEvent(ev);
-      if (
-        ev.Drill.match.videoStartTimeSeconds &&
-        ev.Drill.match.videoOffset &&
-        ev.Drill.match.videoOffset >= 0
-      ) {
-        const secondsSinceEpoch = Math.round(ev.TimeStamp.getTime() / 1000);
-        loc =
-          secondsSinceEpoch -
-          ev.Drill.match.videoStartTimeSeconds +
-          ev.Drill.match.videoOffset -
-          tm.leadTime;
-      } else {
-        if (ev.VideoPosition !== undefined && ev.VideoPosition !== 0) {
-          loc = ev.VideoPosition - tm.leadTime;
-        }
-      }
+    // var evs = [];
+    // for (var ev of filteredEvents) {
+    //   var loc = 0;
+    //   const tm = getTimingForEvent(ev);
+    //   if (
+    //     ev.Drill.match.videoStartTimeSeconds &&
+    //     ev.Drill.match.videoOffset &&
+    //     ev.Drill.match.videoOffset >= 0
+    //   ) {
+    //     const secondsSinceEpoch = Math.round(ev.TimeStamp.getTime() / 1000);
+    //     loc =
+    //       secondsSinceEpoch -
+    //       ev.Drill.match.videoStartTimeSeconds +
+    //       ev.Drill.match.videoOffset -
+    //       tm.leadTime;
+    //   } else {
+    //     if (ev.VideoPosition !== undefined && ev.VideoPosition !== 0) {
+    //       loc = ev.VideoPosition - tm.leadTime;
+    //     }
+    //   }
 
-      var xx = "";
-      var col = "";
-      if (ev.DVGrade === undefined) {
-        const ss = getEventInfo(ev);
-        xx = ss.sub;
-        col = ss.subcolor;
-      } else {
-        xx = DVEventString(ev);
-        col = getEventStringColor(ev);
-      }
-      const evx = {
-        playerName:
-          ev.Player.shirtNumber + ". " + ev.Player.NickName.toUpperCase(),
-        eventString: xx,
-        eventStringColor: col,
-        eventSubstring:
-          "Set " +
-          ev.Drill.GameNumber +
-          " " +
-          ev.TeamScore +
-          "-" +
-          ev.OppositionScore +
-          " R" +
-          ev.Row,
-        videoOnlineUrl: ev.Drill.match.videoOnlineUrl,
-        videoPosition: loc,
-        eventId: ev.EventId,
-        matchVideo: ev.Drill.match.videoOnlineUrl
-          ? ev.Drill.match.videoOnlineUrl
-          : "",
-      };
-      evs.push(evx);
-    }
+    //   var xx = "";
+    //   var col = "";
+    //   if (ev.DVGrade === undefined) {
+    //     const ss = getEventInfo(ev);
+    //     xx = ss.sub;
+    //     col = ss.subcolor;
+    //   } else {
+    //     xx = DVEventString(ev);
+    //     col = getEventStringColor(ev);
+    //   }
+    //   const evx = {
+    //     playerName:
+    //       ev.Player.shirtNumber + ". " + ev.Player.NickName.toUpperCase(),
+    //     eventString: xx,
+    //     eventStringColor: col,
+    //     eventSubstring:
+    //       "Set " +
+    //       ev.Drill.GameNumber +
+    //       " " +
+    //       ev.TeamScore +
+    //       "-" +
+    //       ev.OppositionScore +
+    //       " R" +
+    //       ev.Row,
+    //     videoOnlineUrl: ev.Drill.match.videoOnlineUrl,
+    //     videoPosition: loc,
+    //     eventId: ev.EventId,
+    //     matchVideo: ev.Drill.match.videoOnlineUrl
+    //       ? ev.Drill.match.videoOnlineUrl
+    //       : "",
+    //   };
+    //   evs.push(evx);
+    // }
+
+    const evs = makePlaylist(filteredEvents);
     if (evs.length === 0) {
       // toast.error("Play list is empty.");
     } else {

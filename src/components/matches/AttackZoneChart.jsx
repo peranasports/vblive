@@ -1,9 +1,10 @@
 import { useEffect, useRef } from "react";
 import { writeText, colourForEfficiency } from "../utils/Utils";
 
-function AttackZoneChart({ matches, team, events, row }) {
+function AttackZoneChart({ matches, team, events, row, onEventsSelected }) {
   const canvasRef = useRef(null);
   const ref = useRef(null);
+  const zoneorders = [4, 3, 2, 7, 8, 9, 5, 6, 1];
 
   const draw = (ctx) => {
     var xmargin = 20;
@@ -33,7 +34,6 @@ function AttackZoneChart({ matches, team, events, row }) {
     ctx.fillStyle = "#e67e22";
     ctx.fillRect(xmargin, y, w, h3);
 
-    var zoneorders = [4, 3, 2, 7, 8, 9, 5, 6, 1];
     var grandtotal = 0;
     for (var z = 0; z < 9; z++) {
       var a = events[row - 1][z];
@@ -43,10 +43,10 @@ function AttackZoneChart({ matches, team, events, row }) {
     x = xmargin;
     y = topmargin;
 
-    writeText(
-      { ctx: ctx, text: "ROW " + row, x: x, y: 30 },
-      { textAlign: "left", fontSize: fontsize * 2 }
-    );
+    // writeText(
+    //   { ctx: ctx, text: "ROW " + row, x: x, y: 30 },
+    //   { textAlign: "left", fontSize: fontsize * 2 }
+    // );
 
     ctx.strokeStyle = "#ffffff";
     ctx.lineWidth = 2;
@@ -281,9 +281,18 @@ function AttackZoneChart({ matches, team, events, row }) {
     draw(context);
   }, [draw]);
 
+  const onMouseDown = (e) => {
+    var x = e.nativeEvent.offsetX;
+    var y = e.nativeEvent.offsetY;
+    const line = Math.floor((y - 60) / 90);
+    const col = Math.floor((x - 20) / 90);
+    const evs = events[row - 1][zoneorders[line * 3 + col] - 1];
+    onEventsSelected(evs);
+  };
+
   return (
-    <div ref={ref}>
-      <canvas id="canvas" ref={canvasRef} />
+    <div ref={ref} className="cursor-pointer">
+      <canvas id="canvas" ref={canvasRef} onMouseDown={onMouseDown}/>
     </div>
   );
 }

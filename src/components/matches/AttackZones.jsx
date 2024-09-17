@@ -1,11 +1,67 @@
 import { useState, useEffect } from "react";
 import AttackZoneChart from "./AttackZoneChart";
-import { zoneFromString } from "../utils/Utils";
+import { makePlaylist, zoneFromString } from "../utils/Utils";
+import { toast } from "react-toastify";
+import { useAuthStatus } from "../hooks/useAuthStatus";
+import { useNavigate } from "react-router-dom";
+import { VideoCameraIcon } from "@heroicons/react/24/outline";
 
 const kSkillSpike = 4;
 
 function AttackZones({ matches, team, selectedGame, selectedTeam }) {
   const [events, setEvents] = useState(null);
+  const { currentUser } = useAuthStatus();
+  const navigate = useNavigate();
+
+  const doEventsSelected = (evs) => {
+    const sortedevs = evs.sort((a, b) => a.TimeStamp.getTime() - b.TimeStamp.getTime());
+    const playlist = makePlaylist(sortedevs);
+    if (playlist.length === 0) {
+      toast.error("No events in selected zone.");
+    } else {
+      const evstr = JSON.stringify(playlist);
+      localStorage.setItem("VBLivePlaylistEvents", evstr);
+      const pl = {
+        events: playlist,
+      };
+      const fn = null; // makeFilename("playlist", "vblive", "playlist");
+      const buffer = JSON.stringify(pl);
+      const st = {
+        playlistFileData: buffer,
+        filename: null,
+        playlists: null,
+        serverName: currentUser.email,
+      };
+      navigate("/playlist", { state: st });
+    }
+  };
+
+  const doVideo = (row) => {
+    var evs = [];
+    for (var z = 0; z < 9; z++) {
+      evs = evs.concat(events[row - 1][z]);
+    }
+    const sortedevs = evs.sort((a, b) => a.TimeStamp.getTime() - b.TimeStamp.getTime());
+    const playlist = makePlaylist(sortedevs);
+    if (playlist.length === 0) {
+      toast.error("No events in selected zone.");
+    } else {
+      const evstr = JSON.stringify(playlist);
+      localStorage.setItem("VBLivePlaylistEvents", evstr);
+      const pl = {
+        events: playlist,
+      };
+      const fn = null; // makeFilename("playlist", "vblive", "playlist");
+      const buffer = JSON.stringify(pl);
+      const st = {
+        playlistFileData: buffer,
+        filename: null,
+        playlists: null,
+        serverName: currentUser.email,
+      };
+      navigate("/playlist", { state: st });
+    }    
+  };
 
   const getAttackComboOfEvent = (code) => {
     if (code == undefined) {
@@ -37,13 +93,14 @@ function AttackZones({ matches, team, selectedGame, selectedTeam }) {
       if (matches.length === 1) {
         tm = selectedTeam === 0 ? match.teamA : match.teamB;
       } else {
-        tm = selectedTeam === 0
-          ? team === match.teamA.Name
-            ? match.teamA
-            : match.teamB
-          : team === match.teamA.Name
-          ? match.teamB
-          : match.teamA;
+        tm =
+          selectedTeam === 0
+            ? team === match.teamA.Name
+              ? match.teamA
+              : match.teamB
+            : team === match.teamA.Name
+            ? match.teamB
+            : match.teamA;
       }
       var xevs =
         selectedGame === 0 ? match.events : match.sets[selectedGame - 1].events;
@@ -134,25 +191,133 @@ function AttackZones({ matches, team, selectedGame, selectedTeam }) {
           : "OPPONENTS (" + matches.length + ")"}
       </p>
       <div className="flex h-80 lg:overflow-hidden">
-        <div className="w-80 h-80 bg-slate-100">
-          <AttackZoneChart matches={matches} team={team} events={events} row="4" />
+        <div className="flex-col w-80 h-80 bg-slate-100">
+          <div className="flex justify-between px-4">
+            <div className="text-xl font-bold">ROW 4</div>
+            <div
+              className="tooltip tooltip-bottom"
+              data-tip="Show all attacks. Or click on zones to show attacks in that zone."
+            >
+              <VideoCameraIcon
+                className="h-6 w-6 cursor-pointer"
+                onClick={() => doVideo(4)}
+              />
+            </div>
+          </div>
+          <AttackZoneChart
+            matches={matches}
+            team={team}
+            events={events}
+            row="4"
+            onEventsSelected={(evs) => doEventsSelected(evs)}
+          />
         </div>
         <div className="w-80 h-80 bg-slate-100">
-          <AttackZoneChart matches={matches} team={team} events={events} row="5" />
+          <div className="flex justify-between px-4">
+            <div className="text-xl font-bold">ROW 5</div>
+            <div
+              className="tooltip tooltip-bottom"
+              data-tip="Show all attacks. Or click on zones to show attacks in that zone."
+            >
+              <VideoCameraIcon
+                className="h-6 w-6 cursor-pointer"
+                onClick={() => doVideo(5)}
+              />
+            </div>
+          </div>
+          <AttackZoneChart
+            matches={matches}
+            team={team}
+            events={events}
+            row="5"
+            onEventsSelected={(evs) => doEventsSelected(evs)}
+          />
         </div>
         <div className="w-80 h-80 bg-slate-100">
-          <AttackZoneChart matches={matches} team={team} events={events} row="6" />
+          <div className="flex justify-between px-4">
+            <div className="text-xl font-bold">ROW 6</div>
+            <div
+              className="tooltip tooltip-bottom"
+              data-tip="Show all attacks. Or click on zones to show attacks in that zone."
+            >
+              <VideoCameraIcon
+                className="h-6 w-6 cursor-pointer"
+                onClick={() => doVideo(6)}
+              />
+            </div>
+          </div>
+          <AttackZoneChart
+            matches={matches}
+            team={team}
+            events={events}
+            row="6"
+            onEventsSelected={(evs) => doEventsSelected(evs)}
+          />
         </div>
       </div>
       <div className="flex h-80 lg:overflow-hidden">
         <div className="w-80 h-80 bg-slate-100">
-          <AttackZoneChart matches={matches} team={team} events={events} row="3" />
+          <div className="flex justify-between px-4">
+            <div className="text-xl font-bold">ROW 3</div>
+            <div
+              className="tooltip tooltip-bottom"
+              data-tip="Show all attacks. Or click on zones to show attacks in that zone."
+            >
+              <VideoCameraIcon
+                className="h-6 w-6 cursor-pointer"
+                onClick={() => doVideo(3)}
+              />
+            </div>
+          </div>
+          <AttackZoneChart
+            matches={matches}
+            team={team}
+            events={events}
+            row="3"
+            onEventsSelected={(evs) => doEventsSelected(evs)}
+          />
         </div>
         <div className="w-80 h-80 bg-slate-100">
-          <AttackZoneChart matches={matches} team={team} events={events} row="2" />
+          <div className="flex justify-between px-4">
+            <div className="text-xl font-bold">ROW 2</div>
+            <div
+              className="tooltip tooltip-bottom"
+              data-tip="Show all attacks. Or click on zones to show attacks in that zone."
+            >
+              <VideoCameraIcon
+                className="h-6 w-6 cursor-pointer"
+                onClick={() => doVideo(2)}
+              />
+            </div>
+          </div>
+          <AttackZoneChart
+            matches={matches}
+            team={team}
+            events={events}
+            row="2"
+            onEventsSelected={(evs) => doEventsSelected(evs)}
+          />
         </div>
         <div className="w-80 h-80 bg-slate-100">
-          <AttackZoneChart matches={matches} team={team} events={events} row="1" />
+          <div className="flex justify-between px-4">
+            <div className="text-xl font-bold">ROW 1</div>
+            <div
+              className="tooltip tooltip-bottom"
+              data-tip="Show all attacks. Or click on zones to show attacks in that zone."
+            >
+              <VideoCameraIcon
+                className="h-6 w-6 cursor-pointer"
+                onClick={() => doVideo(1)}
+              />
+            </div>
+          </div>
+          <AttackZoneChart
+            matches={matches}
+            team={team}
+            events={events}
+            row="1"
+            onEventsSelected={(evs) => doEventsSelected(evs)}
+          />
         </div>
       </div>
     </div>

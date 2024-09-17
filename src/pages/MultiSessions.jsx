@@ -64,6 +64,20 @@ function MultiSessions() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const cr = localStorage.getItem("currentReportForMatches");
+    if (cr) {
+      const tokens = cr.split("_");
+      var guids = "";
+      for (var xm of matches) {
+        guids += xm.guid;
+      }
+      if (guids === tokens[1]) {
+        setCurrentReport(parseInt(tokens[0]));
+      }
+    }
+  }, []);
+
+  useEffect(() => {
     var allms = [];
     for (var match of matches) {
       if (match.buffer.includes("DATAVOLLEY")) {
@@ -102,6 +116,17 @@ function MultiSessions() {
   }
 
   const renderReport = () => {
+    if (currentReport !== 0) {
+      var guids = "";
+      for (var xm of matches) {
+        guids += xm.guid;
+      }
+      localStorage.setItem(
+        "currentReportForMatches",
+        currentReport + "_" + guids
+      );
+    }
+
     if (currentReport === 0) {
       return (
         <Dashboard

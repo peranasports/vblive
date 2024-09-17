@@ -20,6 +20,7 @@ import {
   addStatsItem,
   calculateAllStats,
 } from "../utils/StatsItem";
+import { DVEventString } from "./DVWFile";
 
 export function zipBuffer(inputstr) {
   // const input = new Uint8Array(inputstr);
@@ -555,4 +556,62 @@ export function decodeHtml(str) {
   return str.replace(/&amp;|&lt;|&gt;|&quot;|&#039;/g, function (m) {
     return map[m];
   });
+}
+
+export function makePlaylist(events) {
+  var evs = [];
+  for (var ev of events) {
+    var loc = 0;
+    const tm = getTimingForEvent(ev);
+    if (
+      ev.Drill.match.videoStartTimeSeconds &&
+      ev.Drill.match.videoOffset &&
+      ev.Drill.match.videoOffset >= 0
+    ) {
+      const secondsSinceEpoch = Math.round(ev.TimeStamp.getTime() / 1000);
+      loc =
+        secondsSinceEpoch -
+        ev.Drill.match.videoStartTimeSeconds +
+        ev.Drill.match.videoOffset -
+        tm.leadTime;
+    } else {
+      if (ev.VideoPosition !== undefined && ev.VideoPosition !== 0) {
+        loc = ev.VideoPosition - tm.leadTime;
+      }
+    }
+
+    var xx = "";
+    var col = "";
+    if (ev.DVGrade === undefined) {
+      const ss = getEventInfo(ev);
+      xx = ss.sub;
+      col = ss.subcolor;
+    } else {
+      xx = DVEventString(ev);
+      col = getEventStringColor(ev);
+    }
+    const evx = {
+      playerName:
+        ev.Player.shirtNumber + ". " + ev.Player.NickName.toUpperCase(),
+      eventString: xx,
+      eventStringColor: col,
+      eventSubstring:
+        "Set " +
+        ev.Drill.GameNumber +
+        " " +
+        ev.TeamScore +
+        "-" +
+        ev.OppositionScore +
+        " R" +
+        ev.Row,
+      videoOnlineUrl: ev.Drill.match.videoOnlineUrl,
+      videoPosition: loc,
+      eventId: ev.EventId,
+      matchVideo: ev.Drill.match.videoOnlineUrl
+        ? ev.Drill.match.videoOnlineUrl
+        : "",
+    };
+    evs.push(evx);
+  }
+  return evs;
 }

@@ -87,19 +87,17 @@ function Session() {
     dispatch({ type: "GET_SESSION", payload: sessionData });
     var m = null;
     var appname = null;
-    if (sessionData.utcLastUpdate)
-    {
+    if (sessionData.utcLastUpdate) {
       var now = new Date();
-      var utc_timestamp =
-        Date.UTC(
-          now.getUTCFullYear(),
-          now.getUTCMonth(),
-          now.getUTCDate(),
-          now.getUTCHours(),
-          now.getUTCMinutes(),
-          now.getUTCSeconds(),
-          now.getUTCMilliseconds()
-        );
+      var utc_timestamp = Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate(),
+        now.getUTCHours(),
+        now.getUTCMinutes(),
+        now.getUTCSeconds(),
+        now.getUTCMilliseconds()
+      );
       setIsLiveSession(utc_timestamp / 1000 - sessionData.utcLastUpdate < 300);
       setLastUtcLastUpdate(sessionData.utcLastUpdate);
     }
@@ -157,6 +155,13 @@ function Session() {
       if (!mx.guid) {
         mx.guid = generateUUID();
       }
+      const cr = localStorage.getItem("currentReportForMatch");
+      if (cr) {
+        const tokens = cr.split("_");
+        if (mx && mx.dvstring === tokens[1]) {
+          setCurrentReport(parseInt(tokens[0]));
+        }
+      }
       setMatch(mx);
       setAutoRefresh(false);
       setIsLiveSession(false);
@@ -181,6 +186,13 @@ function Session() {
         mx.guid = generateUUID();
       }
       setMatch(mx);
+      const cr = localStorage.getItem("currentReportForMatch");
+      if (cr) {
+        const tokens = cr.split("_");
+        if (mx && mx.dvstring === tokens[1]) {
+          setCurrentReport(parseInt(tokens[0]));
+        }
+      }
       setAutoRefresh(false);
       setIsLiveSession(false);
       forceUpdate((n) => !n);
@@ -216,6 +228,10 @@ function Session() {
   }
 
   const renderReport = () => {
+    localStorage.setItem(
+      "currentReportForMatch",
+      currentReport + "_" + match.dvstring
+    );
     if (currentReport === 0) {
       return (
         <Dashboard
@@ -379,7 +395,9 @@ function Session() {
           <div className="flex-col">
             {isLiveSession ? (
               <div className="flex gap-2">
-                <div className="text-sm font-bold text-white bg-red-700 px-2 h-5">LIVE</div>
+                <div className="text-sm font-bold text-white bg-red-700 px-2 h-5">
+                  LIVE
+                </div>
                 {autoRefresh ? (
                   <label className="text-sm">
                     Auto-refresh in {refreshInterval - counter}s

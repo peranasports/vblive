@@ -193,33 +193,35 @@ function MatchesList() {
         }
       }
       if (!ok) {
+        setLoading(false);
         alert("Not all matches are selected are of the same team.");
         return;
-      }
-      var xms = [];
-      for (var m of ms) {
-        const xm = await getSessionById(m.id);
-        var buffer = myunzip(xm.stats);
-        if (!buffer) {
-          buffer = unzipBuffer(xm.stats);
+      } else {
+        var xms = [];
+        for (var m of ms) {
+          const xm = await getSessionById(m.id);
+          var buffer = myunzip(xm.stats);
+          if (!buffer) {
+            buffer = unzipBuffer(xm.stats);
+          }
+          xm.buffer = buffer;
+          // if (m.videoFilePath) {
+          //   for (var sm of xm.sets) {
+          //     for (var ev of sm.events) {
+          //       ev.videoTime = ev.timestamp - m.videoStartTime;
+          //       ev.videoFile = m.videoFilePath;
+          //     }
+          //   }
+          // }
+          xms.push(xm);
         }
-        xm.buffer = buffer;
-        // if (m.videoFilePath) {
-        //   for (var sm of xm.sets) {
-        //     for (var ev of sm.events) {
-        //       ev.videoTime = ev.timestamp - m.videoStartTime;
-        //       ev.videoFile = m.videoFilePath;
-        //     }
-        //   }
-        // }
-        xms.push(xm);
+        setLoading(false);
+        const st = {
+          matches: xms,
+          team: team,
+        };
+        navigate("/multisessions", { state: st });
       }
-      setLoading(false);
-      const st = {
-        matches: xms,
-        team: team,
-      };
-      navigate("/multisessions", { state: st });
     }
   };
 
@@ -273,7 +275,6 @@ function MatchesList() {
         session.tournament = session.tournament
           ? decodeHtml(session.tournament)
           : "";
-
       })
       .catch((error) => {
         console.log(error);

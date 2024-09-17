@@ -139,6 +139,7 @@ export function generateMatch(str) {
   awayscore = 0;
   homeTeam = null;
   awayTeam = null;
+  dateAtVideoPositionZero = null;
 
   var a = str.split(/\r?\n/);
   if (a.length == 0 || a[0] !== "[3DATAVOLLEYSCOUT]") {
