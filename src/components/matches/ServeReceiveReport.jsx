@@ -5,9 +5,16 @@ import ServeReceive from "./ServeReceive";
 import { CheckIcon, XIcon } from "@heroicons/react/24/outline";
 import { psvbParseLatestStats } from "../utils/PSVBFile";
 import { useNavigate } from "react-router-dom";
-import { getEventInfo, getEventStringColor, getTimingForEvent, makeFilename, makePlaylist } from "../utils/Utils";
+import {
+  getEventInfo,
+  getEventStringColor,
+  getTimingForEvent,
+  makeFilename,
+  makePlaylist,
+} from "../utils/Utils";
 import { DVEventString } from "../utils/DVWFile";
 import { useAuthStatus } from "../hooks/useAuthStatus";
+import { toast } from "react-toastify";
 
 const kFBKills = 0;
 const kFBOppServeErrors = 1;
@@ -254,10 +261,13 @@ function ServeReceiveReport({ matches, team, selectedGame, selectedTeam }) {
                       "_" +
                       mr.passEvent.Player.LastName
                 ) {
+                  mr.passHit = true;
                   plstat.passHits++;
                   if (sev.EventGrade === 3) {
+                    mr.passHitKill = true;
                     plstat.passHitKills++;
                   } else if (sev.EventGrade === 0) {
+                    mr.passHitError = true;
                     plstat.passHitErrors++;
                   }
                   break;
@@ -563,6 +573,118 @@ function ServeReceiveReport({ matches, team, selectedGame, selectedTeam }) {
     );
   };
 
+  const doPlaylist = (playlist) => {
+    if (playlist.length === 0) {
+      toast.error("No passes selected.");
+    } else {
+      const evstr = JSON.stringify(playlist);
+      localStorage.setItem("VBLivePlaylistEvents", evstr);
+      const pl = {
+        events: playlist,
+      };
+      const fn = null; // makeFilename("playlist", "vblive", "playlist");
+      const buffer = JSON.stringify(pl);
+      const st = {
+        playlistFileData: buffer,
+        filename: null,
+        playlists: null,
+        serverName: currentUser.email,
+      };
+      navigate("/playlist", { state: st });
+    }
+  };
+
+  const doVideoNumberOfPasses = (statsItem) => {
+    var evs = [];
+    for (var r of statsItem.rallies) {
+      if (r.passEvent) {
+        evs.push(r.passEvent);
+      }
+    }
+    const playlist = makePlaylist(evs);
+    doPlaylist(playlist);
+  };
+
+  const doVideoPerfectPasses = (statsItem) => {
+    var evs = [];
+    for (var r of statsItem.rallies) {
+      if (r.passEvent && r.passEvent.DVGrade === "#") {
+        evs.push(r.passEvent);
+      }
+    }
+    const playlist = makePlaylist(evs);
+    doPlaylist(playlist);
+  };
+
+  const doVideoPositivePasses = (statsItem) => {
+    var evs = [];
+    for (var r of statsItem.rallies) {
+      if (
+        r.passEvent &&
+        (r.passEvent.DVGrade === "#" || r.passEvent.DVGrade === "+")
+      ) {
+        evs.push(r.passEvent);
+      }
+    }
+    const playlist = makePlaylist(evs);
+    doPlaylist(playlist);
+  };
+
+  const doVideoSideouts = (statsItem) => {
+    var evs = [];
+    for (var r of statsItem.rallies) {
+      if (r.sideout && r.sideout === true) {
+        evs.push(r.passEvent);
+      }
+    }
+    const playlist = makePlaylist(evs);
+    doPlaylist(playlist);
+  };
+
+  const doVideoFBSideouts = (statsItem) => {
+    var evs = [];
+    for (var r of statsItem.rallies) {
+      if (r.sideoutFirstBall && r.sideoutFirstBall === true) {
+        evs.push(r.passEvent);
+      }
+    }
+    const playlist = makePlaylist(evs);
+    doPlaylist(playlist);
+  };
+
+  const doVideoPassHits = (statsItem) => {
+    var evs = [];
+    for (var r of statsItem.rallies) {
+      if (r.passHit && r.passHit === true) {
+        evs.push(r.passEvent);
+      }
+    }
+    const playlist = makePlaylist(evs);
+    doPlaylist(playlist);
+  };
+
+  const doVideoPassHitKills = (statsItem) => {
+    var evs = [];
+    for (var r of statsItem.rallies) {
+      if (r.passHitKill && r.passHitKill === true) {
+        evs.push(r.passEvent);
+      }
+    }
+    const playlist = makePlaylist(evs);
+    doPlaylist(playlist);
+  };
+
+  const doVideoPassHitErrors = (statsItem) => {
+    var evs = [];
+    for (var r of statsItem.rallies) {
+      if (r.passHitError && r.passHitError === true) {
+        evs.push(r.passEvent);
+      }
+    }
+    const playlist = makePlaylist(evs);
+    doPlaylist(playlist);
+  };
+
   useEffect(() => {
     calculatePassingStats();
   }, [selectedGame, selectedTeam, passSelection]);
@@ -653,33 +775,59 @@ function ServeReceiveReport({ matches, team, selectedGame, selectedTeam }) {
                       ". " +
                       statsItem.Player.NickName}
                   </td>
-                  <td className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">
+                  <td
+                    className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500 cursor-pointer"
+                    onClick={() => doVideoNumberOfPasses(statsItem)}
+                  >
                     {statsItem.numberOfPasses}
                   </td>
                   <td className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">
                     {statsItem.passingAverage.toFixed(2)}
                   </td>
-                  <td className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">
-                    {statsItem.perfectPassPC.toFixed(0)}
+                  <td
+                    className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500 cursor-pointer"
+                    onClick={() => doVideoPerfectPasses(statsItem)}
+                  >
+                    {statsItem.perfectPassPC.toFixed(0)} (
+                    {statsItem.perfectPass}/{statsItem.numberOfPasses})
                   </td>
-                  <td className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">
-                    {statsItem.positivePassPC.toFixed(0)}
+                  <td
+                    className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500 cursor-pointer"
+                    onClick={() => doVideoPositivePasses(statsItem)}
+                  >
+                    {statsItem.positivePassPC.toFixed(0)} (
+                    {statsItem.positivePass}/{statsItem.numberOfPasses})
                   </td>
-                  <td className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">
+                  <td
+                    className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500 cursor-pointer"
+                    onClick={() => doVideoSideouts(statsItem)}
+                  >
                     {statsItem.sideOutPC.toFixed(0)} ({statsItem.sideOuts}/
                     {statsItem.numberOfPasses})
                   </td>
-                  <td className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">
+                  <td
+                    className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500 cursor-pointer"
+                    onClick={() => doVideoFBSideouts(statsItem)}
+                  >
                     {statsItem.FBsideOutPC.toFixed(0)} ({statsItem.FBSideOuts}/
                     {statsItem.numberOfPasses})
                   </td>
-                  <td className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">
+                  <td
+                    className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500 cursor-pointer"
+                    onClick={() => doVideoPassHits(statsItem)}
+                  >
                     {statsItem.passHits.toFixed(0)}
                   </td>
-                  <td className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">
+                  <td
+                    className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500 cursor-pointer"
+                    onClick={() => doVideoPassHitKills(statsItem)}
+                  >
                     {statsItem.passHitKills.toFixed(0)}
                   </td>
-                  <td className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">
+                  <td
+                    className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500 cursor-pointer"
+                    onClick={() => doVideoPassHitErrors(statsItem)}
+                  >
                     {statsItem.passHitErrors.toFixed(0)}
                   </td>
                 </tr>
