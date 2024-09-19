@@ -34,14 +34,16 @@ function HittingChartReport({ matches, team, selectedGame, selectedTeam }) {
     for (var n = 0; n < allOptions.length; n++) {
       var option = allOptions[n];
       if (option.title !== "Display") {
-        for (var ni = 0; ni < option.items.length; ni++) {
-          option.items[ni].selected = true;
+        if (option.items) {
+          for (var ni = 0; ni < option.items.length; ni++) {
+            option.items[ni].selected = true;
+          }
         }
       }
     }
     const opts = { allOptions: allOptions, dates: matchdates() };
     localStorage.setItem("VBLiveHittingChartsOptions", JSON.stringify(opts));
-  }
+  };
 
   const doReset = () => {
     doDoReset();
@@ -139,9 +141,17 @@ function HittingChartReport({ matches, team, selectedGame, selectedTeam }) {
       if (options.dates === matchdates()) {
         for (var n = 0; n < allOptions.length; n++) {
           var option = allOptions[n];
-          for (var ni = 0; ni < option.items.length; ni++) {
-            option.items[ni].selected =
-              options.allOptions[n].items[ni].selected;
+          if (option.items) {
+            for (var ni = 0; ni < option.items.length; ni++) {
+              try {
+                if (option.items[ni] && options.allOptions[n].items) {
+                  option.items[ni].selected =
+                    options.allOptions[n].items[ni].selected;
+                }
+              } catch (error) {
+                console.log(error);
+              }
+            }
           }
         }
         setDrawMode(checkFilter("Display", "Cone") ? 1 : 0);
