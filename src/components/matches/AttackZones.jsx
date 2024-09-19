@@ -14,7 +14,9 @@ function AttackZones({ matches, team, selectedGame, selectedTeam }) {
   const navigate = useNavigate();
 
   const doEventsSelected = (evs) => {
-    const sortedevs = evs.sort((a, b) => a.TimeStamp.getTime() - b.TimeStamp.getTime());
+    const sortedevs = evs.sort(
+      (a, b) => a.TimeStamp.getTime() - b.TimeStamp.getTime()
+    );
     const playlist = makePlaylist(sortedevs);
     if (playlist.length === 0) {
       toast.error("No events in selected zone.");
@@ -41,7 +43,9 @@ function AttackZones({ matches, team, selectedGame, selectedTeam }) {
     for (var z = 0; z < 9; z++) {
       evs = evs.concat(events[row - 1][z]);
     }
-    const sortedevs = evs.sort((a, b) => a.TimeStamp.getTime() - b.TimeStamp.getTime());
+    const sortedevs = evs.sort(
+      (a, b) => a.TimeStamp.getTime() - b.TimeStamp.getTime()
+    );
     const playlist = makePlaylist(sortedevs);
     if (playlist.length === 0) {
       toast.error("No events in selected zone.");
@@ -60,7 +64,7 @@ function AttackZones({ matches, team, selectedGame, selectedTeam }) {
         serverName: currentUser.email,
       };
       navigate("/playlist", { state: st });
-    }    
+    }
   };
 
   const getAttackComboOfEvent = (code) => {
@@ -120,8 +124,17 @@ function AttackZones({ matches, team, selectedGame, selectedTeam }) {
         for (var ne = 0; ne < evs.length; ne++) {
           var e = evs[ne];
           var startZone = zoneFromString(e.BallStartString);
-          if (startZone > 0 && e.Row !== undefined && isNaN(e.Row) === false) {
-            events[e.Row - 1][startZone - 1].push(e);
+          try {
+            if (
+              startZone > 0 &&
+              e.Row !== undefined &&
+              e.Row > 0 &&
+              isNaN(e.Row) === false
+            ) {
+              events[e.Row - 1][startZone - 1].push(e);
+            }
+          } catch (error) {
+            console.log(error);
           }
         }
       } else {
@@ -196,7 +209,7 @@ function AttackZones({ matches, team, selectedGame, selectedTeam }) {
             <div className="text-xl font-bold">ROW 4</div>
             <div
               className="tooltip tooltip-bottom"
-              data-tip="Show all attacks. Or click on zones to show attacks in that zone."
+              data-tip="Show all attacks. Or click on a zone to show attacks in that zone."
             >
               <VideoCameraIcon
                 className="h-6 w-6 cursor-pointer"

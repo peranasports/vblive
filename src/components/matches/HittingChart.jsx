@@ -8,9 +8,14 @@ import {
 import { orderBy } from "lodash";
 import { CartesianAxis } from "recharts";
 
-function HittingChart({ matches, events, rows, drawMode }) {
+const zoneorders = [4, 3, 2, 7, 8, 9, 5, 6, 1];
+
+function HittingChart({ matches, events, rows, drawMode, onEventsSelected }) {
   const canvasRef = useRef(null);
   const ref = useRef(null);
+  const [allZoneEvents, setAllZoneEvents] = useState([]);
+  const [dx, setDx] = useState(0);
+  const [dy, setDy] = useState(0);
 
   const getAttackCombo = (code) => {
     for (var match of matches) {
@@ -41,17 +46,30 @@ function HittingChart({ matches, events, rows, drawMode }) {
       return;
     }
 
+    var ptMid = stringToPoint(e.BallMidString);
     var ptStart = stringToPoint(e.BallStartString);
     var ptEnd = stringToPoint(e.BallEndString);
+    if (ptEnd.y > 100) {
+      ptEnd.y = 200 - ptEnd.y;
+      ptEnd.x = 100 - ptEnd.x;
+      ptStart.y = 200 - ptStart.y;
+      ptStart.x = 100 - ptStart.x;
+      if (ptMid.x !== 0 && ptMid.y !== 0) {
+        ptMid.y = 100; //200 - ptMid.y;
+        ptMid.x = 100 - ptMid.x;
+      }
+    }
 
     var spx = x + ptStart.x * xscale;
     var spy = y + ptStart.y * yscale;
     var epx = x + ptEnd.x * xscale;
     var epy = y + ptEnd.y * yscale;
+    var mpx = x + ptMid.x * xscale;
+    var mpy = y + ptMid.y * yscale;
 
     ctx.save();
-    ctx.strokeStyle = "#7f8c8d";
-    ctx.fillStyle = "#7f8c8d";
+    ctx.strokeStyle = "white"; //"#7f8c8d";
+    ctx.fillStyle = "white"; //"#7f8c8d";
     if (e.EventGrade === 0) {
       ctx.fillStyle = "#ff0000";
       ctx.strokeStyle = "#ff0000";
@@ -60,10 +78,15 @@ function HittingChart({ matches, events, rows, drawMode }) {
       ctx.strokeStyle = "#00ff00";
     }
 
-    ctx.lineWidth = 0.5;
+    ctx.lineWidth = 1; //0.5;
     ctx.beginPath();
     ctx.moveTo(spx, spy);
-    ctx.lineTo(epx, epy);
+    if (ptMid.x !== 0 && ptMid.y !== 0) {
+      ctx.lineTo(mpx, mpy);
+      ctx.lineTo(epx, epy);
+    } else {
+      ctx.lineTo(epx, epy);
+    }
     ctx.stroke();
     // ctx.fillStyle = '#000000'
     // ctx.fillRect(spx - 3, spy - 3, 6, 6)
@@ -496,6 +519,8 @@ function HittingChart({ matches, events, rows, drawMode }) {
     var h3 = h / 3;
     var w = h;
     var w3 = w / 3;
+    setDx(w3);
+    setDy(h3);
 
     var xscale = w / 100.0;
     var yscale = h / 100.0;
@@ -522,7 +547,17 @@ function HittingChart({ matches, events, rows, drawMode }) {
     var zw1 = (zzw * 3) / 4;
     var zw2 = zzw - zw1;
 
-    var zoneorders = [4, 3, 2, 7, 8, 9, 5, 6, 1];
+    writeText(
+      {
+        ctx: ctx,
+        text: "Click on a zone to view video clips of attacks in that zone",
+        x: 10,
+        y: 10,
+        width: w,
+      },
+      { textAlign: "centre", fontSize: 12 }
+    );
+
     var grandtotal = 0;
     var allzoneevents = [];
     var acobjects = [];
@@ -807,6 +842,7 @@ function HittingChart({ matches, events, rows, drawMode }) {
         }
       }
     }
+    setAllZoneEvents(allzoneevents);
   };
 
   useEffect(() => {
@@ -817,11 +853,24 @@ function HittingChart({ matches, events, rows, drawMode }) {
     canvas.width = canvas.offsetWidth;
     canvas.height = canvas.offsetHeight;
     draw(context);
-  }, [draw]);
+  }, [events]);
+
+  const onMouseDown = (e) => {
+    const canvas = canvasRef.current;
+    var x = e.nativeEvent.offsetX;
+    var y = e.nativeEvent.offsetY - canvas.offsetHeight / 2;
+    const line = Math.floor(y / dx);
+    const col = Math.floor((x - 40) / dy);
+    if (col >= 0 && col < 3 && line >= 0 && line < 2) {
+      const zone = zoneorders[line * 3 + col] - 1;
+      const evs = allZoneEvents[zone];
+      onEventsSelected(evs);
+    }
+  };
 
   return (
     <div ref={ref}>
-      <canvas id="canvas" ref={canvasRef} />
+      <canvas id="canvas" ref={canvasRef} onMouseDown={onMouseDown} />
     </div>
   );
 }

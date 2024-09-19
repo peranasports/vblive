@@ -158,7 +158,7 @@ function Session() {
       const cr = localStorage.getItem("currentReportForMatch");
       if (cr) {
         const tokens = cr.split("_");
-        if (mx && mx.dvstring === tokens[1]) {
+        if (mx && mx.TrainingDate.toLocaleString() === tokens[1]) {
           setCurrentReport(parseInt(tokens[0]));
         }
       }
@@ -189,7 +189,7 @@ function Session() {
       const cr = localStorage.getItem("currentReportForMatch");
       if (cr) {
         const tokens = cr.split("_");
-        if (mx && mx.dvstring === tokens[1]) {
+        if (mx && mx.TrainingDate.toLocaleString() === tokens[1]) {
           setCurrentReport(parseInt(tokens[0]));
         }
       }
@@ -230,7 +230,7 @@ function Session() {
   const renderReport = () => {
     localStorage.setItem(
       "currentReportForMatch",
-      currentReport + "_" + match.dvstring
+      currentReport + "_" + match.TrainingDate.toLocaleString()
     );
     if (currentReport === 0) {
       return (

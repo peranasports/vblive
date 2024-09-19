@@ -82,7 +82,14 @@ export const storeSession = async (match, currentUser) => {
       : escapeHtml(match.tournamentName)
     : "?";
   const desc = teamAName + " vs " + teamBName;
-  const seconds = match.TrainingDate.getTime() / 1000;
+  var seconds = 0;
+  var dt = match.TrainingDate;
+  try {
+    seconds = match.TrainingDate.getTime() / 1000;    
+  } catch (error) {
+    dt = new Date(match.TrainingDate);
+    seconds = dt.getTime() / 1000;
+  }
   const voffset = match.videoOffset ? match.videoOffset : -1;
   const vstarttime = match.videoStartTimeSeconds
     ? match.videoStartTimeSeconds
@@ -108,7 +115,7 @@ export const storeSession = async (match, currentUser) => {
     tournament: tournamentName,
     videoStartTimeSeconds: vstarttime,
     videoOffset: voffset,
-    sessionDateString: match.TrainingDate.toLocaleDateString(),
+    sessionDateString: dt.toLocaleDateString(),
     description: desc,
     stats: buffer,
   }

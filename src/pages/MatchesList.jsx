@@ -42,8 +42,8 @@ function MatchesList() {
   const [selectedScreen, setSelectedScreen] = useState(0);
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [searchText, setSearchText] = useState("");
-  const [sortColumn, setSortColumn] = useState(0);
-  const [sortAscending, setSortAscending] = useState(true);
+  const [sortColumn, setSortColumn] = useState(4);
+  const [sortAscending, setSortAscending] = useState(false);
   const [thisDayTimeCode, setThisDayTimeCode] = useState(dayTimeCode());
   const [loading, setLoading] = useState(true);
   const [, forceUpdate] = useState(0);
@@ -288,9 +288,12 @@ function MatchesList() {
     if (!uz || uz.length === 0) {
       uz = unzipBuffer(session.stats);
     }
+    const dvbuf = uz.includes("PSVB") ? null : uz;
+    const vbbuf = uz.includes("PSVB") ? uz : null;
     const st = {
       msession: session,
-      dvwFileData: uz,
+      dvwFileData: dvbuf,
+      psvbFileData: vbbuf,
       filename: "",
     };
     navigate("/session", { state: st });
@@ -487,6 +490,11 @@ function MatchesList() {
   useEffect(() => {
     doInit();
   }, [selectedScreen]);
+
+  const makeDate = (seconds) => {
+    const dt = new Date(seconds * 1000);
+    return dt.toLocaleDateString();
+  }
 
   const getSharedColour = (match) => {
     if (match.shareStatus === undefined || match.shareStatus === null) {
@@ -718,7 +726,8 @@ function MatchesList() {
                               <td className="table-cell">{match.tournament}</td>
                               <td className="table-cell">{match.scores}</td>
                               <td className="table-cell">
-                                {match.sessionDateString}
+                                {makeDate(match.sessionDateTimeInSeconds)}
+                                {/*match.sessionDateString*/}
                                 {/* {convertSecondsToDate(match.seconds / 1000)} */}
                               </td>
                               {selectedScreen === 0 ? (

@@ -67,11 +67,11 @@ function MultiSessions() {
     const cr = localStorage.getItem("currentReportForMatches");
     if (cr) {
       const tokens = cr.split("_");
-      var guids = "";
+      var dates = "";
       for (var xm of matches) {
-        guids += xm.guid;
+        dates += xm.sessionDateString;
       }
-      if (guids === tokens[1]) {
+      if (dates === tokens[1]) {
         setCurrentReport(parseInt(tokens[0]));
       }
     }
@@ -117,13 +117,13 @@ function MultiSessions() {
 
   const renderReport = () => {
     if (currentReport !== 0) {
-      var guids = "";
+      var dates = "";
       for (var xm of matches) {
-        guids += xm.guid;
+        dates += xm.sessionDateString;
       }
       localStorage.setItem(
         "currentReportForMatches",
-        currentReport + "_" + guids
+        currentReport + "_" + dates
       );
     }
 

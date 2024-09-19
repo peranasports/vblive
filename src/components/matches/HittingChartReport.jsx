@@ -1,21 +1,94 @@
 import { useState, useEffect } from "react";
-import { zoneFromString } from "../utils/Utils";
+import { makePlaylist, zoneFromString } from "../utils/Utils";
 import AllFiltersPanel from "./AllFiltersPanel";
 import HittingChart from "./HittingChart";
 import AttackZoneChart from "./AttackZoneChart";
 import { allFilters } from "./AllFilters";
 import { kSkillSpike, kSkillSet, kSkillSettersCall } from "../utils/StatsItem";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { useAuthStatus } from "../hooks/useAuthStatus";
+import { ArrowPathIcon, VideoCameraIcon } from "@heroicons/react/24/outline";
 
 function HittingChartReport({ matches, team, selectedGame, selectedTeam }) {
+  const navigate = useNavigate();
+  const { currentUser } = useAuthStatus();
   const [drawMode, setDrawMode] = useState(0);
   const [currentTeam, setCurrentTeam] = useState(-1);
   const [allEvents, setAllEvents] = useState(null);
   const [events, setEvents] = useState(null);
   const [allOptions, setAllOptions] = useState(allFilters);
   const [init, setInit] = useState(false);
+  const [appName, setAppName] = useState("");
   const [, forceUpdate] = useState(0);
 
+  const doEventsSelected = (evs) => {
+    const sortedevs = evs.sort(
+      (a, b) => a.TimeStamp.getTime() - b.TimeStamp.getTime()
+    );
+    const playlist = makePlaylist(sortedevs);
+    doPlaylist(playlist);
+  };
+
+  const doDoReset = () => {
+    for (var n = 0; n < allOptions.length; n++) {
+      var option = allOptions[n];
+      if (option.title !== "Display") {
+        for (var ni = 0; ni < option.items.length; ni++) {
+          option.items[ni].selected = true;
+        }
+      }
+    }
+    const opts = { allOptions: allOptions, dates: matchdates() };
+    localStorage.setItem("VBLiveHittingChartsOptions", JSON.stringify(opts));
+  }
+
+  const doReset = () => {
+    doDoReset();
+    calculateZones();
+  };
+
+  const doVideo = () => {
+    const selrows = selectedRows();
+    var evs = [];
+    for (var row = 0; row < 6; row++) {
+      if (selrows.includes((row + 1).toString())) {
+        for (var z = 0; z < 9; z++) {
+          evs = evs.concat(events[row][z]);
+        }
+      }
+    }
+    const sortedevs = evs.sort(
+      (a, b) => a.TimeStamp.getTime() - b.TimeStamp.getTime()
+    );
+    const playlist = makePlaylist(sortedevs);
+    doPlaylist(playlist);
+  };
+
+  const doPlaylist = (playlist) => {
+    if (playlist.length === 0) {
+      toast.error("No events in selected zone.");
+    } else {
+      const evstr = JSON.stringify(playlist);
+      localStorage.setItem("VBLivePlaylistEvents", evstr);
+      const pl = {
+        events: playlist,
+      };
+      const fn = null;
+      const buffer = JSON.stringify(pl);
+      const st = {
+        playlistFileData: buffer,
+        filename: null,
+        playlists: null,
+        serverName: currentUser.email,
+      };
+      navigate("/playlist", { state: st });
+    }
+  };
+
   const doUpdate = () => {
+    const opts = { allOptions: allOptions, dates: matchdates() };
+    localStorage.setItem("VBLiveHittingChartsOptions", JSON.stringify(opts));
     forceUpdate((n) => !n);
     setDrawMode(checkFilter("Display", "Cone") ? 1 : 0);
     var xevents = calculateZones();
@@ -53,6 +126,68 @@ function HittingChartReport({ matches, team, selectedGame, selectedTeam }) {
     return false;
   };
 
+  const doInit = () => {
+    if (matches[0].app === "DataVolley") {
+      setAppName("DataVolley");
+    } else {
+      setAppName("VBStats");
+    }
+
+    const opts = localStorage.getItem("VBLiveHittingChartsOptions");
+    if (opts) {
+      const options = JSON.parse(opts);
+      if (options.dates === matchdates()) {
+        for (var n = 0; n < allOptions.length; n++) {
+          var option = allOptions[n];
+          for (var ni = 0; ni < option.items.length; ni++) {
+            option.items[ni].selected =
+              options.allOptions[n].items[ni].selected;
+          }
+        }
+        setDrawMode(checkFilter("Display", "Cone") ? 1 : 0);
+        return;
+      }
+    }
+    doDoReset();
+    var evs = [];
+    for (var match of matches) {
+      var tm = null;
+      if (matches.length === 1) {
+        tm = selectedTeam === 0 ? match.teamA : match.teamB;
+      } else {
+        tm =
+          selectedTeam === 0
+            ? team === match.teamA.Name
+              ? match.teamA
+              : match.teamB
+            : team === match.teamA.Name
+            ? match.teamB
+            : match.teamA;
+      }
+      var xevs =
+        selectedGame === 0 ? match.events : match.sets[selectedGame - 1].events;
+      var setter = null;
+      for (var ne = 0; ne < xevs.length; ne++) {
+        var e = xevs[ne];
+        if (
+          e.Player !== null &&
+          tm.players.filter((obj) => obj.Guid === e.Player.Guid).length > 0
+        ) {
+          if (e.EventType == kSkillSpike) {
+            evs.push(e);
+          }
+        }
+      }
+    }
+    setAllEvents(evs);
+    setSpikerNames(evs);
+    if (matches[0].app === "DataVolley") {
+      setSetterNames(evs);
+      setAttackCombos(evs);
+    }
+    setInit(true);
+  };
+
   const calculateZones = () => {
     var xevents = [
       [[], [], [], [], [], [], [], [], []],
@@ -68,13 +203,14 @@ function HittingChartReport({ matches, team, selectedGame, selectedTeam }) {
       if (matches.length === 1) {
         tm = selectedTeam === 0 ? match.teamA : match.teamB;
       } else {
-        tm = selectedTeam === 0
-          ? team === match.teamA.Name
-            ? match.teamA
-            : match.teamB
-          : team === match.teamA.Name
-          ? match.teamB
-          : match.teamA;
+        tm =
+          selectedTeam === 0
+            ? team === match.teamA.Name
+              ? match.teamA
+              : match.teamB
+            : team === match.teamA.Name
+            ? match.teamB
+            : match.teamA;
       }
       var xevs =
         selectedGame === 0 ? match.events : match.sets[selectedGame - 1].events;
@@ -91,7 +227,7 @@ function HittingChartReport({ matches, team, selectedGame, selectedTeam }) {
           }
         }
       }
-
+      /*
       if (currentTeam !== selectedTeam) {
         setAllEvents(evs);
         setSpikerNames(evs);
@@ -101,15 +237,32 @@ function HittingChartReport({ matches, team, selectedGame, selectedTeam }) {
         }
         setCurrentTeam(selectedTeam);
       }
-
+*/
       const egs = ["Errors", "In-play", "In-play", "Kill"];
       const srcs = { F: "Front", B: "Back", C: "Centre" };
 
       if (match.app === "VBStats") {
         for (var ne = 0; ne < evs.length; ne++) {
           var e = evs[ne];
+          if (
+            checkFilter("Stages", e.isSideOut ? "Side Out" : "Transition") ===
+            false
+          ) {
+            continue;
+          }
+          if (checkFilter("Attackers", e.Player.LastName) === false) {
+            continue;
+          }
+          if (checkFilter("Results", egs[e.EventGrade]) === false) {
+            continue;
+          }
           var startZone = zoneFromString(e.BallStartString);
-          if (startZone > 0 && e.Row !== undefined && isNaN(e.Row) === false) {
+          if (
+            startZone > 0 &&
+            e.Row !== undefined &&
+            isNaN(e.Row) === false &&
+            e.Row > 0
+          ) {
             xevents[e.Row - 1][startZone - 1].push(e);
           }
         }
@@ -246,13 +399,13 @@ function HittingChartReport({ matches, team, selectedGame, selectedTeam }) {
           option.items = [];
           for (var nn = 0; nn < setters.length; nn++) {
             var tm =
-            selectedTeam === 0
-              ? team === match.teamA.Name
-                ? match.teamA
-                : match.teamB
-              : team === match.teamA.Name
-              ? match.teamB
-              : match.teamA;
+              selectedTeam === 0
+                ? team === match.teamA.Name
+                  ? match.teamA
+                  : match.teamB
+                : team === match.teamA.Name
+                ? match.teamB
+                : match.teamA;
             var pls = tm.players;
             for (var np = 0; np < pls.length; np++) {
               var pl = pls[np];
@@ -306,13 +459,19 @@ function HittingChartReport({ matches, team, selectedGame, selectedTeam }) {
     return rows;
   };
 
+  const matchdates = () => {
+    var dates = "";
+    for (var xm of matches) {
+      dates += xm.sessionDateString
+        ? xm.sessionDateString
+        : xm.TrainingDate.toLocaleString();
+    }
+    return dates;
+  };
+
   useEffect(() => {
+    doInit();
     var xevents = calculateZones();
-    // setSpikerNames(allEvents);
-    // if (match.app !== "VBStats") {
-    //   setSetterNames(allEvents);
-    //   setAttackCombos(allEvents);
-    // }
     forceUpdate((n) => !n);
   }, [selectedGame, selectedTeam]);
 
@@ -327,25 +486,50 @@ function HittingChartReport({ matches, team, selectedGame, selectedTeam }) {
       <div className="drawer drawer-mobile">
         <input id="my-drawer-5" type="checkbox" className="drawer-toggle" />
         <div className="drawer-content">
-          <div className="w-100 h-full">
+          <div className="w-100 h-full cursor-pointer">
             <HittingChart
               matches={matches}
               events={events}
               rows={selectedRows()}
               drawMode={drawMode}
+              onEventsSelected={(evs) => doEventsSelected(evs)}
             />
           </div>
         </div>
         <div className="drawer-side w-80">
           <label htmlFor="my-drawer-5" className="drawer-overlay"></label>
-          <div className="h-full bg-base-200">
-            <AllFiltersPanel
-              allOptions={allOptions}
-              match={matches[0]}
-              events={events}
-              selectedTeam={selectedTeam}
-              handleFilterOptionChanged={() => doUpdate()}
-            />
+          <div className="flex-col">
+            <div className="flex justify-between bg-base-100 p-1">
+              <div
+                className="tooltip tooltip-right"
+                data-tip="Reset all filters"
+              >
+                <ArrowPathIcon
+                  className="btn btn-xs h-8 w-12 btn-info rounded-none cursor-pointer"
+                  onClick={() => doReset()}
+                />
+              </div>
+              <div
+                className="tooltip tooltip-left"
+                data-tip="Show video clips of filtered attacks"
+                style={{ whiteSpace: "pre-line" }}
+              >
+                <VideoCameraIcon
+                  className="btn btn-xs h-8 w-12 btn-info rounded-none cursor-pointer"
+                  onClick={() => doVideo()}
+                />
+              </div>
+            </div>
+            <div className="h-full bg-base-200">
+              <AllFiltersPanel
+                allOptions={allOptions}
+                match={matches[0]}
+                events={events}
+                selectedTeam={selectedTeam}
+                handleFilterOptionChanged={() => doUpdate()}
+                appName={appName}
+              />
+            </div>
           </div>
         </div>
       </div>

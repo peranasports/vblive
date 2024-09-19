@@ -83,6 +83,7 @@ export const allFilters = [
     {
         title: "Attackers",
         allselected: true,
+        singleSelection: false,
     },
     {
         title: "Results",

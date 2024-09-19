@@ -4,6 +4,8 @@ import {
   createStatsItem,
   addStatsItem,
   calculateAllStats,
+  kSkillPass,
+  kSkillSpike,
 } from "./StatsItem.js";
 import { kSkillSettersCall } from "./StatsItem";
 import { myzip, myunzip } from "./zip";
@@ -14,8 +16,7 @@ export function initWithPSVBCompressedBuffer(buf) {
   // var buffer = unzipBuffer(buf);
   var buffer = "";
   buffer = unzipBuffer(buf);
-  if (buffer === null || buffer.length === 0)
-  {
+  if (buffer === null || buffer.length === 0) {
     buffer = myunzip(buf);
   }
   return generateMatch(buffer);
@@ -217,19 +218,15 @@ export function generateMatch(str) {
   match.teamB.players = [];
   for (var ln = line; ln < a.length; ln++) {
     json = a[ln].split("~");
-    if (json[0] === "V")
-    {
-        var video = JSON.parse(json[1]);        
-        if (video.startTime !== undefined)
-        {
-            match.videoStartTime = new Date(video.startTime);
-            if (video.url.includes("http"))
-            {
-                match.videoUrl = video.url;
-            }
+    if (json[0] === "V") {
+      var video = JSON.parse(json[1]);
+      if (video.startTime !== undefined) {
+        match.videoStartTime = new Date(video.startTime);
+        if (video.url.includes("http")) {
+          match.videoUrl = video.url;
         }
-    }
-    else if (json[0] === "PH") {
+      }
+    } else if (json[0] === "PH") {
       var player = JSON.parse(json[1]);
       match.teamA.players.push(player);
     } else if (json[0] === "PA") {
@@ -415,14 +412,25 @@ export function psvbParseLatestStats(str, match) {
                 ev.Player = null;
               }
             }
+            if (ev.EventType === kSkillPass) {
+              currentGame.passEvent = ev;
+            } else if (ev.EventType === kSkillSpike) {
+              if (currentGame.passEvent) {
+                if ((currentGame.passEvent.homePlayer = ev.homePlayer)) {
+                  ev.isSideOut = true;
+                } else {
+                  ev.isSideOut = false;
+                }
+                delete currentGame.passEvent;
+              }
+            }
             ev.TimeStamp = new Date(ev.TimeStamp);
-            if (match.videoStartTime !== undefined)
-            {
+            if (match.videoStartTime !== undefined) {
               const mvst = match.videoStartTime.getTime();
               const ets = ev.TimeStamp.getTime();
               ev.VideoPosition = (ets - mvst) / 1000;
             }
-  
+
             ev.Drill = currentGame;
             currentGame.events.push(ev);
             match.events.push(ev);
@@ -451,9 +459,8 @@ export function psvbParseLatestStats(str, match) {
           }
         }
       }
-        
     } catch (error) {
-      console.log(error.message);      
+      console.log(error.message);
     }
   }
   return match;

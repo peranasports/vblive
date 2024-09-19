@@ -1,4 +1,4 @@
-import { useState, useReducer } from 'react'
+import { useState, useReducer, useEffect } from 'react'
 
 function MultiChoice({ filter, handleOptionChanged }) {
 
@@ -97,6 +97,10 @@ function MultiChoice({ filter, handleOptionChanged }) {
         handleOptionChanged(filter, item)
     }
 
+    useEffect(() => {
+        console.log(filter);
+    }, [filter]);
+
     if (filter.items === undefined)
     {
         return <></>
@@ -110,14 +114,14 @@ function MultiChoice({ filter, handleOptionChanged }) {
                     filter.singleSelection === false ?
                     <div className="flex flex-col">
                     <div className="flex space-x-4">
-                        <button className="flex btn btn-sm" onClick={() => selectAll()}>Select All</button>
-                        <button className="flex btn btn-sm" onClick={() => selectNone()}>Select None</button>
+                        <button className="flex btn btn-sm rounded-none" onClick={() => selectAll()}>Select All</button>
+                        <button className="flex btn btn-sm rounded-none" onClick={() => selectNone()}>Select None</button>
                     </div>
                     {
                         filter.title == "Shots" ?
                             <div className="flex space-x-4 pt-1">
-                                <button className="flex btn btn-sm" onClick={() => selectServes()}>All Serves</button>
-                                <button className="flex btn btn-sm" onClick={() => selectReturns()}>All Returns</button>
+                                <button className="flex btn btn-sm rounded-none" onClick={() => selectServes()}>All Serves</button>
+                                <button className="flex btn btn-sm rounded-none" onClick={() => selectReturns()}>All Returns</button>
                             </div> : null
                     }
                     </div> :
