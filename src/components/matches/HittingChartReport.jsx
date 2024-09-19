@@ -144,7 +144,7 @@ function HittingChartReport({ matches, team, selectedGame, selectedTeam }) {
           if (option.items) {
             for (var ni = 0; ni < option.items.length; ni++) {
               try {
-                if (option.items[ni] && options.allOptions[n].items) {
+                if (option.items[ni] && options.allOptions[n].items &&  options.allOptions[n].items[ni]) {
                   option.items[ni].selected =
                     options.allOptions[n].items[ni].selected;
                 }
