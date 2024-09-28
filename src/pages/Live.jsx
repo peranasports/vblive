@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import VBLiveAPIContext from "../context/VBLiveAPI/VBLiveAPIContext";
 import {
@@ -21,7 +21,7 @@ import { initWithDVWCompressedBuffer } from "../components/utils/DVWFile";
 
 function Live() {
   const navigate = useNavigate();
-  const [text, setText] = useState("");
+  const [serverName, setServerName] = useState("");
   const { sessions, dispatch, currentUser } = useContext(VBLiveAPIContext);
   const [sortColumn, setSortColumn] = useState(0);
   const [sortAscending, setSortAscending] = useState(true);
@@ -29,16 +29,17 @@ function Live() {
   const [loading, setLoading] = useState(false);
   const [, forceUpdate] = useState(0);
 
-  const handleChange = (e) => setText(e.target.value);
+  const handleChange = (e) => setServerName(e.target.value);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    localStorage.setItem("serverName", serverName);
     setLoading(true);
-    if (text === "") {
+    if (serverName === "") {
       toast.error("Please enter server name to search");
     } else {
       dispatch({ type: "SET_LOADING" });
-      const sessionsData = await getSessionsForServer(text);
+      const sessionsData = await getSessionsForServer(serverName);
       dispatch({ type: "GET_SESSION_INFO_FOR_SERVER", payload: sessionsData });
       const sortedss = sessionsData.sessions.sort((a, b) => b.id - a.id);
       var sss = [];
@@ -149,6 +150,13 @@ function Live() {
     );
   };
 
+  useEffect(() => {
+    const sn = localStorage.getItem("serverName");
+    if (sn) {
+      setServerName(sn);
+    }
+  }, []);
+
   return (
     <>
       {loading ? (
@@ -164,11 +172,11 @@ function Live() {
                     type="text"
                     className="w-80 pr-10 bg-base-300 input input-sm text-base-content rounded-none"
                     placeholder="Enter DVMateLive Server Name"
-                    value={text}
+                    value={serverName}
                     onChange={handleChange}
                   />
                   <button
-                    disabled={text.length === 0}
+                    disabled={serverName.length === 0}
                     type="submit"
                     className="ml-2 rounded-none w-24 btn btn-sm"
                   >

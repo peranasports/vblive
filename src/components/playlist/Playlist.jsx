@@ -195,6 +195,24 @@ function Playlist() {
   };
 
   const doSharePlaylist = async () => {
+    const playlistdescription = document.getElementById(
+      "playlistdescription"
+    ).value;
+    const playlistcomments = document.getElementById("playlistcomments").value;
+    const tags = selectedTags.map((t) => t.value);
+    if (playlistdescription === "") {
+      toast.error("Description is required");
+      return;
+    }
+    if (playlistcomments === "") {
+      toast.error("Comments are required");
+      return;
+    }
+    if (tags.length === 0) {
+      toast.error("Tags are required");
+      return;
+    }
+
     setThisDayTimeCode(dayTimeCode());
     document.getElementById("modal-share").checked = true;
   };
@@ -214,6 +232,18 @@ function Playlist() {
     for (var t of tags) {
       if (stags.length > 0) stags += "|";
       stags += t;
+    }
+    if (playlistdescription === "") {
+      toast.error("Description is required");
+      return;
+    }
+    if (playlistcomments === "") {
+      toast.error("Comments are required");
+      return;
+    }
+    if (stags === "") {
+      toast.error("Tags are required");
+      return;
     }
     const now = new Date();
     const xpl = myzip(JSON.stringify(playlists));
