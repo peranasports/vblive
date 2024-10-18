@@ -2,7 +2,10 @@ import { useState, useEffect } from "react";
 import { sortBy } from "lodash";
 import { getDVRalliesInGameForTeam } from "../utils/StatsItem";
 import ServeReceive from "./ServeReceive";
-import { CheckIcon, XIcon } from "@heroicons/react/24/outline";
+// import { CheckIcon, XIcon } from "@heroicons/react/24/outline";
+import { CheckIcon } from "@heroicons/react/20/solid";
+import Select from "react-select";
+
 import { psvbParseLatestStats } from "../utils/PSVBFile";
 import { useNavigate } from "react-router-dom";
 import {
@@ -28,8 +31,13 @@ function ServeReceiveReport({ matches, team, selectedGame, selectedTeam }) {
   const navigate = useNavigate();
   const { currentUser } = useAuthStatus();
   const [passingStats, setPassingStats] = useState(null);
+  const [rowOptions, setRowOptions] = useState([]);
+  const [rows, setRows] = useState([]);
+  const [selectedRowOptions, setSelectedRowOptions] = useState([]);
+  const [selectedRows, setSelectedRows] = useState([1, 2, 3, 4, 5, 6]);
   const [showPasses, setShowPasses] = useState(true);
   const [showAttacks, setShowAttacks] = useState(true);
+  const [, forceUpdate] = useState(0);
   const [passSelection, sePassSelection] = useState([
     true,
     true,
@@ -39,6 +47,48 @@ function ServeReceiveReport({ matches, team, selectedGame, selectedTeam }) {
     true,
     true,
   ]);
+
+  function handleSelectRows(data) {
+    if (data.length === 0) {
+      setSelectedRowOptions(rowOptions[0]);
+      setSelectedRows([1, 2, 3, 4, 5, 6]);
+      forceUpdate((n) => !n);
+      return;
+    }
+    for (var nd = 1; nd < data.length; nd++) {
+      const opt = data[nd];
+      if (opt.value === 0) {
+        setSelectedRowOptions([rowOptions[0]]);
+        setSelectedRows([1, 2, 3, 4, 5, 6]);
+        forceUpdate((n) => !n);
+        return;
+      }
+    }
+    if (data[0].value === 0 && data.length > 1) {
+      var ddd = [];
+      var rs = [];
+      for (var nd = 1; nd < data.length; nd++) {
+        ddd.push(data[nd]);
+        rs.push(data[nd].value);
+      }
+      setSelectedRowOptions(ddd);
+      setSelectedRows(rs);
+      forceUpdate((n) => !n);
+      return;
+    } else if (data[data.length - 1].value === 0 && data.length > 1) {
+      setSelectedRowOptions([data[data.length - 1]]);
+      setSelectedRows([data[data.length - 1]].value);
+      forceUpdate((n) => !n);
+      return;
+    }
+    setSelectedRowOptions(data);
+    var rs = [];
+    for (var nd = 0; nd < data.length; nd++) {
+      rs.push(data[nd].value);
+    }
+    setSelectedRows(rs);
+    forceUpdate((n) => !n);
+  }
 
   const calculatePassingStats = () => {
     var players = [];
@@ -82,6 +132,9 @@ function ServeReceiveReport({ matches, team, selectedGame, selectedTeam }) {
         for (var nr = 0; nr < rallies.length; nr++) {
           var mr = rallies[nr];
           var row = mr.passrow;
+          if (selectedRows.includes(row) === false) {
+            continue;
+          }
           if (mr.passEvent === undefined || mr.passEvent.Player === undefined) {
             continue;
           }
@@ -420,60 +473,6 @@ function ServeReceiveReport({ matches, team, selectedGame, selectedTeam }) {
         filteredEvents.push(r.passEvent);
       }
     }
-    // var evs = [];
-    // for (var ev of filteredEvents) {
-    //   var loc = 0;
-    //   const tm = getTimingForEvent(ev);
-    //   if (
-    //     ev.Drill.match.videoStartTimeSeconds &&
-    //     ev.Drill.match.videoOffset &&
-    //     ev.Drill.match.videoOffset >= 0
-    //   ) {
-    //     const secondsSinceEpoch = Math.round(ev.TimeStamp.getTime() / 1000);
-    //     loc =
-    //       secondsSinceEpoch -
-    //       ev.Drill.match.videoStartTimeSeconds +
-    //       ev.Drill.match.videoOffset -
-    //       tm.leadTime;
-    //   } else {
-    //     if (ev.VideoPosition !== undefined && ev.VideoPosition !== 0) {
-    //       loc = ev.VideoPosition - tm.leadTime;
-    //     }
-    //   }
-
-    //   var xx = "";
-    //   var col = "";
-    //   if (ev.DVGrade === undefined) {
-    //     const ss = getEventInfo(ev);
-    //     xx = ss.sub;
-    //     col = ss.subcolor;
-    //   } else {
-    //     xx = DVEventString(ev);
-    //     col = getEventStringColor(ev);
-    //   }
-    //   const evx = {
-    //     playerName:
-    //       ev.Player.shirtNumber + ". " + ev.Player.NickName.toUpperCase(),
-    //     eventString: xx,
-    //     eventStringColor: col,
-    //     eventSubstring:
-    //       "Set " +
-    //       ev.Drill.GameNumber +
-    //       " " +
-    //       ev.TeamScore +
-    //       "-" +
-    //       ev.OppositionScore +
-    //       " R" +
-    //       ev.Row,
-    //     videoOnlineUrl: ev.Drill.match.videoOnlineUrl,
-    //     videoPosition: loc,
-    //     eventId: ev.EventId,
-    //     matchVideo: ev.Drill.match.videoOnlineUrl
-    //       ? ev.Drill.match.videoOnlineUrl
-    //       : "",
-    //   };
-    //   evs.push(evx);
-    // }
 
     const evs = makePlaylist(filteredEvents);
     if (evs.length === 0) {
@@ -494,8 +493,6 @@ function ServeReceiveReport({ matches, team, selectedGame, selectedTeam }) {
         serverName: currentUser.email,
       };
       navigate("/playlist", { state: st });
-
-      // saveToPC(buffer, fn);
     }
   };
 
@@ -541,32 +538,14 @@ function ServeReceiveReport({ matches, team, selectedGame, selectedTeam }) {
               <CheckIcon
                 className={
                   color === "white" || color === "#00ff00"
-                    ? "ml-0 mt-0 h-4 w-4 text-black"
-                    : "ml-0 mt-0 h-4 w-4 text-white"
+                    ? "ml-0 mt-0 h-4 w-4 text-black font-bold"
+                    : "ml-0 mt-0 h-4 w-4 text-white font-bold"
                 }
               />
             ) : (
               <></>
             )}
           </div>
-          {/* <div
-            className=""
-            style={{
-              width: "16px",
-              height: "16px",
-              // borderRadius: "6px",
-              backgroundColor: {color},
-            }}
-          /> */}
-          {/* <div
-            className={cln}
-            style={{
-              width: "12px",
-              height: "12px",
-              borderRadius: "6px",
-              backgroundColor: color,
-            }}
-          /> */}
           <div className="text-sm mt-1 text-gray-800">{text}</div>
         </div>
       </div>
@@ -687,7 +666,15 @@ function ServeReceiveReport({ matches, team, selectedGame, selectedTeam }) {
 
   useEffect(() => {
     calculatePassingStats();
-  }, [selectedGame, selectedTeam, passSelection]);
+    if (rowOptions.length === 0) {
+      var plas = [{ value: 0, label: "All Rows" }];
+      for (var nd = 1; nd <= 6; nd++) {
+        plas.push({ value: nd, label: "R" + nd });
+      }
+      setRowOptions(plas);
+      setSelectedRowOptions([plas[0]]);
+    }
+  }, [selectedGame, selectedTeam, passSelection, selectedRows]);
 
   if (passingStats === null) {
     return <></>;
@@ -835,8 +822,39 @@ function ServeReceiveReport({ matches, team, selectedGame, selectedTeam }) {
           </tbody>
         </table>
       </div>
-      <div className="flex mt-2">
-        <button
+      <div className="flex mt-2 gap-2">
+        <Select
+          id="rows"
+          name="rows"
+          onChange={handleSelectRows}
+          className="block max-w-80 min-w-48 border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500text-sm"
+          options={rowOptions}
+          value={selectedRowOptions}
+          isMulti
+        />
+        <div className="flex gap-2 mt-2">
+          <label className="text-sm text-base-content">Passes</label>
+          <input
+            type="checkbox"
+            defaultChecked={showPasses}
+            className="checkbox checkbox-secondary checkbox-sm rounded-none"
+            onChange={() => {
+              setShowPasses(!showPasses);
+            }}
+          />
+        </div>
+        <div className="flex gap-1 mt-2">
+          <label className="text-sm text-base-content">Attacks</label>
+          <input
+            type="checkbox"
+            defaultChecked={showAttacks}
+            className="checkbox checkbox-secondary checkbox-sm rounded-none"
+            onChange={() => {
+              setShowAttacks(!showAttacks);
+            }}
+          />
+        </div>
+        {/* <button
           type="button"
           onClick={() => {
             setShowPasses(!showPasses);
@@ -844,8 +862,8 @@ function ServeReceiveReport({ matches, team, selectedGame, selectedTeam }) {
           className="flex mr-4 justify-end rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto"
         >
           {showPasses ? "Hide Passes" : "Show Passes"}
-        </button>
-        <button
+        </button> */}
+        {/* <button
           type="button"
           onClick={() => {
             setShowAttacks(!showAttacks);
@@ -853,29 +871,29 @@ function ServeReceiveReport({ matches, team, selectedGame, selectedTeam }) {
           className="flex justify-end rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto"
         >
           {showAttacks ? "Hide Attacks" : "Show Attacks"}
-        </button>
-        <div className="flex gap-4 ml-4 mt-1 bg-gray-100 border px-4">
+        </button> */}
+        <div className="flex gap-4 ml-4 mt-0.5 pb-1 bg-gray-100 border px-4">
           {passingLegend(0, "Error Pass", "red", "red", "= passes")}
           {passingLegend(1, "1 Pass", "orange", "orange", "/ and - passes")}
           {passingLegend(2, "2 Pass", "green", "green", "! and + passes")}
           {passingLegend(3, "Perfect Pass", "#00ff00", "#00ff00", "# passes")}
           {passingLegend(
             4,
-            "Successful Sideout",
+            "Successful SO",
             "white",
             "black",
             "Successful sideouts from passes"
           )}
           {passingLegend(
             5,
-            "FB Sideout",
+            "First Ball SO",
             "white",
             "dodgerblue",
             "First ball sideouts from passes"
           )}
           {passingLegend(
             6,
-            "Unsuccessful Sideout",
+            "Unsuccessful SO",
             "white",
             "red",
             "Unsuccessful sideouts from passes"
