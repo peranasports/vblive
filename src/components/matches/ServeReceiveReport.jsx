@@ -831,6 +831,7 @@ function ServeReceiveReport({ matches, team, selectedGame, selectedTeam }) {
           options={rowOptions}
           value={selectedRowOptions}
           isMulti
+          components={{ ClearIndicator:() => null }}
         />
         <div className="flex gap-2 mt-2">
           <label className="text-sm text-base-content">Passes</label>

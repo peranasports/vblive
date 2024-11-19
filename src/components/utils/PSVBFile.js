@@ -426,11 +426,14 @@ export function psvbParseLatestStats(str, match) {
             }
             ev.TimeStamp = new Date(ev.TimeStamp);
             if (match.videoStartTime !== undefined) {
-              const mvst = match.videoStartTime.getTime();
-              const ets = ev.TimeStamp.getTime();
-              ev.VideoPosition = (ets - mvst) / 1000;
+              if (typeof match.videoStartTime !== 'string') {
+                const mvst = match.videoStartTime.getTime();
+                const ets = ev.TimeStamp.getTime();
+                ev.VideoPosition = (ets - mvst) / 1000;
+              } else {
+                ev.VideoPosition = 0;
+              }
             }
-
             ev.Drill = currentGame;
             currentGame.events.push(ev);
             match.events.push(ev);
