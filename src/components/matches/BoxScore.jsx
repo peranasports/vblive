@@ -106,7 +106,7 @@ function BoxScore({ matches, team, selectedGame, selectedTeam }) {
               onClick={() => {
                 setShortHeader(!shortHeader);
               }}
-              className="btn btn-sm btn-secondary rounded-none my-1"
+              className="btn-in-form my-1"
             >
               {shortHeader ? "Show Full Headers" : "Show Short Headers"}
             </button>
@@ -116,126 +116,126 @@ function BoxScore({ matches, team, selectedGame, selectedTeam }) {
               onClick={() => {
                 setShowAllPlayers(!showAllPlayers);
               }}
-              className="ml-2 btn btn-sm btn-secondary rounded-none my-1"
+              className="ml-2 btn-in-form my-1"
             >
               {showAllPlayers ? "Show Less Players" : "Show All Players"}
             </button>
             <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-              <table className="min-w-full divide-y divide-gray-300">
-                <thead className="bg-gray-50">
+              <table className="table-generic">
+                <thead className="thead-generic">
                   {shortHeader ? (
                     <tr>
                       <th
                         scope="col"
-                        className="py-2 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
+                        className="py-2 pl-4 pr-3 text-left text-sm font-semibold text-base-content sm:pl-6"
                       >
                         Player
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                        className="px-3 py-2 text-left text-sm font-semibold text-base-content"
                       >
                         K
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                        className="px-3 py-2 text-left text-sm font-semibold text-base-content"
                       >
                         E
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                        className="px-3 py-2 text-left text-sm font-semibold text-base-content"
                       >
                         TA
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                        className="px-3 py-2 text-left text-sm font-semibold text-base-content"
                       >
                         HE
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                        className="px-3 py-2 text-left text-sm font-semibold text-base-content"
                       >
                         SA
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                        className="px-3 py-2 text-left text-sm font-semibold text-base-content"
                       >
                         SE
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                        className="px-3 py-2 text-left text-sm font-semibold text-base-content"
                       >
                         PE
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                        className="px-3 py-2 text-left text-sm font-semibold text-base-content"
                       >
                         %PP
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                        className="px-3 py-2 text-left text-sm font-semibold text-base-content"
                       >
                         PAVE
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                        className="px-3 py-2 text-left text-sm font-semibold text-base-content"
                       >
                         TP
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                        className="px-3 py-2 text-left text-sm font-semibold text-base-content"
                       >
                         ASS
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                        className="px-3 py-2 text-left text-sm font-semibold text-base-content"
                       >
                         DIG
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                        className="px-3 py-2 text-left text-sm font-semibold text-base-content"
                       >
                         DE
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                        className="px-3 py-2 text-left text-sm font-semibold text-base-content"
                       >
                         DAVE
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                        className="px-3 py-2 text-left text-sm font-semibold text-base-content"
                       >
                         BS
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                        className="px-3 py-2 text-left text-sm font-semibold text-base-content"
                       >
                         BA
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                        className="px-3 py-2 text-left text-sm font-semibold text-base-content"
                       >
                         BE
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                        className="px-3 py-2 text-left text-sm font-semibold text-base-content"
                       >
                         PTS
                       </th>
@@ -244,190 +244,190 @@ function BoxScore({ matches, team, selectedGame, selectedTeam }) {
                     <tr>
                       <th
                         scope="col"
-                        className="py-2 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
+                        className="py-2 pl-4 pr-3 text-left text-sm font-semibold text-base-content sm:pl-6"
                       >
                         Player
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                        className="px-3 py-2 text-left text-sm font-semibold text-base-content"
                       >
                         Attack Kills
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                        className="px-3 py-2 text-left text-sm font-semibold text-base-content"
                       >
                         Attack Errors
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                        className="px-3 py-2 text-left text-sm font-semibold text-base-content"
                       >
                         Total Attempts
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                        className="px-3 py-2 text-left text-sm font-semibold text-base-content"
                       >
                         Hitting Efficiency
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                        className="px-3 py-2 text-left text-sm font-semibold text-base-content"
                       >
                         Serve Aces
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                        className="px-3 py-2 text-left text-sm font-semibold text-base-content"
                       >
                         Serve Errors
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                        className="px-3 py-2 text-left text-sm font-semibold text-base-content"
                       >
                         Pass Errors
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                        className="px-3 py-2 text-left text-sm font-semibold text-base-content"
                       >
                         % Perfect Passes
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                        className="px-3 py-2 text-left text-sm font-semibold text-base-content"
                       >
                         Passing Average
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                        className="px-3 py-2 text-left text-sm font-semibold text-base-content"
                       >
                         Total Passes
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                        className="px-3 py-2 text-left text-sm font-semibold text-base-content"
                       >
                         Set Assists
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                        className="px-3 py-2 text-left text-sm font-semibold text-base-content"
                       >
                         Digs
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                        className="px-3 py-2 text-left text-sm font-semibold text-base-content"
                       >
                         Dig Errors
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                        className="px-3 py-2 text-left text-sm font-semibold text-base-content"
                       >
                         Dig Average
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                        className="px-3 py-2 text-left text-sm font-semibold text-base-content"
                       >
                         Block Solos
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                        className="px-3 py-2 text-left text-sm font-semibold text-base-content"
                       >
                         Block Assists
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                        className="px-3 py-2 text-left text-sm font-semibold text-base-content"
                       >
                         Block Errors
                       </th>
                       <th
                         scope="col"
-                        className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                        className="px-3 py-2 text-left text-sm font-semibold text-base-content"
                       >
                         Points Scored
                       </th>
                     </tr>
                   )}
                 </thead>
-                <tbody className="bg-white">
+                <tbody className="tbody-generic">
                   {sortBy(statsItems, "ShirtNumber").map((statsItem, i) => (
                     <tr
                       key={statsItem.Guid}
-                      className={i % 2 === 0 ? undefined : "bg-gray-100"}
+                      className={i % 2 === 0 ? "bg-transparent" : "bg-base-300/10"}
                     >
-                      <td className="whitespace-nowrap py-2.5 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                      <td className="whitespace-nowrap py-2.5 pl-4 pr-3 text-sm font-medium text-base-content sm:pl-6">
                         {statsItem.player !== null
                           ? statsItem.player.shirtNumber +
                             ". " +
                             statsItem.player.NickName.toUpperCase()
                           : "TEAM"}
                       </td>
-                      <td className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">
+                      <td className="whitespace-nowrap px-3 py-2.5 text-sm text-base-content">
                         {statsItem.Spike3}
                       </td>
-                      <td className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">
+                      <td className="whitespace-nowrap px-3 py-2.5 text-sm text-base-content">
                         {statsItem.Spike0}
                       </td>
-                      <td className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">
+                      <td className="whitespace-nowrap px-3 py-2.5 text-sm text-base-content">
                         {statsItem.SpikeTotal}
                       </td>
-                      <td className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">
+                      <td className="whitespace-nowrap px-3 py-2.5 text-sm text-base-content">
                         {statsItem.SpikeEfficiency != -3
                           ? statsItem.SpikeEfficiencyString
                           : ""}
                       </td>
-                      <td className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">
+                      <td className="whitespace-nowrap px-3 py-2.5 text-sm text-base-content">
                         {statsItem.Serve3}
                       </td>
-                      <td className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">
+                      <td className="whitespace-nowrap px-3 py-2.5 text-sm text-base-content">
                         {statsItem.Serve0}
                       </td>
-                      <td className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">
+                      <td className="whitespace-nowrap px-3 py-2.5 text-sm text-base-content">
                         {statsItem.Pass0}
                       </td>
-                      <td className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">
+                      <td className="whitespace-nowrap px-3 py-2.5 text-sm text-base-content">
                         {statsItem.PassTotal === 0
                           ? ""
                           : statsItem.PassPercentPerfect.toFixed(0)}
                       </td>
-                      <td className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">
+                      <td className="whitespace-nowrap px-3 py-2.5 text-sm text-base-content">
                         {statsItem.PassAverageString}
                       </td>
-                      <td className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">
+                      <td className="whitespace-nowrap px-3 py-2.5 text-sm text-base-content">
                         {statsItem.PassTotal}
                       </td>
-                      <td className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">
+                      <td className="whitespace-nowrap px-3 py-2.5 text-sm text-base-content">
                         {statsItem.Set3}
                       </td>
-                      <td className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">
+                      <td className="whitespace-nowrap px-3 py-2.5 text-sm text-base-content">
                         {statsItem.GoodDigs}
                       </td>
-                      <td className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">
+                      <td className="whitespace-nowrap px-3 py-2.5 text-sm text-base-content">
                         {statsItem.Dig0}
                       </td>
-                      <td className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">
+                      <td className="whitespace-nowrap px-3 py-2.5 text-sm text-base-content">
                         {statsItem.DigAverageString}
                       </td>
-                      <td className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">
+                      <td className="whitespace-nowrap px-3 py-2.5 text-sm text-base-content">
                         {statsItem.BlckSolo}
                       </td>
-                      <td className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">
+                      <td className="whitespace-nowrap px-3 py-2.5 text-sm text-base-content">
                         {statsItem.BlckAssist}
                       </td>
-                      <td className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">
+                      <td className="whitespace-nowrap px-3 py-2.5 text-sm text-base-content">
                         {statsItem.Blck0}
                       </td>
-                      <td className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">
+                      <td className="whitespace-nowrap px-3 py-2.5 text-sm text-base-content">
                         {statsItem.PointsWon}
                       </td>
                     </tr>

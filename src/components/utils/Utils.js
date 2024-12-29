@@ -596,9 +596,9 @@ export function makePlaylist(events) {
       eventString: xx,
       eventStringColor: col,
       eventSubstring:
-        "Set " +
+        "[S" +
         ev.Drill.GameNumber +
-        " " +
+        "] " +
         ev.TeamScore +
         "-" +
         ev.OppositionScore +
@@ -614,4 +614,8 @@ export function makePlaylist(events) {
     evs.push(evx);
   }
   return evs;
+}
+
+export function classNames(...classes) {
+  return classes.filter(Boolean).join(" ");
 }

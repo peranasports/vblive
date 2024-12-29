@@ -81,7 +81,7 @@ function Input() {
           />
           <input
             type="button"
-            className="btn btn-sm btn-info rounded-none w-60"
+            className="btn-in-form w-60"
             value="Load DVW file..."
             onClick={() => document.getElementById("selectedDVWFile").click()}
           />
@@ -107,7 +107,7 @@ function Input() {
           />
           <input
             type="button"
-            className="btn btn-sm btn-info rounded-none w-60"
+            className="btn-in-form w-60"
             value="Load PSVB file..."
             onClick={() => document.getElementById("selectedPSVBFile").click()}
           />
@@ -133,7 +133,7 @@ function Input() {
           />
           <input
             type="button"
-            className="btn btn-sm btn-info rounded-none w-60"
+            className="btn-in-form w-60"
             value="Load play list file..."
             onClick={() =>
               document.getElementById("selectedPlaylistFile").click()

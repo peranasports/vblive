@@ -98,7 +98,7 @@ function MultiChoice({ filter, handleOptionChanged }) {
     }
 
     useEffect(() => {
-        console.log(filter);
+        // console.log(filter);
     }, [filter]);
 
     if (filter.items === undefined)

@@ -13,7 +13,7 @@ function AttackZones({ matches, team, selectedGame, selectedTeam }) {
   const { currentUser } = useAuthStatus();
   const navigate = useNavigate();
 
-  const doEventsSelected = (evs) => {
+  const doEventsSelected = (evs, row, zone) => {
     const sortedevs = evs.sort(
       (a, b) => a.TimeStamp.getTime() - b.TimeStamp.getTime()
     );
@@ -33,6 +33,8 @@ function AttackZones({ matches, team, selectedGame, selectedTeam }) {
         filename: null,
         playlists: null,
         serverName: currentUser.email,
+        description: `Attacks in zone ${zone} - row ${row}`,
+        initialTags: ["spiking"],
       };
       navigate("/playlist", { state: st });
     }
@@ -196,141 +198,64 @@ function AttackZones({ matches, team, selectedGame, selectedTeam }) {
     return <></>;
   }
 
-  return (
-    <div className="">
-      <p className="text-3xl font-bold">
-        {selectedTeam === 0
-          ? team.toUpperCase()
-          : "OPPONENTS (" + matches.length + ")"}
-      </p>
-      <div className="flex h-80 lg:overflow-hidden">
-        <div className="flex-col w-80 h-80 bg-slate-100">
-          <div className="flex justify-between px-4">
-            <div className="text-xl font-bold">ROW 4</div>
+  const doRow = (row) => {
+    return (
+      <>
+        <div className="flex-col w-80 h-[360px] border shadow-lg">
+          <div className="flex justify-between px-4 bg-gray-400/50">
+            <div className="text-lg text-base-content font-bold">ROW {row}</div>
             <div
               className="tooltip tooltip-bottom"
               data-tip="Show all attacks. Or click on a zone to show attacks in that zone."
             >
               <VideoCameraIcon
                 className="h-6 w-6 cursor-pointer"
-                onClick={() => doVideo(4)}
+                onClick={() => doVideo(row)}
               />
             </div>
           </div>
-          <AttackZoneChart
-            matches={matches}
-            team={team}
-            events={events}
-            row="4"
-            onEventsSelected={(evs) => doEventsSelected(evs)}
-          />
+          <div className="bg-orange-400 h-full overflow-hidden">
+            <AttackZoneChart
+            className="h-[200px]"
+              matches={matches}
+              team={team}
+              events={events}
+              row={row.toString()}
+              onEventsSelected={(evs, zone) => doEventsSelected(evs, row, zone)}
+            />
+          </div>
         </div>
-        <div className="w-80 h-80 bg-slate-100">
-          <div className="flex justify-between px-4">
-            <div className="text-xl font-bold">ROW 5</div>
-            <div
-              className="tooltip tooltip-bottom"
-              data-tip="Show all attacks. Or click on zones to show attacks in that zone."
-            >
-              <VideoCameraIcon
-                className="h-6 w-6 cursor-pointer"
-                onClick={() => doVideo(5)}
-              />
-            </div>
+      </>
+    );
+  };
+
+  const doTeamName = () => {
+    if (selectedTeam === 0) return team.toUpperCase();
+    else {
+      if (matches.length === 1) {
+        return matches[0].teamB.Name.toUpperCase();
+      }
+      return `OPPONENTS (${matches.length})`;
+    }
+  }
+
+  return (
+    <div className="h-full">
+      <p className="text-xl font-bold">
+        {doTeamName()}
+      </p>
+      <div className="flex overflow-x-auto w-[90vw]">
+        <div className="flex-col gap-4">
+          <div className="flex gap-2 p-4 lg:overflow-hidden">
+            {doRow(4)}
+            {doRow(5)}
+            {doRow(6)}
           </div>
-          <AttackZoneChart
-            matches={matches}
-            team={team}
-            events={events}
-            row="5"
-            onEventsSelected={(evs) => doEventsSelected(evs)}
-          />
-        </div>
-        <div className="w-80 h-80 bg-slate-100">
-          <div className="flex justify-between px-4">
-            <div className="text-xl font-bold">ROW 6</div>
-            <div
-              className="tooltip tooltip-bottom"
-              data-tip="Show all attacks. Or click on zones to show attacks in that zone."
-            >
-              <VideoCameraIcon
-                className="h-6 w-6 cursor-pointer"
-                onClick={() => doVideo(6)}
-              />
-            </div>
+          <div className="flex gap-2 mt-2 p-4 lg:overflow-hidden">
+            {doRow(3)}
+            {doRow(2)}
+            {doRow(1)}
           </div>
-          <AttackZoneChart
-            matches={matches}
-            team={team}
-            events={events}
-            row="6"
-            onEventsSelected={(evs) => doEventsSelected(evs)}
-          />
-        </div>
-      </div>
-      <div className="flex h-80 lg:overflow-hidden">
-        <div className="w-80 h-80 bg-slate-100">
-          <div className="flex justify-between px-4">
-            <div className="text-xl font-bold">ROW 3</div>
-            <div
-              className="tooltip tooltip-bottom"
-              data-tip="Show all attacks. Or click on zones to show attacks in that zone."
-            >
-              <VideoCameraIcon
-                className="h-6 w-6 cursor-pointer"
-                onClick={() => doVideo(3)}
-              />
-            </div>
-          </div>
-          <AttackZoneChart
-            matches={matches}
-            team={team}
-            events={events}
-            row="3"
-            onEventsSelected={(evs) => doEventsSelected(evs)}
-          />
-        </div>
-        <div className="w-80 h-80 bg-slate-100">
-          <div className="flex justify-between px-4">
-            <div className="text-xl font-bold">ROW 2</div>
-            <div
-              className="tooltip tooltip-bottom"
-              data-tip="Show all attacks. Or click on zones to show attacks in that zone."
-            >
-              <VideoCameraIcon
-                className="h-6 w-6 cursor-pointer"
-                onClick={() => doVideo(2)}
-              />
-            </div>
-          </div>
-          <AttackZoneChart
-            matches={matches}
-            team={team}
-            events={events}
-            row="2"
-            onEventsSelected={(evs) => doEventsSelected(evs)}
-          />
-        </div>
-        <div className="w-80 h-80 bg-slate-100">
-          <div className="flex justify-between px-4">
-            <div className="text-xl font-bold">ROW 1</div>
-            <div
-              className="tooltip tooltip-bottom"
-              data-tip="Show all attacks. Or click on zones to show attacks in that zone."
-            >
-              <VideoCameraIcon
-                className="h-6 w-6 cursor-pointer"
-                onClick={() => doVideo(1)}
-              />
-            </div>
-          </div>
-          <AttackZoneChart
-            matches={matches}
-            team={team}
-            events={events}
-            row="1"
-            onEventsSelected={(evs) => doEventsSelected(evs)}
-          />
         </div>
       </div>
     </div>

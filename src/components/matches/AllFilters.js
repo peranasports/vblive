@@ -1,5 +1,37 @@
 export const allFilters = [
     {
+        title: "Sets",
+        allselected: true,
+        singleSelection: false,
+        items: [
+            {
+                name: "1",
+                selected: true,
+                amount: 0
+            },
+            {
+                name: "2",
+                selected: true,
+                amount: 0
+            },
+            {
+                name: "3",
+                selected: true,
+                amount: 0
+            },
+            {
+                name: "4",
+                selected: true,
+                amount: 0
+            },
+            {
+                name: "5",
+                selected: true,
+                amount: 0
+            },
+        ],
+    },
+    {
         title: "Rotations",
         allselected: true,
         singleSelection: false,

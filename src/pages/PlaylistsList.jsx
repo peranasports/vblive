@@ -21,6 +21,7 @@ import {
 import Share from "../components/matches/Share";
 import VBLiveAPIContext from "../context/VBLiveAPI/VBLiveAPIContext";
 import {
+  classNames,
   dayTimeCode,
   decodeHtml,
   functionTabSecondary,
@@ -29,10 +30,10 @@ import {
 import { confirmAlert } from "react-confirm-alert";
 import "react-confirm-alert/src/react-confirm-alert.css";
 
-function PlaylistsList() {
+function PlaylistsList({ userEmail }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { userEmail } = location.state;
+  // const { userEmail } = location.state;
   const [allPlaylists, setAllPlaylists] = useState([]);
   const [filteredPlaylists, setFilteredPlaylists] = useState([]);
   const [allTagsOptions, setAllTagsOptions] = useState([]);
@@ -359,69 +360,59 @@ function PlaylistsList() {
     }
   }, []);
 
+  const tabs = [
+    { name: "My Play Lists", index: 0, current: true },
+    { name: "Shared Play Lists", index: 1, current: false },
+  ];
+
   return (
     <>
       <div className="flex-col h-[88vh] mt-4">
-        <div className="flex justify-between">
-          <div className="flex gap-2">
-            <div className="tooltip" data-tip="Select All">
-              <div
-                className="bg-info p-1 cursor-pointer"
-                onClick={doSelect(true)}
-              >
-                <img src={selectall} alt="Select All" className="w-6 h-6" />
-              </div>
-            </div>
-            <div className="tooltip" data-tip="Unselect All">
-              <div
-                className="bg-info p-1 cursor-pointer"
-                onClick={doSelect(false)}
-              >
-                <img src={selectnone} alt="Select None" className="w-6 h-6" />
-              </div>
-            </div>
-            <div className="flex gap-2 w-72 -mt-0.5">
-              {/* <div className="mt-1.5 text-sm text-base-content">Team:</div> */}
-              <Select
-                value={selectedTagOptions}
-                options={allTagsOptions}
-                onChange={onTagChanged}
-                className="w-72 h-[10px] text-sm"
-                isMulti
-              />
-            </div>
-          </div>
-          {/* <button
-            className="btn btn-sm btn-info rounded-none"
-            onClick={() => doMultiPlaylistReports()}
-          >
-            Multi Playlist Reports
-          </button> */}
-        </div>
         {loading ? (
           <Spinner />
         ) : (
           <>
             <div className="flex-col">
-              <div className="flex gap-2 my-2">
-                {functionTabSecondary(
-                  selectedScreen === 0,
-                  0,
-                  "My Playlists",
-                  onPlaylistsScreenChanged
-                )}
-                {functionTabSecondary(
-                  selectedScreen === 1,
-                  1,
-                  "Shared Playlists",
-                  onPlaylistsScreenChanged
-                )}
+              <div className="border-b border-gray-200">
+                <nav aria-label="Tabs" className="-mb-px flex space-x-8">
+                  {tabs.map((tab) => (
+                    <a
+                      key={tab.name}
+                      onClick={() => onPlaylistsScreenChanged(tab.index)}
+                      aria-current={
+                        tab.index === selectedScreen ? "page" : undefined
+                      }
+                      className={classNames(
+                        tab.index === selectedScreen
+                          ? "border-primary/80 text-primary/80"
+                          : "border-transparent text-base-content hover:border-base-content/30 hover:text-base-content/70",
+                        "whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium"
+                      )}
+                    >
+                      {tab.name}
+                    </a>
+                  ))}
+                </nav>
               </div>
+
+              <div className="flex gap-2 my-4">
+                <div className="flex gap-2 w-72 -mt-0.5">
+                  <div className="mt-1.5 text-sm text-base-content">Tags:</div>
+                  <Select
+                    value={selectedTagOptions}
+                    options={allTagsOptions}
+                    onChange={onTagChanged}
+                    className="w-72 h-[10px] text-sm"
+                    isMulti
+                  />
+                </div>
+              </div>
+
               <div className="overflow-x-auto">
                 <div className="inline-block min-w-full py-2 align-middle">
-                  <div className="table-div">
-                    <table className="min-w-full divide-y divide-gray-300 text-sm">
-                      <thead className="table-header">
+                  <div className="">
+                    <table className="table-generic">
+                      <thead className="thead-generic">
                         <tr>
                           {/* <th
                             scope="col"
@@ -450,12 +441,16 @@ function PlaylistsList() {
                           ></th>
                         </tr>
                       </thead>
-                      <tbody className="table-body">
+                      <tbody className="tbody-generic">
                         {filteredPlaylists &&
                           filteredPlaylists.map((playlist, i) => (
                             <tr
                               key={i}
-                              className={i % 2 ? "bg-base-100" : "bg-base-200"}
+                              className={
+                                i % 2 === 0
+                                  ? "bg-transparent"
+                                  : "bg-base-300/10"
+                              }
                             >
                               {/* <td className="table-cell">
                                 <input

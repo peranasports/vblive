@@ -15,9 +15,9 @@ function AttackZoneChart({ matches, team, events, row, onEventsSelected }) {
     // console.log('canvas width, height', canvas.width, canvas.height)
     canvas.style.width = `${window.innerWidth}px`;
     canvas.style.height = `${window.innerHeight * 0.78}px`;
-    var w = 270;
+    var w = 280;
     var w3 = w / 3;
-    var h = 270;
+    var h = 280;
     var h3 = h / 3;
 
     var fontsize = 10;
@@ -287,7 +287,7 @@ function AttackZoneChart({ matches, team, events, row, onEventsSelected }) {
     const line = Math.floor((y - 60) / 90);
     const col = Math.floor((x - 20) / 90);
     const evs = events[row - 1][zoneorders[line * 3 + col] - 1];
-    onEventsSelected(evs);
+    onEventsSelected(evs, zoneorders[line * 3 + col]);
   };
 
   return (

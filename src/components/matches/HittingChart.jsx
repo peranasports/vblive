@@ -547,16 +547,16 @@ function HittingChart({ matches, events, rows, drawMode, onEventsSelected }) {
     var zw1 = (zzw * 3) / 4;
     var zw2 = zzw - zw1;
 
-    writeText(
-      {
-        ctx: ctx,
-        text: "Click on a zone to view video clips of attacks in that zone",
-        x: 10,
-        y: 10,
-        width: w,
-      },
-      { textAlign: "centre", fontSize: 12 }
-    );
+    // writeText(
+    //   {
+    //     ctx: ctx,
+    //     text: "Click on a zone to view video clips of attacks in that zone",
+    //     x: 10,
+    //     y: 10,
+    //     width: w,
+    //   },
+    //   { textAlign: "centre", fontSize: 12 }
+    // );
 
     var grandtotal = 0;
     var allzoneevents = [];

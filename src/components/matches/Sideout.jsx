@@ -160,8 +160,8 @@ function Sideout({
         <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
             <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-              <table className="min-w-full divide-y divide-gray-300">
-                <thead className="bg-gray-50">
+              <table className="table-generic">
+                <thead className="thead-generic">
                   <tr>
                     <th>
                       {/* <label>
@@ -172,7 +172,7 @@ function Sideout({
                       scope="col"
                       className="py-2 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
                     >
-                      Rotation
+                      Row
                     </th>
                     <th
                       scope="col"
@@ -189,11 +189,11 @@ function Sideout({
                     <th></th>
                   </tr>
                 </thead>
-                <tbody className="bg-white">
+                <tbody className="tbody-generic">
                   {rotSideouts.map((rotsideout, row) => (
                     <tr
                       key={row}
-                      className={row % 2 === 0 ? undefined : "bg-gray-100"}
+                      className={row % 2 === 0 ? "bg-transparent" : "bg-base-300/10"}
                     >
                       <th>
                         {row === 6 ? (
@@ -202,7 +202,7 @@ function Sideout({
                           <label>
                             <input
                               type="checkbox"
-                              className="checkbox"
+                              className="checkbox-generic mt-2"
                               defaultChecked={
                                 selectedRows.indexOf(row + 1) !== -1
                               }
@@ -212,7 +212,7 @@ function Sideout({
                         )}
                       </th>
                       <td className="whitespace-nowrap py-2.5 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                        {rotsideout.row}
+                        {row === 6 ? "All" : row + 1}
                       </td>
                       <td className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">
                         {rotsideout.fbsideout}
@@ -239,8 +239,8 @@ function Sideout({
 
           <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
             <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-              <table className="min-w-full divide-y divide-gray-300">
-                <thead className="bg-gray-50">
+              <table className="table-generic">
+                <thead className="thead-generic">
                   <tr>
                     <th
                       scope="col"
@@ -266,11 +266,11 @@ function Sideout({
                     ></th>
                   </tr>
                 </thead>
-                <tbody className="bg-white">
+                <tbody className="tbody-generic">
                   {setSideouts.map((setsideout, row) => (
                     <tr
                       key={row}
-                      className={row % 2 === 0 ? undefined : "bg-gray-100"}
+                      className={row % 2 === 0 ? "bg-transparent" : "bg-base-300/10"}
                     >
                       <td className="whitespace-nowrap py-2.5 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
                         {setsideout.set}
