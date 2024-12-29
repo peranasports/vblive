@@ -90,7 +90,7 @@ function SignIn() {
             </div>
 
             <Link
-              to="/forgot-password"
+              to="/forgotpassword"
               className="link link-error text-sm text-base-content mt-4"
             >
               Forgot Password

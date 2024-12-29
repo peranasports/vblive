@@ -24,7 +24,7 @@ function ForgotPassword() {
 
       await sendPasswordResetEmail(auth, email);
 
-      toast.success("Email was sent");
+      toast.success("Email was sent to " + email);
     } catch (error) {
       toast.error("Could not send reset email");
     }
@@ -33,7 +33,7 @@ function ForgotPassword() {
   return (
     <div className="pageContainer">
       <header>
-        <p className="pageHeader mt-10 text-xl">Forgot Password</p>
+        <p className="pageHeader mt-10 text-sm mb-10">Forgot Password</p>
       </header>
 
       <main>
@@ -41,18 +41,18 @@ function ForgotPassword() {
           <input
             type="email"
             id="email"
-            className='w-full my-10 pr-40 bg-gray-200 input text-xl input-md text-black'
-            placeholder="Email"
+            className='input-generic'
+            placeholder="Enter your email"
             value={email}
             onChange={onChange}
           />
 
-          <Link className="forgotPasswordLink mt-10 text-xl" to="/sign-in">
+          {/* <Link className="btn-in-form" to="/sign-in">
             Sign In
-          </Link>
+          </Link> */}
 
-          <div className="signInBar">
-            <button className="signInButton mt-10 top-0 right-0 rounded-l-none btn btn-lg">
+          <div className="mt-4">
+            <button className="btn-in-form">
               Send Reset Email
             </button>
             </div>
