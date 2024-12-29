@@ -2,33 +2,19 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import VBLiveLogo from "../components/assets/VBLive_Logo.png";
 import PSLogo from "../components/assets/PeranaSportsLogo.png";
-
-// Icons
 import {
   EyeIcon,
   EyeSlashIcon,
 } from "@heroicons/react/24/outline";
-
-// Firebase Authentication
 import {
   createUserWithEmailAndPassword,
   updateProfile,
   getAuth,
 } from "firebase/auth";
-
 import {
-  setDoc,
-  doc,
   serverTimestamp,
-  collection,
-  query,
-  where,
-  getDocs,
 } from "firebase/firestore";
-
-// React Toastify
 import { toast } from "react-toastify";
-import { async } from "@firebase/util";
 
 function SignUp() {
   const [showPassword, setShowPassword] = useState(false);

@@ -6,11 +6,7 @@ import {
 } from "@heroicons/react/24/outline";
 import VBLiveLogo from "../components/assets/VBLive_Logo.png";
 import PSLogo from "../components/assets/PeranaSportsLogo.png";
-
-// Firebase Authentication
 import { signInWithEmailAndPassword, getAuth } from "firebase/auth";
-
-// React Toastify
 import { toast } from "react-toastify";
 
 function SignIn() {
