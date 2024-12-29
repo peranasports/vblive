@@ -1,17 +1,37 @@
 import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { makePlaylist, zoneFromString } from "../utils/Utils";
 import AllFiltersPanel from "./AllFiltersPanel";
 import HittingChart from "./HittingChart";
 import AttackZoneChart from "./AttackZoneChart";
 import { allFilters } from "./AllFilters";
 import { kSkillSpike, kSkillSet, kSkillSettersCall } from "../utils/StatsItem";
-import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useAuthStatus } from "../hooks/useAuthStatus";
-import { ArrowPathIcon, VideoCameraIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowPathIcon,
+  VideoCameraIcon,
+  XMarkIcon,
+  Bars3Icon,
+} from "@heroicons/react/24/outline";
+import {
+  Dialog,
+  DialogBackdrop,
+  DialogPanel,
+  TransitionChild,
+} from "@headlessui/react";
 
-function HittingChartReport({ matches, team, selectedGame, selectedTeam }) {
+function HittingChartReport({
+  matches,
+  team,
+  selectedGame,
+  selectedTeam,
+  verticalScroll,
+}) {
   const navigate = useNavigate();
+  const location = useLocation();
+  // const { matches, team, selectedGame, selectedTeam } = location.state;
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const { currentUser } = useAuthStatus();
   const [drawMode, setDrawMode] = useState(0);
   const [currentTeam, setCurrentTeam] = useState(-1);
@@ -135,29 +155,33 @@ function HittingChartReport({ matches, team, selectedGame, selectedTeam }) {
       setAppName("VBStats");
     }
 
-    const opts = localStorage.getItem("VBLiveHittingChartsOptions");
-    if (opts) {
-      const options = JSON.parse(opts);
-      if (options.dates === matchdates()) {
-        for (var n = 0; n < allOptions.length; n++) {
-          var option = allOptions[n];
-          if (option.items) {
-            for (var ni = 0; ni < option.items.length; ni++) {
-              try {
-                if (option.items[ni] && options.allOptions[n].items &&  options.allOptions[n].items[ni]) {
-                  option.items[ni].selected =
-                    options.allOptions[n].items[ni].selected;
-                }
-              } catch (error) {
-                console.log(error);
-              }
-            }
-          }
-        }
-        setDrawMode(checkFilter("Display", "Cone") ? 1 : 0);
-        return;
-      }
-    }
+    // const opts = localStorage.getItem("VBLiveHittingChartsOptions");
+    // if (opts) {
+    //   const options = JSON.parse(opts);
+    //   if (options.dates === matchdates()) {
+    //     for (var n = 0; n < options.allOptions.length; n++) {
+    //       var option = options.allOptions[n];
+    //       if (option.items) {
+    //         for (var ni = 0; ni < option.items.length; ni++) {
+    //           try {
+    //             if (
+    //               option.items[ni] &&
+    //               options.allOptions[n].items &&
+    //               options.allOptions[n].items[ni]
+    //             ) {
+    //               option.items[ni].selected =
+    //                 options.allOptions[n].items[ni].selected;
+    //             }
+    //           } catch (error) {
+    //             console.log(error);
+    //           }
+    //         }
+    //       }
+    //     }
+    //     setDrawMode(checkFilter("Display", "Cone") ? 1 : 0);
+    //     return;
+    //   }
+    // }
     doDoReset();
     var evs = [];
     for (var match of matches) {
@@ -175,7 +199,9 @@ function HittingChartReport({ matches, team, selectedGame, selectedTeam }) {
             : match.teamA;
       }
       var xevs =
-        selectedGame === 0 ? match.events : match.sets[selectedGame - 1].events;
+        !selectedGame || selectedGame === 0
+          ? match.events
+          : match.sets[selectedGame - 1].events;
       var setter = null;
       for (var ne = 0; ne < xevs.length; ne++) {
         var e = xevs[ne];
@@ -194,6 +220,33 @@ function HittingChartReport({ matches, team, selectedGame, selectedTeam }) {
     if (matches[0].app === "DataVolley") {
       setSetterNames(evs);
       setAttackCombos(evs);
+    }
+    const opts = localStorage.getItem("VBLiveHittingChartsOptions");
+    if (opts) {
+      const options = JSON.parse(opts);
+      if (options.dates === matchdates()) {
+        for (var n = 0; n < options.allOptions.length; n++) {
+          var option = allOptions[n];
+          if (option.items) {
+            for (var ni = 0; ni < option.items.length; ni++) {
+              try {
+                if (
+                  option.items[ni] &&
+                  options.allOptions[n].items &&
+                  options.allOptions[n].items[ni]
+                ) {
+                  option.items[ni].selected =
+                    options.allOptions[n].items[ni].selected;
+                }
+              } catch (error) {
+                console.log(error);
+              }
+            }
+          }
+        }
+        setDrawMode(checkFilter("Display", "Cone") ? 1 : 0);
+        return;
+      }
     }
     setInit(true);
   };
@@ -283,6 +336,9 @@ function HittingChartReport({ matches, team, selectedGame, selectedTeam }) {
             checkFilter("Stages", e.isSideOut ? "Side Out" : "Transition") ===
             false
           ) {
+            continue;
+          }
+          if (checkFilter("Sets", e.Drill.GameNumber.toString()) === false) {
             continue;
           }
           if (checkFilter("Attackers", e.Player.LastName) === false) {
@@ -482,20 +538,61 @@ function HittingChartReport({ matches, team, selectedGame, selectedTeam }) {
   useEffect(() => {
     doInit();
     var xevents = calculateZones();
-    forceUpdate((n) => !n);
   }, [selectedGame, selectedTeam]);
 
-  useEffect(() => {}, [events]);
+  useEffect(() => {
+    console.log("vs=", verticalScroll);
+    // forceUpdate((n) => !n);
+  }, [events, verticalScroll]);
 
   if (events === null) {
     return <></>;
   }
 
-  return (
-    <div className="flex-col">
-      <div className="drawer drawer-mobile">
-        <input id="my-drawer-5" type="checkbox" className="drawer-toggle" />
-        <div className="drawer-content">
+  const doLeftSide = () => {
+    return (
+      <>
+        <div className="flex-col">
+          <div className="flex justify-between bg-base-300 p-1 h-10">
+            <div className="tooltip tooltip-right" data-tip="Reset all filters">
+              <ArrowPathIcon
+                className="btn-toolbar"
+                onClick={() => doReset()}
+              />
+            </div>
+            <div
+              className="tooltip tooltip-left"
+              data-tip="Show video clips of filtered attacks"
+              style={{ whiteSpace: "pre-line" }}
+            >
+              <VideoCameraIcon
+                className="btn-toolbar"
+                onClick={() => doVideo()}
+              />
+            </div>
+          </div>
+          <div className="h-[calc(100vh-40px)] overflow-auto bg-base-200">
+            <AllFiltersPanel
+              allOptions={allOptions}
+              match={matches[0]}
+              events={events}
+              selectedTeam={selectedTeam}
+              handleFilterOptionChanged={() => doUpdate()}
+              appName={appName}
+            />
+          </div>
+        </div>
+      </>
+    );
+  };
+
+  const doRightSide = () => {
+    return (
+      <>
+        <div className="flex-col">
+          <p className="text-sm font-semibold text-base-content/50">
+            Click on the zones to view video of attacks
+          </p>
           <div className="w-100 h-full cursor-pointer">
             <HittingChart
               matches={matches}
@@ -506,44 +603,189 @@ function HittingChartReport({ matches, team, selectedGame, selectedTeam }) {
             />
           </div>
         </div>
-        <div className="drawer-side w-80">
-          <label htmlFor="my-drawer-5" className="drawer-overlay"></label>
-          <div className="flex-col">
-            <div className="flex justify-between bg-base-100 p-1">
-              <div
-                className="tooltip tooltip-right"
-                data-tip="Reset all filters"
+      </>
+    );
+  };
+
+  const onBackClick = () => {
+    navigate(-1);
+  };
+
+  const getTeamName = () => {
+    if (selectedTeam === 0) {
+      return team.toUpperCase();
+    } else {
+      if (matches.length === 1) {
+        return matches[0].teamB.Name.toUpperCase();
+      }
+      else {
+        return "OPPONENTS (" + matches.length + ")";
+      }
+    }
+  };
+
+  const verticalInset = (h) => {
+    const yy = h - verticalScroll;
+    // console.log("yy = ", yy);
+    return yy;
+  };
+
+  return (
+    <>
+      <div className="">
+        <div>
+          <Dialog
+            open={sidebarOpen}
+            onClose={setSidebarOpen}
+            className="relative z-50 lg:hidden"
+          >
+            <DialogBackdrop
+              transition
+              className="fixed inset-0 bg-gray-900/80 transition-opacity duration-300 ease-linear data-[closed]:opacity-0"
+            />
+
+            <div
+              className="fixed inset-0 inset-y-[180px] flex"
+              style={{
+                top: `${verticalInset(180)}px`,
+                bottom: `${verticalInset(180)}px`,
+              }}
+            >
+              <DialogPanel
+                transition
+                className="relative mr-16 flex w-full max-w-[320px] flex-1 transform transition duration-300 ease-in-out data-[closed]:-translate-x-full"
               >
-                <ArrowPathIcon
-                  className="btn btn-xs h-8 w-12 btn-info rounded-none cursor-pointer"
-                  onClick={() => doReset()}
-                />
-              </div>
-              <div
-                className="tooltip tooltip-left"
-                data-tip="Show video clips of filtered attacks"
-                style={{ whiteSpace: "pre-line" }}
-              >
-                <VideoCameraIcon
-                  className="btn btn-xs h-8 w-12 btn-info rounded-none cursor-pointer"
-                  onClick={() => doVideo()}
-                />
+                <TransitionChild>
+                  <div className="absolute left-full top-0 flex w-16 justify-center pt-5 duration-300 ease-in-out data-[closed]:opacity-0">
+                    <button
+                      type="button"
+                      onClick={() => setSidebarOpen(false)}
+                      className="-m-2.5 p-2.5"
+                    >
+                      <span className="sr-only">Close sidebar</span>
+                      <XMarkIcon
+                        aria-hidden="true"
+                        className="size-6 text-white"
+                      />
+                    </button>
+                  </div>
+                </TransitionChild>
+                {/* Sidebar component, swap this element with another sidebar if you like */}
+                <div className="flex grow flex-col bg-base-100">
+                  {doLeftSide()}
+                </div>
+              </DialogPanel>
+            </div>
+          </Dialog>
+
+          {/* Static sidebar for desktop */}
+          <div
+            className="hidden lg:fixed lg:z-50 lg:flex lg:w-[320px] lg:flex-col"
+            style={{
+              top: `${verticalInset(210)}px`,
+              bottom: `${verticalInset(210)}px`,
+            }}
+          >
+            {/* Sidebar component, swap this element with another sidebar if you like */}
+            <div className="flex grow flex-col bg-base-100">{doLeftSide()}</div>
+          </div>
+
+          <div className="lg:px-4 lg:ml-72">
+            <div className="sticky top-0 z-40 lg:mx-auto lg:max-w-7xl lg:px-0">
+              <div className="flex h-10 items-center gap-x-4 border-b border-gray-200 bg-base-300 px-2 shadow-sm sm:gap-x-6 sm:px-0 lg:px-2 lg:shadow-none">
+                <button
+                  type="button"
+                  onClick={() => setSidebarOpen(true)}
+                  className="-m-2.5 p-2.5 text-base-content/50 lg:hidden"
+                >
+                  <span className="sr-only">Open sidebar</span>
+                  <Bars3Icon
+                    aria-hidden="true"
+                    className="size-6 cursor-pointer text-base-content/50 hover:text-base-content/80"
+                  />
+                </button>
+
+                <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6 lg:ml-8">
+                  <form
+                    action="#"
+                    method="GET"
+                    className="grid flex-1 grid-cols-1"
+                  >
+                    {/* <h1 className="text-sm text-center py-2 font-semibold text-gray-900"> */}
+                    <div className="flex justify-between">
+                      <h1 className="text-lg mt-1 font-semibold text-base-content/70">
+                        {getTeamName()}
+                      </h1>
+                      {/* {doItemDetails()} */}
+
+                      {/* <div className="flex ml-4">
+                        <a
+                          data-tooltip-id="tt-prev"
+                          data-tooltip-content="Previous item"
+                        >
+                          <button type="button" className="mt-3.5">
+                            <span className="sr-only">Navigate Back</span>
+                            <ChevronLeftIcon
+                              className="size-6 cursor-pointer text-base-content/50 hover:text-base-content/80"
+                              onClick={() => moveToItem(-1)}
+                            />
+                          </button>
+                        </a>
+                        <Tooltip
+                          id="tt-prev"
+                          place={"bottom-end"}
+                          style={{
+                            backgroundColor: "oklch(var(--b3))",
+                            color: "oklch(var(--bc))",
+                          }}
+                        />
+
+                        <a
+                          data-tooltip-id="tt-prev"
+                          data-tooltip-content="Next item"
+                        >
+                          <button type="button" className="mt-3.5">
+                            <span className="sr-only">Navigate Back</span>
+                            <ChevronRightIcon
+                              className="size-6 cursor-pointer text-base-content/50 hover:text-base-content/80"
+                              onClick={() => moveToItem(1)}
+                            />
+                          </button>
+                        </a>
+                        <Tooltip
+                          id="tt-prev"
+                          place={"bottom-end"}
+                          style={{
+                            backgroundColor: "oklch(var(--b3))",
+                            color: "oklch(var(--bc))",
+                          }}
+                        />
+                      </div> */}
+                    </div>
+                  </form>
+                  <div className="flex items-center gap-x-4 lg:gap-x-6">
+                    {/* <button type="button" className="">
+                      <span className="sr-only">Navigate Back</span>
+                      <XMarkIcon
+                        aria-hidden="true"
+                        className="size-6 cursor-pointer text-base-content/50 hover:text-base-content/80"
+                        onClick={() => onBackClick()}
+                      />
+                    </button> */}
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="h-full bg-base-200">
-              <AllFiltersPanel
-                allOptions={allOptions}
-                match={matches[0]}
-                events={events}
-                selectedTeam={selectedTeam}
-                handleFilterOptionChanged={() => doUpdate()}
-                appName={appName}
-              />
-            </div>
+
+            <main className="py-2">
+              <div className="mx-auto max-w-7xl px-1 sm:pl-0 sm:pr-2 lg:pr-2 lg:pl-8">
+                {doRightSide()}
+              </div>
+            </main>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

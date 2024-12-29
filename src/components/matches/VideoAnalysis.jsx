@@ -4,12 +4,20 @@ import { useCookies } from "react-cookie";
 import { sortBy, sortedIndex } from "lodash";
 import playlistIcon from "../assets/passing_001.svg";
 import {
+  Bars3Icon,
   FunnelIcon,
   ListBulletIcon,
   VideoCameraIcon,
   ChevronDoubleDownIcon,
   ChevronDoubleUpIcon,
   SignalIcon,
+  XMarkIcon,
+  ClockIcon,
+  MagnifyingGlassIcon,
+  CloudArrowUpIcon,
+  FilmIcon,
+  PlayIcon,
+  ArrowPathRoundedSquareIcon,
 } from "@heroicons/react/24/outline";
 import Select from "react-select";
 import ReactPlayer from "react-player/lazy";
@@ -27,6 +35,15 @@ import { myzip, myunzip } from "../utils/zip";
 import { DVEventString } from "../utils/DVWFile";
 import { storeSession } from "../../context/VBLiveAPI/VBLiveAPIAction";
 import { useAuthStatus } from "../hooks/useAuthStatus";
+import VideoFilters from "./VideoFilters";
+import { Tooltip } from "react-tooltip";
+import "react-tooltip/dist/react-tooltip.css";
+import {
+  Dialog,
+  DialogBackdrop,
+  DialogPanel,
+  TransitionChild,
+} from "@headlessui/react";
 
 function VideoAnalysis() {
   // function VideoAnalysis({ match, selectedGame }) {
@@ -45,7 +62,6 @@ function VideoAnalysis() {
   const [videoFilePath, setVideoFilePath] = useState(null);
   const [videoFileName, setVideoFileName] = useState(null);
   const [videoFileObject, setVideoFileObject] = useState(null);
-  // const videoUrl = process.env.REACT_APP_VIDEO_SERVER_URL + match.code + ".mp4";
   const [selectedSet, setSelectedSet] = useState(1);
   const [selectedMatchGuid, setSelectedMatchGuid] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -76,12 +92,11 @@ function VideoAnalysis() {
   const menuRef = useRef();
   const [menuOpen, setMenuOpen] = useState(false);
   const wref = useRef(null);
-  const refWindow = useRef();
-  const refList = useRef();
   const [contentsHeight, setContentsHeight] = useState(0);
   const [isYoutube, setIsYoutube] = useState(false);
   const [videoWidth, setVideoWidth] = useState(0);
   const [windowHeight, setWindowHeight] = useState(0);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const eventTypes = [
     { value: 0, label: "All Types" },
@@ -173,214 +188,230 @@ function VideoAnalysis() {
     }
   };
 
-  function handleSelectEventTypes(data) {
-    if (data.length === 0) {
-      setSelectedEventTypes(data);
-      return;
-    }
-    if (data[0].value === 0 && data.length > 1) {
-      var ddd = [];
-      for (var nd = 1; nd < data.length; nd++) {
-        ddd.push(data[nd]);
-      }
-      setSelectedEventTypes(ddd);
-      return;
-    } else if (data[data.length - 1].value === 0 && data.length > 1) {
-      setSelectedEventTypes([data[data.length - 1]]);
-      return;
-    }
-    setSelectedEventTypes(data);
-  }
+  // function handleSelectEventTypes(data) {
+  //   if (data.length === 0) {
+  //     setSelectedEventTypes(data);
+  //     return;
+  //   }
+  //   if (data[0].value === 0 && data.length > 1) {
+  //     var ddd = [];
+  //     for (var nd = 1; nd < data.length; nd++) {
+  //       ddd.push(data[nd]);
+  //     }
+  //     setSelectedEventTypes(ddd);
+  //     return;
+  //   } else if (data[data.length - 1].value === 0 && data.length > 1) {
+  //     setSelectedEventTypes([data[data.length - 1]]);
+  //     return;
+  //   }
+  //   setSelectedEventTypes(data);
+  // }
 
-  function handleSelectGames(data) {
-    if (data.length === 0) {
-      setSelectedGames(data);
-      return;
-    }
-    if (data[0].value === 0 && data.length > 1) {
-      var ddd = [];
-      for (var nd = 1; nd < data.length; nd++) {
-        ddd.push(data[nd]);
-      }
-      setSelectedGames(ddd);
-      return;
-    } else if (data[data.length - 1].value === 0 && data.length > 1) {
-      setSelectedGames([data[data.length - 1]]);
-      return;
-    }
-    setSelectedGames(data);
-  }
+  // function handleSelectGames(data) {
+  //   if (data.length === 0) {
+  //     setSelectedGames(data);
+  //     return;
+  //   }
+  //   if (data[0].value === 0 && data.length > 1) {
+  //     var ddd = [];
+  //     for (var nd = 1; nd < data.length; nd++) {
+  //       ddd.push(data[nd]);
+  //     }
+  //     setSelectedGames(ddd);
+  //     return;
+  //   } else if (data[data.length - 1].value === 0 && data.length > 1) {
+  //     setSelectedGames([data[data.length - 1]]);
+  //     return;
+  //   }
+  //   setSelectedGames(data);
+  // }
 
-  function handleSelectRotations(data) {
-    if (data.length === 0) {
-      setSelectedRotations(data);
-      return;
-    }
-    if (data[0].value === 0 && data.length > 1) {
-      var ddd = [];
-      for (var nd = 1; nd < data.length; nd++) {
-        ddd.push(data[nd]);
-      }
-      setSelectedRotations(ddd);
-      return;
-    } else if (data[data.length - 1].value === 0 && data.length > 1) {
-      setSelectedRotations([data[data.length - 1]]);
-      return;
-    }
-    setSelectedRotations(data);
-  }
+  // function handleSelectRotations(data) {
+  //   if (data.length === 0) {
+  //     setSelectedRotations(data);
+  //     return;
+  //   }
+  //   if (data[0].value === 0 && data.length > 1) {
+  //     var ddd = [];
+  //     for (var nd = 1; nd < data.length; nd++) {
+  //       ddd.push(data[nd]);
+  //     }
+  //     setSelectedRotations(ddd);
+  //     return;
+  //   } else if (data[data.length - 1].value === 0 && data.length > 1) {
+  //     setSelectedRotations([data[data.length - 1]]);
+  //     return;
+  //   }
+  //   setSelectedRotations(data);
+  // }
 
-  function handleSelectEventResults(data) {
-    if (data.length === 0) {
-      setSelectedEventResults(data);
-      return;
-    }
-    if (data[0].value === 0 && data.length > 1) {
-      var ddd = [];
-      for (var nd = 1; nd < data.length; nd++) {
-        ddd.push(data[nd]);
-      }
-      setSelectedEventResults(ddd);
-      return;
-    } else if (data[data.length - 1].value === 0 && data.length > 1) {
-      setSelectedEventResults([data[data.length - 1]]);
-      return;
-    }
-    setSelectedEventResults(data);
-  }
+  // function handleSelectEventResults(data) {
+  //   if (data.length === 0) {
+  //     setSelectedEventResults(data);
+  //     return;
+  //   }
+  //   if (data[0].value === 0 && data.length > 1) {
+  //     var ddd = [];
+  //     for (var nd = 1; nd < data.length; nd++) {
+  //       ddd.push(data[nd]);
+  //     }
+  //     setSelectedEventResults(ddd);
+  //     return;
+  //   } else if (data[data.length - 1].value === 0 && data.length > 1) {
+  //     setSelectedEventResults([data[data.length - 1]]);
+  //     return;
+  //   }
+  //   setSelectedEventResults(data);
+  // }
 
-  function handleSelectAttackTypes(data) {
-    if (data.length === 0) {
-      setSelectedAttackTypes(data);
-      return;
-    }
-    if (data[0].value === 0 && data.length > 1) {
-      var ddd = [];
-      for (var nd = 1; nd < data.length; nd++) {
-        ddd.push(data[nd]);
-      }
-      setSelectedAttackTypes(ddd);
-      return;
-    } else if (data[data.length - 1].value === 0 && data.length > 1) {
-      setSelectedAttackTypes([data[data.length - 1]]);
-      return;
-    }
-    setSelectedAttackTypes(data);
-  }
+  // function handleSelectAttackTypes(data) {
+  //   if (data.length === 0) {
+  //     setSelectedAttackTypes(data);
+  //     return;
+  //   }
+  //   if (data[0].value === 0 && data.length > 1) {
+  //     var ddd = [];
+  //     for (var nd = 1; nd < data.length; nd++) {
+  //       ddd.push(data[nd]);
+  //     }
+  //     setSelectedAttackTypes(ddd);
+  //     return;
+  //   } else if (data[data.length - 1].value === 0 && data.length > 1) {
+  //     setSelectedAttackTypes([data[data.length - 1]]);
+  //     return;
+  //   }
+  //   setSelectedAttackTypes(data);
+  // }
 
-  function handleSelectHitTypes(data) {
-    if (data.length === 0) {
-      setSelectedHitTypes(data);
-      return;
-    }
-    if (data[0].value === 0 && data.length > 1) {
-      var ddd = [];
-      for (var nd = 1; nd < data.length; nd++) {
-        ddd.push(data[nd]);
-      }
-      setSelectedHitTypes(ddd);
-      return;
-    } else if (data[data.length - 1].value === 0 && data.length > 1) {
-      setSelectedHitTypes([data[data.length - 1]]);
-      return;
-    }
-    setSelectedHitTypes(data);
-  }
+  // function handleSelectHitTypes(data) {
+  //   if (data.length === 0) {
+  //     setSelectedHitTypes(data);
+  //     return;
+  //   }
+  //   if (data[0].value === 0 && data.length > 1) {
+  //     var ddd = [];
+  //     for (var nd = 1; nd < data.length; nd++) {
+  //       ddd.push(data[nd]);
+  //     }
+  //     setSelectedHitTypes(ddd);
+  //     return;
+  //   } else if (data[data.length - 1].value === 0 && data.length > 1) {
+  //     setSelectedHitTypes([data[data.length - 1]]);
+  //     return;
+  //   }
+  //   setSelectedHitTypes(data);
+  // }
 
-  function handleSelectBlockTypes(data) {
-    if (data.length === 0) {
-      setSelectedBlockTypes(data);
-      return;
-    }
-    if (data[0].value === 6 && data.length > 1) {
-      var ddd = [];
-      for (var nd = 1; nd < data.length; nd++) {
-        ddd.push(data[nd]);
-      }
-      setSelectedBlockTypes(ddd);
-      return;
-    } else if (data[data.length - 1].value === 6 && data.length > 1) {
-      setSelectedBlockTypes([data[data.length - 1]]);
-      return;
-    }
-    setSelectedBlockTypes(data);
-  }
+  // function handleSelectBlockTypes(data) {
+  //   if (data.length === 0) {
+  //     setSelectedBlockTypes(data);
+  //     return;
+  //   }
+  //   if (data[0].value === 6 && data.length > 1) {
+  //     var ddd = [];
+  //     for (var nd = 1; nd < data.length; nd++) {
+  //       ddd.push(data[nd]);
+  //     }
+  //     setSelectedBlockTypes(ddd);
+  //     return;
+  //   } else if (data[data.length - 1].value === 6 && data.length > 1) {
+  //     setSelectedBlockTypes([data[data.length - 1]]);
+  //     return;
+  //   }
+  //   setSelectedBlockTypes(data);
+  // }
 
-  function handleSelectAttackCombos(data) {
-    if (data.length === 0) {
-      setSelectedAttackCombos(data);
-      return;
-    }
-    if (data[0].value === 0 && data.length > 1) {
-      var ddd = [];
-      for (var nd = 1; nd < data.length; nd++) {
-        ddd.push(data[nd]);
-      }
-      setSelectedAttackCombos(ddd);
-      return;
-    } else if (data[data.length - 1].value === 0 && data.length > 1) {
-      setSelectedAttackCombos([data[data.length - 1]]);
-      return;
-    }
-    setSelectedAttackCombos(data);
-  }
+  // function handleSelectAttackCombos(data) {
+  //   if (data.length === 0) {
+  //     setSelectedAttackCombos(data);
+  //     return;
+  //   }
+  //   if (data[0].value === 0 && data.length > 1) {
+  //     var ddd = [];
+  //     for (var nd = 1; nd < data.length; nd++) {
+  //       ddd.push(data[nd]);
+  //     }
+  //     setSelectedAttackCombos(ddd);
+  //     return;
+  //   } else if (data[data.length - 1].value === 0 && data.length > 1) {
+  //     setSelectedAttackCombos([data[data.length - 1]]);
+  //     return;
+  //   }
+  //   setSelectedAttackCombos(data);
+  // }
 
-  function handleSelectSetterCalls(data) {
-    if (data.length === 0) {
-      setSelectedSetterCalls(data);
-      return;
-    }
-    if (data[0].value === 0 && data.length > 1) {
-      var ddd = [];
-      for (var nd = 1; nd < data.length; nd++) {
-        ddd.push(data[nd]);
-      }
-      setSelectedSetterCalls(ddd);
-      return;
-    } else if (data[data.length - 1].value === 0 && data.length > 1) {
-      setSelectedSetterCalls([data[data.length - 1]]);
-      return;
-    }
-    setSelectedSetterCalls(data);
-  }
+  // function handleSelectSetterCalls(data) {
+  //   if (data.length === 0) {
+  //     setSelectedSetterCalls(data);
+  //     return;
+  //   }
+  //   if (data[0].value === 0 && data.length > 1) {
+  //     var ddd = [];
+  //     for (var nd = 1; nd < data.length; nd++) {
+  //       ddd.push(data[nd]);
+  //     }
+  //     setSelectedSetterCalls(ddd);
+  //     return;
+  //   } else if (data[data.length - 1].value === 0 && data.length > 1) {
+  //     setSelectedSetterCalls([data[data.length - 1]]);
+  //     return;
+  //   }
+  //   setSelectedSetterCalls(data);
+  // }
 
-  function handleSelectTeamAPlayers(data) {
-    if (data.length === 0) {
-      setSelectedTeamAPlayers(data);
-      return;
-    }
-    if (data[0].value === 0 && data.length > 1) {
-      var ddd = [];
-      for (var nd = 1; nd < data.length; nd++) {
-        ddd.push(data[nd]);
-      }
-      setSelectedTeamAPlayers(ddd);
-      return;
-    } else if (data[data.length - 1].value === 0 && data.length > 1) {
-      setSelectedTeamAPlayers([data[data.length - 1]]);
-      return;
-    }
-    setSelectedTeamAPlayers(data);
-  }
+  // function handleSelectTeamAPlayers(data) {
+  //   if (data.length === 0) {
+  //     setSelectedTeamAPlayers(data);
+  //     return;
+  //   }
+  //   if (data[0].value === 0 && data.length > 1) {
+  //     var ddd = [];
+  //     for (var nd = 1; nd < data.length; nd++) {
+  //       ddd.push(data[nd]);
+  //     }
+  //     setSelectedTeamAPlayers(ddd);
+  //     return;
+  //   } else if (data[data.length - 1].value === 0 && data.length > 1) {
+  //     setSelectedTeamAPlayers([data[data.length - 1]]);
+  //     return;
+  //   }
+  //   setSelectedTeamAPlayers(data);
+  // }
 
-  function handleSelectTeamBPlayers(data) {
-    if (data.length === 0) {
-      setSelectedTeamBPlayers(data);
-      return;
-    }
-    if (data[0].value === 0 && data.length > 1) {
-      var ddd = [];
-      for (var nd = 1; nd < data.length; nd++) {
-        ddd.push(data[nd]);
-      }
-      setSelectedTeamBPlayers(ddd);
-      return;
-    } else if (data[data.length - 1].value === 0 && data.length > 1) {
-      setSelectedTeamBPlayers([data[data.length - 1]]);
-      return;
-    }
-    setSelectedTeamBPlayers(data);
-  }
+  // function handleSelectTeamBPlayers(data) {
+  //   if (data.length === 0) {
+  //     setSelectedTeamBPlayers(data);
+  //     return;
+  //   }
+  //   if (data[0].value === 0 && data.length > 1) {
+  //     var ddd = [];
+  //     for (var nd = 1; nd < data.length; nd++) {
+  //       ddd.push(data[nd]);
+  //     }
+  //     setSelectedTeamBPlayers(ddd);
+  //     return;
+  //   } else if (data[data.length - 1].value === 0 && data.length > 1) {
+  //     setSelectedTeamBPlayers([data[data.length - 1]]);
+  //     return;
+  //   }
+  //   setSelectedTeamBPlayers(data);
+  // }
+
+  const onFilters = (fes) => {
+    setSelectedTeamAPlayers(fes ? fes.teamAPlayers : []);
+    setSelectedTeamBPlayers(fes ? fes.teamBPlayers : []);
+    setSelectedGames(fes ? fes.games : []);
+    setSelectedRotations(fes ? fes.rotations : []);
+    setSelectedEventTypes(fes ? fes.eventTypes : []);
+    setSelectedEventResults(fes ? fes.eventResults : []);
+    setSelectedAttackTypes(fes ? fes.attackTypes : []);
+    setSelectedHitTypes(fes ? fes.hitTypes : []);
+    setSelectedBlockTypes(fes ? fes.blockTypes : []);
+    setSelectedAttackCombos(fes ? fes.attackCombos : []);
+    setSelectedSetterCalls(fes ? fes.setterCalls : []);
+    setAllFilters(fes);
+    document.getElementById("modal-filters").checked = false;
+  };
 
   const onDoFilters = () => {
     document.getElementById("modal-filters").checked = false;
@@ -887,6 +918,10 @@ function VideoAnalysis() {
     }
   };
 
+  const doTiming = () => {
+    document.getElementById("modal-timing").click();
+  };
+
   const doCloseTiming = () => {
     document.getElementById("modal-timing").click();
     const obj = localStorage.getItem("vblive_timings");
@@ -928,16 +963,19 @@ function VideoAnalysis() {
       console.log("contentsHeight:" + ch);
       setContentsHeight(ch);
     }
-    if (refWindow.current && refList.current) {
-      setVideoWidth(
-        refWindow.current.offsetWidth - refList.current.offsetWidth
-      );
-      setWindowHeight(window.innerHeight);
-    }
+    const sb = window.innerWidth > 960 ? 320 + 80 : 80; // smaller than md
+    setVideoWidth(window.innerWidth - sb);
+    setWindowHeight(window.innerHeight);
   }, []);
 
   useEffect(() => {
-    if (matches.length === 1) {
+    if (matches.length > 1) {
+      const yturl = convertYouTubeUrl(
+        "https://youtu.be/d4E-qfL8LbI?si=H3vLG4PSfInEpQH7"
+      );
+      setVideoOnlineUrl(yturl);
+      setVideoFilePath(yturl);
+    } else if (matches.length === 1) {
       if (matches[0].videoOnlineUrl) {
         const yturl = convertYouTubeUrl(matches[0].videoOnlineUrl);
         setVideoOnlineUrl(yturl);
@@ -1091,12 +1129,10 @@ function VideoAnalysis() {
         console.log("contentsHeight:" + ch);
         setContentsHeight(ch);
       }
-      if (refWindow.current && refList.current) {
-        setVideoWidth(
-          refWindow.current.offsetWidth - refList.current.offsetWidth
-        );
-        setWindowHeight(window.innerHeight);
-      }
+      const sb = window.innerWidth > 960 ? 320 + 80 : 80; // smaller than md
+      setVideoWidth(window.innerWidth - sb);
+      setWindowHeight(window.innerHeight);
+      setWindowHeight(window.innerHeight);
     }
 
     window.addEventListener("resize", handleWindowResize);
@@ -1121,6 +1157,23 @@ function VideoAnalysis() {
       document.removeEventListener("mousedown", handleOutsideClicks);
     };
   }, [menuOpen]);
+
+  const doFilters = () => {
+    setAllFilters({
+      teamAPlayers: selectedTeamAPlayers,
+      teamBPlayers: selectedTeamBPlayers,
+      eventTypes: selectedEventTypes,
+      eventResults: selectedEventResults,
+      attackTypes: selectedAttackTypes,
+      hitTypes: selectedHitTypes,
+      blockTypes: selectedBlockTypes,
+      attackCombos: selectedAttackCombos,
+      setterCalls: selectedSetterCalls,
+      games: selectedGames,
+      rotations: selectedRotations,
+    });
+    document.getElementById("modal-filters").checked = true;
+  };
 
   //create a function in your component to handleOutsideClicks
   const handleOutsideClicks = (event) => {
@@ -1158,14 +1211,440 @@ function VideoAnalysis() {
   const videoTitle = () => {
     var title = "";
     if (matches.length === 1) {
-      title = matches[0].teamA.Name.toUpperCase() + " vs " + matches[0].teamB.Name.toUpperCase();
-    }
-    else if (selectedEvent) {
+      title =
+        matches[0].teamA.Name.toUpperCase() +
+        " vs " +
+        matches[0].teamB.Name.toUpperCase();
+    } else if (selectedEvent) {
       const m = selectedEvent.Drill.match;
       title = m.teamA.Name.toUpperCase() + " vs " + m.teamB.Name.toUpperCase();
     }
     return title;
-  }
+  };
+
+  const doLeftSide = () => {
+    return (
+      <div className="flex-col min-w-[320px] border-r border-base-content/10">
+        <div className="flex justify-between gap-1 h-10 p-1 bg-base-300 mt-1">
+          <div className="flex gap-1">
+            <a data-tooltip-id="tt-filters" data-tooltip-content="Filters">
+              <FunnelIcon className="btn-toolbar" onClick={() => doFilters()} />
+            </a>
+            <Tooltip
+              id="tt-filters"
+              place={"bottom-end"}
+              style={{
+                backgroundColor: "oklch(var(--b3))",
+                color: "oklch(var(--bc))",
+              }}
+            />
+            {matches.length === 1 ? (
+              <div className="dropdown">
+                <a data-tooltip-id="tt-filters" data-tooltip-content="Sets">
+                  <ListBulletIcon tabIndex={0} className="btn-toolbar" />
+                </a>
+                <Tooltip
+                  id="tt-filters"
+                  place={"bottom-end"}
+                  style={{
+                    backgroundColor: "oklch(var(--b3))",
+                    opacity: 0.9,
+                    color: "oklch(var(--bc))",
+                  }}
+                />
+                <ul
+                  tabIndex={0}
+                  className="dropdown-content menu p-2 shadow bg-base-100 w-52"
+                >
+                  {matches[0].sets.map((vobj, idx) => (
+                    <li key={idx} onClick={() => onGameChanged(idx + 1)}>
+                      <a>Set {vobj.GameNumber}</a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <div className="dropdown">
+                <a data-tooltip-id="tt-filters" data-tooltip-content="Sets">
+                  <ListBulletIcon tabIndex={0} className="btn-toolbar" />
+                </a>
+                <Tooltip
+                  id="tt-filters"
+                  place={"bottom-end"}
+                  style={{
+                    backgroundColor: "oklch(var(--b3))",
+                    opacity: 0.9,
+                    color: "oklch(var(--bc))",
+                  }}
+                />
+                <ul
+                  tabIndex={0}
+                  className="dropdown-content menu p-2 shadow bg-base-100 w-52"
+                >
+                  {matches.map((match, idx) => (
+                    <li key={idx} onClick={() => onMatchChanged(match)}>
+                      <a>
+                        {match.teamA.Name} vs {match.teamB.Name}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            <div className="dropdown" ref={menuRef}>
+              <div tabIndex={0} onClick={() => setMenuOpen(!menuOpen)}>
+                <a
+                  data-tooltip-id="tt-filters"
+                  data-tooltip-content="Playlists"
+                >
+                  <VideoCameraIcon className="btn-toolbar" />
+                </a>
+                <Tooltip
+                  id="tt-filters"
+                  place={"bottom-end"}
+                  style={{
+                    backgroundColor: "oklch(var(--b3))",
+                    opacity: 0.9,
+                    color: "oklch(var(--bc))",
+                  }}
+                />
+              </div>
+              {menuOpen ? (
+                <ul
+                  tabIndex={0}
+                  className="dropdown-content menu p-2 shadow bg-base-100 w-52"
+                >
+                  <li onClick={() => selectAllItems()}>
+                    <a>Select all items</a>
+                  </li>
+                  <li onClick={() => unselectAllItems()}>
+                    <a>Unselect all items</a>
+                  </li>
+                  <li onClick={() => createPlaylist()}>
+                    <a>Create play list</a>
+                  </li>
+                </ul>
+              ) : (
+                <></>
+              )}
+            </div>
+          </div>
+          <div>
+            {isCollapseAll ? (
+              <>
+                <a
+                  data-tooltip-id="tt-filters"
+                  data-tooltip-content="Expand All"
+                >
+                  <ChevronDoubleDownIcon
+                    className="btn-toolbar"
+                    onClick={() => setIsCollapseAll(false)}
+                  />
+                </a>
+
+                <Tooltip
+                  id="tt-filters"
+                  place={"bottom-end"}
+                  style={{
+                    backgroundColor: "oklch(var(--b3))",
+                    opacity: 0.9,
+                    color: "oklch(var(--bc))",
+                  }}
+                />
+              </>
+            ) : (
+              <>
+                <a
+                  data-tooltip-id="tt-filters"
+                  data-tooltip-content="Collapse All"
+                >
+                  <ChevronDoubleUpIcon
+                    className="btn-toolbar"
+                    onClick={() => setIsCollapseAll(true)}
+                  />
+                </a>
+
+                <Tooltip
+                  id="tt-filters"
+                  place={"bottom-end"}
+                  style={{
+                    backgroundColor: "oklch(var(--b3))",
+                    opacity: 0.9,
+                    color: "oklch(var(--bc))",
+                  }}
+                />
+              </>
+            )}
+          </div>
+
+          <div>
+            {matches.length === 1 ? (
+              <>
+                <a
+                  data-tooltip-id="tt-filters"
+                  data-tooltip-content="Import Radar File"
+                >
+                  <SignalIcon
+                    className="btn-toolbar"
+                    onClick={() => setShowRadarFile(!showRadarFile)}
+                  />
+                </a>
+
+                <Tooltip
+                  id="tt-filters"
+                  place={"bottom-end"}
+                  style={{
+                    backgroundColor: "oklch(var(--b3))",
+                    opacity: 0.9,
+                    color: "oklch(var(--bc))",
+                  }}
+                />
+              </>
+            ) : (
+              <></>
+            )}
+          </div>
+        </div>
+        <div
+          className="overflow-y-auto h-[calc(100vh-40px)]"
+        >
+          <div className="">
+            <EventsList
+              matches={matches}
+              team={team}
+              filters={allFilters}
+              selectedSet={selectedSet}
+              selectedMatchGuid={selectedMatchGuid}
+              doSelectEvent={(ev) => doSelectEvent(ev)}
+              onFilter={(fes) => onFilter(fes)}
+              collapseAll={isCollapseAll}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const doRightSide = () => {
+    return (
+      <div className="flex-col w-full">
+        <div className="flex flex-col w-full justify-between">
+          <div>
+            {showRadarFile === false ? (
+              <></>
+            ) : (
+              <div className="flex my-2">
+                <input
+                  type="file"
+                  id="selectedRadarFile"
+                  ref={radarRef}
+                  style={{ display: "none" }}
+                  onChange={handleRadarUpload}
+                  onClick={(event) => {
+                    event.target.value = null;
+                  }}
+                />
+                <input
+                  type="button"
+                  className="btn-in-form w-44"
+                  value="Select Radar File..."
+                  onClick={() =>
+                    document.getElementById("selectedRadarFile").click()
+                  }
+                />
+                <label className="label ml-4">
+                  <span className="label-text text-base-content/50">
+                    {videoFileName === null
+                      ? "radar file not selected"
+                      : radarFileName}
+                  </span>
+                </label>
+              </div>
+            )}
+            {matches.length === 1 ? (
+              <div className="flex flex-col">
+                <div className="flex justify-between">
+                  <div className="flex my-2">
+                    <input
+                      type="file"
+                      id="selectedVideoFile"
+                      ref={dvRef}
+                      style={{ display: "none" }}
+                      onChange={handleVideoUpload}
+                      onClick={(event) => {
+                        event.target.value = null;
+                      }}
+                    />
+                    <a
+                      data-tooltip-id="tt-videofile"
+                      data-tooltip-content="Select local video file"
+                    >
+                      <FilmIcon
+                        className="btn-toolbar"
+                        onClick={() =>
+                          document.getElementById("selectedVideoFile").click()
+                        }
+                      />
+                    </a>
+                    <Tooltip
+                      id="tt-videofile"
+                      place={"bottom-start"}
+                      style={{
+                        backgroundColor: "oklch(var(--b3))",
+                        color: "oklch(var(--bc))",
+                      }}
+                    />
+
+                    <label className="label ml-4">
+                      <span className="label-text text-base-content/50">
+                        {videoFileName === null
+                          ? "local video not selected"
+                          : videoFileName}
+                      </span>
+                    </label>
+                  </div>
+                  <div className="flex gap-1">
+                    <a
+                      data-tooltip-id="tt-save"
+                      data-tooltip-content="Save to database"
+                    >
+                      <CloudArrowUpIcon
+                        className="btn-toolbar mt-2"
+                        onClick={() => onSaveToDatabase()}
+                      />
+                    </a>
+                    <Tooltip
+                      id="tt-save"
+                      place={"bottom-end"}
+                      style={{
+                        backgroundColor: "oklch(var(--b3))",
+                        color: "oklch(var(--bc))",
+                      }}
+                    />
+                  </div>
+                </div>
+                <div className="flex gap-1 mb-2">
+                  <input
+                    type="text"
+                    className="w-full text-base-content/50 bg-base-100/50 input input-sm rounded-md"
+                    id="onlineVideoUrl"
+                    value={videoOnlineUrl}
+                    placeholder="Online video URL"
+                    onChange={handleChange}
+                  />
+                  <a
+                    data-tooltip-id="tt-save"
+                    data-tooltip-content="Load and play online video"
+                  >
+                    <PlayIcon
+                      className="btn-toolbar"
+                      onClick={() => showOnlineVideo()}
+                    />
+                  </a>
+                  <Tooltip
+                    id="tt-save"
+                    place={"bottom-end"}
+                    style={{
+                      backgroundColor: "oklch(var(--b3))",
+                      color: "oklch(var(--bc))",
+                    }}
+                  />
+                  <a
+                    data-tooltip-id="tt-save"
+                    data-tooltip-content="Synchronise video with events"
+                  >
+                    <ArrowPathRoundedSquareIcon
+                      className="btn-toolbar"
+                      onClick={() => onSynchVideo()}
+                    />
+                  </a>
+                  <Tooltip
+                    id="tt-save"
+                    place={"bottom-end"}
+                    style={{
+                      backgroundColor: "oklch(var(--b3))",
+                      color: "oklch(var(--bc))",
+                    }}
+                  />
+                </div>
+              </div>
+            ) : (
+              <></>
+            )}
+            <div
+              className="flex m-2 p-1 justify-center bg-black"
+              onTouchStart={onTouchStart}
+              onTouchMove={onTouchMove}
+              onTouchEnd={onTouchEnd}
+            >
+              {isYoutube ? (
+                <>
+                  <ReactPlayer
+                    ref={playerRef}
+                    url={videoFilePath}
+                    playing={true}
+                    controls={true}
+                    onReady={() => playerReady()}
+                    onTouchStart={onTouchStart}
+                    onTouchMove={onTouchMove}
+                    onTouchEnd={onTouchEnd}
+                    width={`${calcVideoSize().width}px`}
+                    height={`${calcVideoSize().height}px`}
+                  />
+                </>
+              ) : (
+                <>
+                  <ReactPlayer
+                    ref={playerRef}
+                    url={videoFilePath}
+                    playing={true}
+                    controls={true}
+                    onReady={() => playerReady()}
+                    onTouchStart={onTouchStart}
+                    onTouchMove={onTouchMove}
+                    onTouchEnd={onTouchEnd}
+                    width={`${calcVideoSize().width}px`}
+                    height={`${calcVideoSize().height}px`}
+                  />
+                </>
+              )}
+            </div>
+            {matches.length === 1 ? (
+              <div className="flex justify-between">
+                <div className="flex gap-2">
+                  <a
+                    data-tooltip-id="tt-timing"
+                    data-tooltip-content="Set timing for events"
+                  >
+                    <ClockIcon
+                      className="btn-toolbar"
+                      onClick={() => doTiming()}
+                    />
+                  </a>
+                  <Tooltip
+                    id="tt-timing"
+                    place={"bottom-near"}
+                    style={{
+                      backgroundColor: "oklch(var(--b3))",
+                      color: "oklch(var(--bc))",
+                    }}
+                  />
+                </div>
+                {videoOffset !== 0 ? (
+                  <></>
+                ) : (
+                  // <p>Offset = {videoOffset} secs</p>
+                  <></>
+                )}
+              </div>
+            ) : (
+              <></>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   if (!matches) {
     return <></>;
@@ -1173,506 +1652,121 @@ function VideoAnalysis() {
 
   return (
     <>
-      <div className="flex-col">
-        <div className="flex h-full w-full" ref={refWindow}>
-          <div className="flex-col min-w-[320px]">
-            <div className="flex justify-between gap-1 h-10 p-1 bg-base-300 mt-1">
-              <div className="flex gap-1">
-                {/* <label
-                  htmlFor="modal-filters"
-                  className="btn btn-sm bg-gray-600 hover:btn-gray-900 "
-                >
-                  Filters
-                </label> */}
-                <div className="tooltip" data-tip="Filters">
-                  <FunnelIcon
-                    className="w-8 h-8 p-1 bg-info text-info-content hover:bg-info-focus cursor-pointer"
-                    onClick={() =>
-                      (document.getElementById("modal-filters").checked = true)
-                    }
-                  />
-                </div>
-                {matches.length === 1 ? (
-                  <div className="dropdown">
-                    <div className="tooltip" data-tip="Sets">
-                      <ListBulletIcon
-                        tabIndex={0}
-                        className="w-8 h-8 p-1 bg-info text-info-content hover:bg-info-focus cursor-pointer"
-                      />
-                    </div>
-                    <ul
-                      tabIndex={0}
-                      className="dropdown-content menu p-2 shadow bg-base-100 w-52"
-                    >
-                      {matches[0].sets.map((vobj, idx) => (
-                        <li key={idx} onClick={() => onGameChanged(idx + 1)}>
-                          <a>Set {vobj.GameNumber}</a>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : (
-                  <div className="dropdown">
-                    <div className="tooltip" data-tip="Sets">
-                      <ListBulletIcon
-                        tabIndex={0}
-                        className="w-8 h-8 p-1 bg-info text-info-content hover:bg-info-focus cursor-pointer"
-                      />
-                    </div>
-                    <ul
-                      tabIndex={0}
-                      className="dropdown-content menu p-2 shadow bg-base-100 w-52"
-                    >
-                      {matches.map((match, idx) => (
-                        <li key={idx} onClick={() => onMatchChanged(match)}>
-                          <a>
-                            {match.teamA.Name} vs {match.teamB.Name}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                <div className="dropdown" ref={menuRef}>
-                  <div tabIndex={0} onClick={() => setMenuOpen(!menuOpen)}>
-                    <div className="tooltip" data-tip="Play List">
-                      <VideoCameraIcon className="w-8 h-8 p-1 bg-info text-info-content hover:bg-info-focus cursor-pointer" />
-                    </div>
-                  </div>
-                  {menuOpen ? (
-                    <ul
-                      tabIndex={0}
-                      className="dropdown-content menu p-2 shadow bg-base-100 w-52"
-                    >
-                      <li onClick={() => selectAllItems()}>
-                        <a>Select all items</a>
-                      </li>
-                      <li onClick={() => unselectAllItems()}>
-                        <a>Unselect all items</a>
-                      </li>
-                      <li onClick={() => createPlaylist()}>
-                        <a>Create play list</a>
-                      </li>
-                    </ul>
-                  ) : (
-                    <></>
-                  )}
-                </div>
-              </div>
-              <div>
-                {isCollapseAll ? (
-                  <div className="tooltip" data-tip="Expand All">
-                    <ChevronDoubleDownIcon
-                      className="w-8 h-8 p-1 bg-info text-info-content hover:bg-info-focus cursor-pointer"
-                      onClick={() => setIsCollapseAll(false)}
-                    />
-                  </div>
-                ) : (
-                  <div className="tooltip" data-tip="Collapse All">
-                    <ChevronDoubleUpIcon
-                      className="w-8 h-8 p-1 bg-info text-info-content hover:bg-info-focus cursor-pointer"
-                      onClick={() => setIsCollapseAll(true)}
-                    />
-                  </div>
-                )}
-              </div>
+      <div>
+        <Dialog
+          open={sidebarOpen}
+          onClose={setSidebarOpen}
+          className="relative z-50 lg:hidden"
+        >
+          <DialogBackdrop
+            transition
+            className="fixed inset-0 bg-gray-900/80 transition-opacity duration-300 ease-linear data-[closed]:opacity-0"
+          />
 
-              <div>
-                {matches.length === 1 ? (
-                  <div className="tooltip" data-tip="Speed Radar">
-                    <SignalIcon
-                      className="w-8 h-8 p-1 bg-info text-info-content hover:bg-info-focus cursor-pointer"
-                      onClick={() => setShowRadarFile(!showRadarFile)}
-                    />
-                  </div>
-                ) : (
-                  <></>
-                )}
-              </div>
-            </div>
-            <div
-              className="overflow-y-auto"
-              ref={refList}
-              style={{ height: `${windowHeight - 140}px` }}
+          <div className="fixed inset-0 flex">
+            <DialogPanel
+              transition
+              className="relative mr-16 flex w-full max-w-[320px] flex-1 transform transition duration-300 ease-in-out data-[closed]:-translate-x-full"
             >
-              <div className="">
-                <EventsList
-                  matches={matches}
-                  team={team}
-                  filters={allFilters}
-                  selectedSet={selectedSet}
-                  selectedMatchGuid={selectedMatchGuid}
-                  doSelectEvent={(ev) => doSelectEvent(ev)}
-                  onFilter={(fes) => onFilter(fes)}
-                  collapseAll={isCollapseAll}
-                />
-              </div>
-            </div>
-          </div>
-          <div className="flex-col">
-            <div className="flex flex-col w-full justify-between ml-2">
-              <div>
-                {showRadarFile === false ? (
-                  <></>
-                ) : (
-                  <div className="flex my-2">
-                    <input
-                      type="file"
-                      id="selectedRadarFile"
-                      ref={radarRef}
-                      style={{ display: "none" }}
-                      onChange={handleRadarUpload}
-                      onClick={(event) => {
-                        event.target.value = null;
-                      }}
+              <TransitionChild>
+                <div className="absolute left-full top-0 flex w-16 justify-center pt-5 duration-300 ease-in-out data-[closed]:opacity-0">
+                  <button
+                    type="button"
+                    onClick={() => setSidebarOpen(false)}
+                    className="-m-2.5 p-2.5"
+                  >
+                    <span className="sr-only">Close sidebar</span>
+                    <XMarkIcon
+                      aria-hidden="true"
+                      className="size-6 text-white"
                     />
-                    <input
-                      type="button"
-                      className="btn btn-sm w-60"
-                      value="Select Radar File..."
-                      onClick={() =>
-                        document.getElementById("selectedRadarFile").click()
-                      }
-                    />
-                    <label className="label ml-4">
-                      <span className="label-text">
-                        {videoFileName === null
-                          ? "radar file not selected"
-                          : radarFileName}
-                      </span>
-                    </label>
-                  </div>
-                )}
-                {matches.length === 1 ? (
-                  <div>
-                    <div className="flex justify-between">
-                      <div className="flex my-2">
-                        <input
-                          type="file"
-                          id="selectedVideoFile"
-                          ref={dvRef}
-                          style={{ display: "none" }}
-                          onChange={handleVideoUpload}
-                          onClick={(event) => {
-                            event.target.value = null;
-                          }}
-                        />
-                        <input
-                          type="button"
-                          className="btn btn-sm btn-info w-60 rounded-none"
-                          value="Select Match Video..."
-                          onClick={() =>
-                            document.getElementById("selectedVideoFile").click()
-                          }
-                        />
-                        <label className="label ml-4">
-                          <span className="label-text">
-                            {videoFileName === null
-                              ? "match video not selected"
-                              : videoFileName}
-                          </span>
-                        </label>
-                      </div>
-                      <div className="flex">
-                        <button
-                          className="btn btn-primary rounded-none btn-sm m-2"
-                          onClick={() => onSaveToDatabase()}
-                        >
-                          Save to Database
-                        </button>
-                        <button
-                          className="btn btn-primary rounded-none btn-sm m-2"
-                          onClick={() => onBackClick()}
-                        >
-                          Back
-                        </button>
-                      </div>
-                    </div>
-                    <div className="flex gap-1 mx-2 my-2">
-                      <input
-                        type="text"
-                        className="w-full text-gray-500 bg-gray-200 input input-sm rounded-sm"
-                        id="onlineVideoUrl"
-                        value={videoOnlineUrl}
-                        placeholder="Online video URL"
-                        onChange={handleChange}
-                      />
-                      <button
-                        className="btn btn-sm btn-info rounded-none"
-                        onClick={() => showOnlineVideo()}
-                      >
-                        Apply
-                      </button>
-                      <button
-                        className="btn btn-sm btn-info rounded-none"
-                        onClick={() => onSynchVideo()}
-                      >
-                        Synch
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <></>
-                )}
-                <div className="flex mt-2 ml-2 px-2 font-medium bg-base-300 text-base-content text-md">
-                  {videoTitle()}
+                  </button>
                 </div>
-                <div
-                  className="flex m-2 p-1 justify-center bg-black"
-                  onTouchStart={onTouchStart}
-                  onTouchMove={onTouchMove}
-                  onTouchEnd={onTouchEnd}
+              </TransitionChild>
+              {/* Sidebar component, swap this element with another sidebar if you like */}
+              <div className="flex grow flex-col bg-base-100">
+                {doLeftSide()}
+              </div>
+            </DialogPanel>
+          </div>
+        </Dialog>
+
+        {/* Static sidebar for desktop */}
+        <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-[320px] lg:flex-col">
+          <div className="flex grow flex-col bg-base-100">{doLeftSide()}</div>
+        </div>
+
+        <div className="lg:px-4 lg:ml-72 w-fit">
+          <div className="sticky top-0 z-40 lg:mx-auto lg:max-w-7xl lg:px-0">
+            <div className="flex items-center gap-x-4 border-b border-gray-200 bg-base-100 px-2 shadow-sm sm:gap-x-6 sm:px-0 lg:px-2 lg:shadow-none">
+              <button
+                type="button"
+                onClick={() => setSidebarOpen(true)}
+                className="text-base-content/50 lg:hidden"
+              >
+                <span className="sr-only">Open sidebar</span>
+                <Bars3Icon aria-hidden="true" className="size-6" />
+              </button>
+
+              <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
+                <form
+                  action="#"
+                  method="GET"
+                  className="grid flex-1 grid-cols-1"
                 >
-                  {isYoutube ? (
-                    <>
-                      {" "}
-                      <ReactPlayer
-                        ref={playerRef}
-                        url={videoFilePath}
-                        playing={true}
-                        controls={true}
-                        onReady={() => playerReady()}
-                        onTouchStart={onTouchStart}
-                        onTouchMove={onTouchMove}
-                        onTouchEnd={onTouchEnd}
-                        width={`${calcVideoSize().width}px`}
-                        height={`${calcVideoSize().height}px`}
-                      />
-                    </>
-                  ) : (
-                    <>
-                      <ReactPlayer
-                        ref={playerRef}
-                        url={videoFilePath}
-                        playing={true}
-                        // width="100%"
-                        // height="100%"
-                        controls={true}
-                        onReady={() => playerReady()}
-                        onTouchStart={onTouchStart}
-                        onTouchMove={onTouchMove}
-                        onTouchEnd={onTouchEnd}
-                        width={`${calcVideoSize().width}px`}
-                        height={`${calcVideoSize().height}px`}
-                      />
-                    </>
-                  )}
+                  <h1 className="text-sm text-center py-2 font-semibold text-base-content/80">
+                    {videoTitle()}
+                  </h1>
+                </form>
+                <div className="flex items-center gap-x-4 lg:gap-x-6">
+                  <button type="button" className="text-base-content/50">
+                    <span className="sr-only">Navigate Back</span>
+                    <XMarkIcon
+                      aria-hidden="true"
+                      className="size-6"
+                      onClick={() => onBackClick()}
+                    />
+                  </button>
                 </div>
-                {matches.length === 1 ? (
-                  <div className="flex justify-between">
-                    <div className="flex gap-2">
-                      <label
-                        htmlFor="modal-timing"
-                        className="btn btn-sm bg-info text-info-content rounded-none"
-                      >
-                        Timing
-                      </label>
-                      {/* <button
-                        className="btn btn-sm btn-info rounded-none"
-                        onClick={() => doSaveFile()}
-                      >
-                        Save Video Settings to DVW File
-                      </button> */}
-                    </div>
-                    {videoOffset !== 0 ? (
-                      <></>
-                    ) : (
-                      // <p>Offset = {videoOffset} secs</p>
-                      <></>
-                    )}
-                  </div>
-                ) : (
-                  <></>
-                )}
               </div>
             </div>
           </div>
+
+          <main className="py-2">
+            <div className="mx-auto max-w-7xl px-1 sm:pl-0 sm:pr-2 lg:pr-2 lg:pl-8">
+              {doRightSide()}
+            </div>
+          </main>
         </div>
       </div>
 
       <input type="checkbox" id="modal-filters" className="modal-toggle" />
       <div className="modal">
         <div className="modal-box w-7/12 max-w-5xl h-full">
-          <h3 className="mb-4 font-bold text-2xl">Filters</h3>
-          <div className="form">
-            <div className="my-4 text-gray-800">
-              <div className="flex justify-between mt-4">
-                <div className="flex=col justify-between w-full mx-2">
-                  <p className="text-xs">
-                    {matches.length === 1 ? matches[0].teamA.Name : team}{" "}
-                    Players
-                  </p>
-                  <Select
-                    id="teamAPlayersSelect"
-                    name="teamAPlayersSelect"
-                    onChange={handleSelectTeamAPlayers}
-                    className="mt-2 block w-full border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500text-sm"
-                    options={teamAPlayers}
-                    value={selectedTeamAPlayers}
-                    isMulti
-                  />
-                </div>
-                <div className="flex=col justify-between w-full mx-2">
-                  <p className="text-xs">
-                    {matches.length === 1 ? matches[0].teamB.Name : "Opponents"}{" "}
-                    Players
-                  </p>
-                  <Select
-                    id="teamBPlayersSelect"
-                    name="teamBPlayersSelect"
-                    onChange={handleSelectTeamBPlayers}
-                    className="mt-2 block w-full border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500text-sm"
-                    options={teamBPlayers}
-                    value={selectedTeamBPlayers}
-                    isMulti
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-between mt-4">
-                <div className="flex=col justify-between w-full mx-2">
-                  <p className="text-xs">Set</p>
-                  <Select
-                    id="gamesSelect"
-                    name="gamesSelect"
-                    onChange={handleSelectGames}
-                    className="mt-2 block w-full border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500text-sm"
-                    options={games}
-                    value={selectedGames}
-                    isMulti
-                  />
-                </div>
-
-                <div className="flex=col justify-between w-full mx-2">
-                  <p className="text-xs">Rotation</p>
-                  <Select
-                    id="rotationsSelect"
-                    name="rotationsSelect"
-                    onChange={handleSelectRotations}
-                    className="mt-2 block w-full border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500text-sm"
-                    options={rotations}
-                    value={selectedRotations}
-                    isMulti
-                  />
-                </div>
-              </div>
-              <div className="flex justify-between mt-4">
-                <div className="flex=col justify-between w-full mx-2">
-                  <p className="text-xs">Event Type</p>
-                  <Select
-                    id="eventTypesSelect"
-                    name="eventTypesSelect"
-                    onChange={handleSelectEventTypes}
-                    className="mt-2 block w-full border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500text-sm"
-                    options={eventTypes}
-                    value={selectedEventTypes}
-                    isMulti
-                  />
-                </div>
-                <div className="flex=col justify-between w-full mx-2">
-                  <p className="text-xs">Event Result</p>
-                  <Select
-                    id="eventResultsSelect"
-                    name="eventResultsSelect"
-                    onChange={handleSelectEventResults}
-                    className="mt-2 block w-full border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500text-sm"
-                    options={eventResults}
-                    value={selectedEventResults}
-                    isMulti
-                  />
-                </div>
-              </div>
-              <div className="flex justify-between mt-4">
-                <div className="flex=col justify-between w-full mx-2">
-                  <p className="text-xs">Attack Type</p>
-                  <Select
-                    id="attackTypesSelect"
-                    name="attackTypesSelect"
-                    onChange={handleSelectAttackTypes}
-                    className="mt-2 block w-full border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500text-sm"
-                    options={attackTypes}
-                    value={selectedAttackTypes}
-                    isMulti
-                  />
-                </div>
-                <div className="flex=col justify-between w-full mx-2">
-                  <p className="text-xs">Hit Type</p>
-                  <Select
-                    id="hitTypesSelect"
-                    name="hitTypesSelect"
-                    onChange={handleSelectHitTypes}
-                    className="mt-2 block w-full border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500text-sm"
-                    options={hitTypes}
-                    value={selectedHitTypes}
-                    isMulti
-                  />
-                </div>
-                <div className="flex=col justify-between w-full mx-2">
-                  <p className="text-xs">Block Type</p>
-                  <Select
-                    id="blockTypesSelect"
-                    name="blockTypesSelect"
-                    onChange={handleSelectBlockTypes}
-                    className="mt-2 block w-full border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500text-sm"
-                    options={blockTypes}
-                    value={selectedBlockTypes}
-                    isMulti
-                  />
-                </div>
-              </div>
-              <div className="flex justify-between mt-4">
-                <div className="flex=col justify-between w-full mx-2">
-                  <p className="text-xs">Attack Combo</p>
-                  <Select
-                    id="attackCombosSelect"
-                    name="attackCombosSelect"
-                    onChange={handleSelectAttackCombos}
-                    className="mt-2 block w-full border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500text-sm"
-                    options={attackCombos}
-                    value={selectedAttackCombos}
-                    isMulti
-                  />
-                </div>
-                <div className="flex=col justify-between w-full mx-2">
-                  <p className="text-xs">Setter's Call</p>
-                  <Select
-                    id="setterCallsSelect"
-                    name="setterCallsSelect"
-                    onChange={handleSelectSetterCalls}
-                    className="mt-2 block w-full border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500text-sm"
-                    options={setterCalls}
-                    value={selectedSetterCalls}
-                    isMulti
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="flex gap-2 justify-end">
-            <div className="modal-action">
-              <label
-                htmlFor="modal-filters"
-                className="btn btn-info rounded-none btn-sm"
-              >
-                Cancel
-              </label>
-            </div>
-            <div className="modal-action">
-              <button
-                htmlFor="modal-filters"
-                className="btn btn-info rounded-none btn-sm"
-                onClick={() => onDoFilters()}
-              >
-                Apply
-              </button>
-            </div>
-          </div>
+          <VideoFilters
+            allFilters={allFilters}
+            matches={matches}
+            team={team}
+            teamAPlayers={teamAPlayers}
+            teamBPlayers={teamBPlayers}
+            games={games}
+            rotations={rotations}
+            eventTypes={eventTypes}
+            eventResults={eventResults}
+            attackTypes={attackTypes}
+            hitTypes={hitTypes}
+            blockTypes={blockTypes}
+            attackCombos={attackCombos}
+            setterCalls={setterCalls}
+            onDoFilters={(fes) => onFilters(fes)}
+            updated={(n) => !n}
+          />
         </div>
       </div>
 
       <input type="checkbox" id="modal-timing" className="modal-toggle" />
       <div className="modal">
-        <div className="modal-box w-4/12 max-w-5xl h-[62vh]">
+        <div className="modal-box sm:w-4/12 w-full max-w-5xl h-[70vh]">
           <h3 className="mb-4 font-bold text-2xl">Timing</h3>
           <div className="flex flex-col">
             <div>

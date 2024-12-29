@@ -13,6 +13,7 @@ function AllFiltersPanel({
   const [, forceUpdate] = useState(0);
   const [filteredOptions, setFilteredOptions] = useState(allOptions);
   const validvbstats = [
+    "Sets",
     "Rotations",
     "Attackers",
     "Stages",
@@ -47,6 +48,7 @@ function AllFiltersPanel({
 
   const validFilter = (filter) => {
     const validvbstats = [
+      "Sets",
       "Rotations",
       "Attackers",
       "Stages",
@@ -82,7 +84,7 @@ function AllFiltersPanel({
           className="collapse collapse-arrow rounded-sm"
         >
           <input type="checkbox" className="peer" />
-          <div className="collapse-title pt-2 bg-base-300 text-lg font-medium  peer-checked:bg-base-100 peer-checked:text-base-700">
+          <div className="collapse-title pt-2 bg-base-200 text-sm font-medium  peer-checked:bg-base-100 peer-checked:text-base-700">
             {filter.title.toUpperCase()}
             <p className="text-xs font-normal">{selectedOptions(filter)}</p>
           </div>

@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { sortBy } from "lodash";
 import Moment from "moment";
+import { ChevronDownIcon, HomeIcon } from "@heroicons/react/24/outline";
+import { useNavigate } from "react-router-dom";
 
 function MatchSummary({
   matches,
@@ -11,9 +13,14 @@ function MatchSummary({
   onTeamSelected,
   onSaveToDatabase,
   inDatabase,
+  isLive,
 }) {
+  const navigate = useNavigate();
   const [currentGame, setCurrentGame] = useState(0);
   const [currentTeam, setCurrentTeam] = useState(0);
+  const [teamTabs, setTeamTabs] = useState([]);
+  const [gameTabs, setGameTabs] = useState([]);
+
   const doSelectGame = (sgn) => {
     setCurrentGame(sgn);
     onGameSelected(sgn);
@@ -23,83 +30,215 @@ function MatchSummary({
     onTeamSelected(tmn);
   };
 
+  useEffect(() => {
+    setCurrentGame(gameSelected);
+    setCurrentTeam(teamSelected);
+    if (matches) {
+      const tts = [
+        { name: team.toUpperCase(), index: 0 },
+        {
+          name:
+            matches.length === 1
+              ? matches[0].teamB.Name.toUpperCase()
+              : "OPPONENTS (" + matches.length + ")",
+          index: 1,
+        },
+      ];
+      setTeamTabs(tts);
+      if (matches.length === 1) {
+        var gameTabs = [{ name: "Match", index: 0 }];
+        sortBy(matches[0].sets, "GameNumber").map((game, i) => {
+          gameTabs.push({
+            name:
+              "Set " +
+              game.GameNumber +
+              ": " +
+              game.HomeScore +
+              " - " +
+              game.AwayScore,
+            index: game.GameNumber,
+          });
+        });
+        setGameTabs(gameTabs);
+      }
+    }
+  }, [gameSelected, teamSelected]);
+
+  function classNames(...classes) {
+    return classes.filter(Boolean).join(" ");
+  }
+
+  const doHome = () => {
+    navigate("/");
+  }
+
   return (
     matches && (
-      <div className="flex-auto tabs-boxed rounded-none">
+      <div className="flex-col w-full mt-2">
         <div className="flex justify-between">
+          <>
+            {matches.length === 1 ? (
+              <>
+                <div className="flex-col">
+                  <div className="flex gap-2">
+                    <p className="mt-1 text-sm text-base-700">
+                      {Moment(matches[0].TrainingDate).format("DD-MMM-yyyy")}
+                    </p>
+                    {matches[0].tournamentName ? (
+                      <p className="mt-1 text-sm text-base-700">
+                        - {matches[0].tournamentName}
+                      </p>
+                    ) : (
+                      <></>
+                    )}
+                  </div>
+                  {/* <div className="w-full divider divide-y divide-base-content"></div> */}
+                </div>
+              </>
+            ) : (
+              <></>
+            )}
+          </>
           <div className="flex gap-2">
-            <button
-              className={
-                teamSelected === 0
-                  ? "btn btn-sm text-xl btn-primary rounded-none font-medium"
-                  : "btn btn-sm bg-base-300 text-base-content text-xl font-medium rounded-none"
-              }
-              onClick={() => doSelectTeam(0)}
-            >
-              {team.toUpperCase()}
-            </button>
-            <div className="text-xl"> vs </div>
-            <button
-              className={
-                teamSelected === 1
-                  ? "btn btn-sm text-xl btn-primary rounded-none font-medium"
-                  : "btn btn-sm bg-base-300 text-base-content text-xl font-medium rounded-none"
-              }
-              onClick={() => doSelectTeam(1)}
-            >
-              {matches.length === 1
-                ? matches[0].teamB.Name.toUpperCase()
-                : "OPPONENTS (" + matches.length + ")"}
-            </button>
+            <>
+              {isLive === false && inDatabase === false ? (
+                <div
+                  className="tooltip tooltip-bottom"
+                  data-tip="Save to database"
+                >
+                  <button
+                    className="btn-in-form"
+                    onClick={() => onSaveToDatabase()}
+                  >
+                    Save to DB
+                  </button>
+                </div>
+              ) : (
+                <></>
+              )}
+            </>
+            <HomeIcon
+              className="mt-1 size-6 cursor-pointer text-base-content/50 hover:text-base-content/80"
+              onClick={() => doHome()}
+            />
           </div>
-          {inDatabase === false ? (
-            <button
-              className="btn btn-sm btn-primary rounded-none"
-              onClick={() => onSaveToDatabase()}
-            >
-              Save to Database
-            </button>
-          ) : (
-            <></>
-          )}
+        </div>
+        <div className="">
+          <div>
+            <div className="grid grid-cols-1 sm:hidden my-2">
+              <div className="grid grid-cols-6">
+                <div className="col-span-1">
+                  <label className="text-sm pt-1.5">Team</label>
+                </div>
+                <div className="col-span-5">
+                  <div className="flex gap-1">
+                    <select
+                      onChange={(e) =>
+                        doSelectTeam(
+                          teamTabs.find((tab) => tab.name === e.target.value)
+                            .index
+                        )
+                      }
+                      value={
+                        teamTabs[currentTeam] && teamTabs[currentTeam].name
+                      }
+                      aria-label="Select a tab"
+                      className="select-generic"
+                    >
+                      {teamTabs.map((tab) => (
+                        <option key={tab.name}>{tab.name}</option>
+                      ))}
+                    </select>
+                    {/* <ChevronDownIcon
+                      aria-hidden="true"
+                      className="pointer-events-none col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end fill-gray-500"
+                    /> */}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="hidden sm:block">
+              <div className="border-b border-base-content/20">
+                <nav aria-label="Tabs" className="-mb-px flex space-x-8">
+                  {teamTabs.map((tab) => (
+                    <a
+                      key={tab.name}
+                      onClick={() => doSelectTeam(tab.index)}
+                      aria-current={
+                        tab.index === currentTeam ? "page" : undefined
+                      }
+                      className={classNames(
+                        tab.index === currentTeam
+                          ? "border-primary/80 text-primary/80"
+                          : "border-transparent text-base-content hover:border-base-content/30 hover:text-base-content/70",
+                        "whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium"
+                      )}
+                    >
+                      {tab.name}
+                    </a>
+                  ))}
+                </nav>
+              </div>
+            </div>
+          </div>
         </div>
         {matches.length === 1 ? (
-          <p className="ml-4 my-1 text-sm text-base-700">
-            {Moment(matches[0].TrainingDate).format("DD-MMM-yyyy")} -{" "}
-            {matches[0].tournamentName}
-          </p>
-        ) : (
-          <></>
-        )}
-        {matches.length === 1 ? (
-          <div className="ml-2 tabs tabs-boxed rounded-none">
-            <a
-              className={
-                gameSelected == 0
-                  ? "tab tab-active rounded-none"
-                  : "tab rounded-none"
-              }
-              onClick={() => {
-                doSelectGame(0);
-              }}
-            >
-              Match
-            </a>
-            {sortBy(matches[0].sets, "GameNumber").map((game, i) => (
-              <a
-                className={
-                  gameSelected === game.GameNumber
-                    ? "tab tab-active rounded-none"
-                    : "tab rounded-none"
-                }
-                key={game.GameNumber}
-                onClick={() => {
-                  doSelectGame(game.GameNumber);
-                }}
-              >
-                {game.HomeScore} - {game.AwayScore}
-              </a>
-            ))}
+          <div>
+            <div className="grid grid-cols-1 sm:hidden my-2">
+              <div className="grid grid-cols-6">
+                <div className="col-span-1">
+                  <label className="text-sm pt-1">Sets</label>
+                </div>
+                <div className="col-span-5">
+                  <div className="flex gap-1">
+                    <select
+                      onChange={(e) =>
+                        doSelectGame(
+                          gameTabs.find((tab) => tab.name === e.target.value)
+                            .index
+                        )
+                      }
+                      value={
+                        gameTabs[currentGame] && gameTabs[currentGame].name
+                      }
+                      aria-label="Select a tab"
+                      className="select-generic"
+                    >
+                      {gameTabs.map((tab) => (
+                        <option key={tab.name}>{tab.name}</option>
+                      ))}
+                    </select>
+                    {/* <ChevronDownIcon
+                      aria-hidden="true"
+                      className="pointer-events-none col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end fill-gray-500"
+                    /> */}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="hidden sm:block">
+              <div className="border-b border-base-content/20">
+                <nav aria-label="Tabs" className="-mb-px flex space-x-8">
+                  {gameTabs.map((tab) => (
+                    <a
+                      key={tab.name}
+                      onClick={() => doSelectGame(tab.index)}
+                      aria-current={
+                        tab.index === currentGame ? "page" : undefined
+                      }
+                      className={classNames(
+                        tab.index === currentGame
+                          ? "border-primary/80 text-primary/80"
+                          : "border-transparent text-base-content hover:border-base-content/30 hover:text-base-content/70",
+                        "whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium"
+                      )}
+                    >
+                      {tab.name}
+                    </a>
+                  ))}
+                </nav>
+              </div>
+            </div>
           </div>
         ) : (
           <></>

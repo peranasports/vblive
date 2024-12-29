@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
-import { sortBy } from "lodash";
+import { initial, sortBy } from "lodash";
 import { getDVRalliesInGameForTeam } from "../utils/StatsItem";
 import ServeReceive from "./ServeReceive";
 // import { CheckIcon, XIcon } from "@heroicons/react/24/outline";
-import { CheckIcon } from "@heroicons/react/20/solid";
+import { CheckIcon, CheckCircleIcon } from "@heroicons/react/20/solid";
+import { CheckCircleIcon as CheckCircleIconOutline } from "@heroicons/react/24/outline";
 import Select from "react-select";
-
+import { Tooltip } from "react-tooltip";
+import "react-tooltip/dist/react-tooltip.css";
 import { psvbParseLatestStats } from "../utils/PSVBFile";
 import { useNavigate } from "react-router-dom";
 import {
@@ -491,6 +493,8 @@ function ServeReceiveReport({ matches, team, selectedGame, selectedTeam }) {
         filename: null,
         playlists: null,
         serverName: currentUser.email,
+        description: `Serve-receives by ${statsItem.Player.NickName}`,
+        initialTags: ["passing"],
       };
       navigate("/playlist", { state: st });
     }
@@ -514,41 +518,44 @@ function ServeReceiveReport({ matches, team, selectedGame, selectedTeam }) {
   };
 
   const passingLegend = (index, text, color, bordercolor, description) => {
-    var cln = "h-5 w-5 text-black";
-    if (passSelection[index] === true) {
-      cln = "h-5 w-5 text-white";
-    }
-    // const bgcolor = passSelection[index] === true ? color : "white";
     const bwidth = "2.5px";
     return (
-      <div className="tooltip" data-tip={description}>
-        <div className="flex gap-2">
-          <div
-            className="min-w-[16px] mt-1 rounded-full"
-            style={{
-              width: "20px",
-              height: "20px",
-              backgroundColor: color,
-              borderColor: bordercolor,
-              borderWidth: bwidth,
-            }}
-            onClick={() => togglePassEvent(index)}
-          >
-            {passSelection[index] === true ? (
-              <CheckIcon
-                className={
-                  color === "white" || color === "#00ff00"
-                    ? "ml-0 mt-0 h-4 w-4 text-black font-bold"
-                    : "ml-0 mt-0 h-4 w-4 text-white font-bold"
-                }
-              />
-            ) : (
-              <></>
-            )}
+      <>
+        <a data-tooltip-id="tt-filters" data-tooltip-content={description}>
+          <div className="flex gap-2 lg:w-30 cursor-pointer">
+            <div
+              className="max-w-5 max-h-5 min-w-5 min-h-5 mt-1 rounded-full"
+              style={{
+                backgroundColor: color,
+                borderColor: bordercolor,
+                borderWidth: bwidth,
+              }}
+              onClick={() => togglePassEvent(index)}
+            >
+              {passSelection[index] === true ? (
+                <CheckIcon
+                  className={
+                    color === "white" || color === "#00ff00"
+                      ? "ml-0 mt-0 max-h-4 max-w-4 text-black font-bold"
+                      : "ml-0 mt-0 max-h-4 max-w-4 text-white font-bold"
+                  }
+                />
+              ) : (
+                <></>
+              )}
+            </div>
+            <div className="text-sm mt-1 text-base-content">{text}</div>
           </div>
-          <div className="text-sm mt-1 text-gray-800">{text}</div>
-        </div>
-      </div>
+        </a>
+        <Tooltip
+          id="tt-filters"
+          place={"bottom-end"}
+          style={{
+            backgroundColor: "oklch(var(--b3))",
+            color: "oklch(var(--bc))",
+          }}
+        />
+      </>
     );
   };
 
@@ -568,6 +575,8 @@ function ServeReceiveReport({ matches, team, selectedGame, selectedTeam }) {
         filename: null,
         playlists: null,
         serverName: currentUser.email,
+        description: `Serve-receives by ${playlist[0].playerName}`,
+        initialTags: ["passing"],
       };
       navigate("/playlist", { state: st });
     }
@@ -667,7 +676,8 @@ function ServeReceiveReport({ matches, team, selectedGame, selectedTeam }) {
   useEffect(() => {
     calculatePassingStats();
     if (rowOptions.length === 0) {
-      var plas = [{ value: 0, label: "All Rows" }];
+      // var plas = [{ value: 0, label: "All Rows" }];
+      var plas = [];
       for (var nd = 1; nd <= 6; nd++) {
         plas.push({ value: nd, label: "R" + nd });
       }
@@ -682,280 +692,255 @@ function ServeReceiveReport({ matches, team, selectedGame, selectedTeam }) {
 
   return (
     <div>
-      <div className="h-[30vh] overflow-auto">
-        <table className="min-w-full divide-y divide-gray-300">
-          <thead className="bg-gray-50">
-            <tr>
-              <th
-                scope="col"
-                className="py-2 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
-              >
-                Receiver
-              </th>
-              <th
-                scope="col"
-                className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
-              >
-                # Passes
-              </th>
-              <th
-                scope="col"
-                className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
-              >
-                Passing Average
-              </th>
-              <th
-                scope="col"
-                className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
-              >
-                Perfect %
-              </th>
-              <th
-                scope="col"
-                className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
-              >
-                Positive %
-              </th>
-              <th
-                scope="col"
-                className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
-              >
-                Sideout %
-              </th>
-              <th
-                scope="col"
-                className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
-              >
-                FB Sideout %
-              </th>
-              <th
-                scope="col"
-                className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
-              >
-                Pass Hits
-              </th>
-              <th
-                scope="col"
-                className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
-              >
-                Pass Hit Kills
-              </th>
-              <th
-                scope="col"
-                className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
-              >
-                Pass Hit Errors
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white">
-            {/* {sortBy(currentStats(), "FBsideOutPC") */}
-            {currentStats()
-              //   .filter((obj) => obj.frequency > 0.1)
-              .map((statsItem, i) => (
-                <tr
-                  key={statsItem.Player.FirstName + statsItem.Player.LastName}
-                  className={i % 2 === 0 ? undefined : "bg-gray-100"}
+      <div className="flex-col p-4 bg-gray-500/20">
+        <div className="h-[30vh] overflow-auto">
+          <table className="table-generic">
+            <thead className="thead-generic">
+              <tr>
+                <th
+                  scope="col"
+                  className="py-2 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
                 >
-                  <td className="whitespace-nowrap py-2.5 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                    {statsItem.Player.shirtNumber +
-                      ". " +
-                      statsItem.Player.NickName}
-                  </td>
-                  <td
-                    className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500 cursor-pointer"
-                    onClick={() => doVideoNumberOfPasses(statsItem)}
+                  Receiver
+                </th>
+                <th
+                  scope="col"
+                  className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                >
+                  # Passes
+                </th>
+                <th
+                  scope="col"
+                  className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                >
+                  Passing Average
+                </th>
+                <th
+                  scope="col"
+                  className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                >
+                  Perfect %
+                </th>
+                <th
+                  scope="col"
+                  className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                >
+                  Positive %
+                </th>
+                <th
+                  scope="col"
+                  className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                >
+                  Sideout %
+                </th>
+                <th
+                  scope="col"
+                  className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                >
+                  FB Sideout %
+                </th>
+                <th
+                  scope="col"
+                  className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                >
+                  Pass Hits
+                </th>
+                <th
+                  scope="col"
+                  className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                >
+                  Pass Hit Kills
+                </th>
+                <th
+                  scope="col"
+                  className="px-3 py-2 text-left text-sm font-semibold text-gray-900"
+                >
+                  Pass Hit Errors
+                </th>
+              </tr>
+            </thead>
+            <tbody className="tbody-generic">
+              {/* {sortBy(currentStats(), "FBsideOutPC") */}
+              {currentStats()
+                //   .filter((obj) => obj.frequency > 0.1)
+                .map((statsItem, i) => (
+                  <tr
+                    key={statsItem.Player.FirstName + statsItem.Player.LastName}
+                    className={
+                      i % 2 === 0 ? "bg-transparent" : "bg-base-300/10"
+                    }
                   >
-                    {statsItem.numberOfPasses}
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">
-                    {statsItem.passingAverage.toFixed(2)}
-                  </td>
-                  <td
-                    className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500 cursor-pointer"
-                    onClick={() => doVideoPerfectPasses(statsItem)}
-                  >
-                    {statsItem.perfectPassPC.toFixed(0)} (
-                    {statsItem.perfectPass}/{statsItem.numberOfPasses})
-                  </td>
-                  <td
-                    className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500 cursor-pointer"
-                    onClick={() => doVideoPositivePasses(statsItem)}
-                  >
-                    {statsItem.positivePassPC.toFixed(0)} (
-                    {statsItem.positivePass}/{statsItem.numberOfPasses})
-                  </td>
-                  <td
-                    className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500 cursor-pointer"
-                    onClick={() => doVideoSideouts(statsItem)}
-                  >
-                    {statsItem.sideOutPC.toFixed(0)} ({statsItem.sideOuts}/
-                    {statsItem.numberOfPasses})
-                  </td>
-                  <td
-                    className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500 cursor-pointer"
-                    onClick={() => doVideoFBSideouts(statsItem)}
-                  >
-                    {statsItem.FBsideOutPC.toFixed(0)} ({statsItem.FBSideOuts}/
-                    {statsItem.numberOfPasses})
-                  </td>
-                  <td
-                    className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500 cursor-pointer"
-                    onClick={() => doVideoPassHits(statsItem)}
-                  >
-                    {statsItem.passHits.toFixed(0)}
-                  </td>
-                  <td
-                    className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500 cursor-pointer"
-                    onClick={() => doVideoPassHitKills(statsItem)}
-                  >
-                    {statsItem.passHitKills.toFixed(0)}
-                  </td>
-                  <td
-                    className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500 cursor-pointer"
-                    onClick={() => doVideoPassHitErrors(statsItem)}
-                  >
-                    {statsItem.passHitErrors.toFixed(0)}
-                  </td>
-                </tr>
+                    <td className="whitespace-nowrap py-2.5 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                      {statsItem.Player.shirtNumber +
+                        ". " +
+                        statsItem.Player.NickName}
+                    </td>
+                    <td
+                      className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500 cursor-pointer"
+                      onClick={() => doVideoNumberOfPasses(statsItem)}
+                    >
+                      {statsItem.numberOfPasses}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500">
+                      {statsItem.passingAverage.toFixed(2)}
+                    </td>
+                    <td
+                      className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500 cursor-pointer"
+                      onClick={() => doVideoPerfectPasses(statsItem)}
+                    >
+                      {statsItem.perfectPassPC.toFixed(0)} (
+                      {statsItem.perfectPass}/{statsItem.numberOfPasses})
+                    </td>
+                    <td
+                      className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500 cursor-pointer"
+                      onClick={() => doVideoPositivePasses(statsItem)}
+                    >
+                      {statsItem.positivePassPC.toFixed(0)} (
+                      {statsItem.positivePass}/{statsItem.numberOfPasses})
+                    </td>
+                    <td
+                      className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500 cursor-pointer"
+                      onClick={() => doVideoSideouts(statsItem)}
+                    >
+                      {statsItem.sideOutPC.toFixed(0)} ({statsItem.sideOuts}/
+                      {statsItem.numberOfPasses})
+                    </td>
+                    <td
+                      className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500 cursor-pointer"
+                      onClick={() => doVideoFBSideouts(statsItem)}
+                    >
+                      {statsItem.FBsideOutPC.toFixed(0)} ({statsItem.FBSideOuts}
+                      /{statsItem.numberOfPasses})
+                    </td>
+                    <td
+                      className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500 cursor-pointer"
+                      onClick={() => doVideoPassHits(statsItem)}
+                    >
+                      {statsItem.passHits.toFixed(0)}
+                    </td>
+                    <td
+                      className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500 cursor-pointer"
+                      onClick={() => doVideoPassHitKills(statsItem)}
+                    >
+                      {statsItem.passHitKills.toFixed(0)}
+                    </td>
+                    <td
+                      className="whitespace-nowrap px-3 py-2.5 text-sm text-gray-500 cursor-pointer"
+                      onClick={() => doVideoPassHitErrors(statsItem)}
+                    >
+                      {statsItem.passHitErrors.toFixed(0)}
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="lg:flex md:flex flex-col mt-2 gap-2">
+          <div className="sm:flex sm:gap-10 ml-1">
+            <div className="flex gap-3 my-2">
+              {rowOptions.map((rowOption, i) => (
+                <div className="flex gap-1 mt-2" key={i}>
+                  <label className="text-sm text-base-content">
+                    {rowOption.label}
+                  </label>
+                  <input
+                    type="checkbox"
+                    defaultChecked={selectedRows.includes(rowOption.value)}
+                    className="checkbox-generic"
+                    onChange={() => {
+                      if (selectedRows.includes(rowOption.value)) {
+                        setSelectedRows(
+                          selectedRows.filter((obj) => obj !== rowOption.value)
+                        );
+                      } else {
+                        setSelectedRows([...selectedRows, rowOption.value]);
+                      }
+                    }}
+                  />
+                </div>
               ))}
-          </tbody>
-        </table>
-      </div>
-      <div className="flex mt-2 gap-2">
-        <Select
-          id="rows"
-          name="rows"
-          onChange={handleSelectRows}
-          className="block max-w-80 min-w-48 border-gray-300 shadow-sm focus:border-gray-500 focus:ring-gray-500text-sm"
-          options={rowOptions}
-          value={selectedRowOptions}
-          isMulti
-          components={{ ClearIndicator:() => null }}
-        />
-        <div className="flex gap-2 mt-2">
-          <label className="text-sm text-base-content">Passes</label>
-          <input
-            type="checkbox"
-            defaultChecked={showPasses}
-            className="checkbox checkbox-secondary checkbox-sm rounded-none"
-            onChange={() => {
-              setShowPasses(!showPasses);
-            }}
-          />
-        </div>
-        <div className="flex gap-1 mt-2">
-          <label className="text-sm text-base-content">Attacks</label>
-          <input
-            type="checkbox"
-            defaultChecked={showAttacks}
-            className="checkbox checkbox-secondary checkbox-sm rounded-none"
-            onChange={() => {
-              setShowAttacks(!showAttacks);
-            }}
-          />
-        </div>
-        {/* <button
-          type="button"
-          onClick={() => {
-            setShowPasses(!showPasses);
-          }}
-          className="flex mr-4 justify-end rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto"
-        >
-          {showPasses ? "Hide Passes" : "Show Passes"}
-        </button> */}
-        {/* <button
-          type="button"
-          onClick={() => {
-            setShowAttacks(!showAttacks);
-          }}
-          className="flex justify-end rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto"
-        >
-          {showAttacks ? "Hide Attacks" : "Show Attacks"}
-        </button> */}
-        <div className="flex gap-4 ml-4 mt-0.5 pb-1 bg-gray-100 border px-4">
-          {passingLegend(0, "Error Pass", "red", "red", "= passes")}
-          {passingLegend(1, "1 Pass", "orange", "orange", "/ and - passes")}
-          {passingLegend(2, "2 Pass", "green", "green", "! and + passes")}
-          {passingLegend(3, "Perfect Pass", "#00ff00", "#00ff00", "# passes")}
-          {passingLegend(
-            4,
-            "Successful SO",
-            "white",
-            "black",
-            "Successful sideouts from passes"
-          )}
-          {passingLegend(
-            5,
-            "First Ball SO",
-            "white",
-            "dodgerblue",
-            "First ball sideouts from passes"
-          )}
-          {passingLegend(
-            6,
-            "Unsuccessful SO",
-            "white",
-            "red",
-            "Unsuccessful sideouts from passes"
-          )}
-          {/* <div className="tooltip" data-tip="Sideout successfully from pass">
-            <div className="flex gap-2">
-              <div
-                className="flex gap-2 mt-2"
-                style={{
-                  width: "12px",
-                  height: "12px",
-                  borderRadius: "6px",
-                  borderColor: "black",
-                  borderWidth: "1px",
-                  backgroundColor: "white",
-                }}
-              ></div>
-              <div className="text-sm mt-1 text-gray-800">
-                Successful Sideout
-              </div>
+            </div>
+            <div className="flex gap-4 mt-2 p-1 bg-gray-500/10  px-1 overflow-auto">
+              {passingLegend(0, "Error Pass", "red", "red", "= passes")}
+              {passingLegend(1, "1 Pass", "orange", "orange", "/ and - passes")}
+              {passingLegend(2, "2 Pass", "green", "green", "! and + passes")}
+              {passingLegend(
+                3,
+                "Perfect Pass",
+                "#00ff00",
+                "#00ff00",
+                "# passes"
+              )}
+              {passingLegend(
+                4,
+                "Successful SO",
+                "white",
+                "black",
+                "Successful sideouts from passes"
+              )}
+              {passingLegend(
+                5,
+                "First Ball SO",
+                "white",
+                "dodgerblue",
+                "First ball sideouts from passes"
+              )}
+              {passingLegend(
+                6,
+                "Unsuccessful SO",
+                "white",
+                "red",
+                "Unsuccessful sideouts from passes"
+              )}
             </div>
           </div>
-          <div className="tooltip" data-tip="Sideout first ball from pass">
-            <div className="flex gap-2">
-              <div
-                className="flex gap-2 mt-2"
-                style={{
-                  width: "12px",
-                  height: "12px",
-                  borderRadius: "6px",
-                  borderColor: "magenta",
-                  borderWidth: "1px",
-                  backgroundColor: "white",
-                }}
-              ></div>
-              <div className="text-sm mt-1 text-gray-800">
-                Sideout First Ball
-              </div>
-            </div>
-          </div> */}
         </div>
       </div>
-      <div className="carousel w-full">
-        {/* {sortBy(currentStats(), "FBsideOutPC")
-          .filter((obj) => obj.frequency > 0.1) */}
-        {currentStats().map((statsItem, i) => (
-          <div
-            className="carousel-item w-80 h-80 my-2 cursor-pointer"
-            key={statsItem.Player.FirstName + statsItem.Player.LastName}
-            onClick={() => doPlayerVideo(statsItem)}
-          >
-            {/* <img src="https://placeimg.com/400/300/arch" alt="Burger" /> */}
-            <ServeReceive
-              matches={matches}
-              team={team}
-              stats={statsItem}
-              showPasses={showPasses}
-              showAttacks={showAttacks}
+      <div className="flex-col p-4 bg-gray-500/20 w-90 h-90 overflow-auto mt-2">
+        <div className="flex gap-4">
+          <div className="flex gap-1 mt-2">
+            <label className="text-sm text-base-content">Show Passes</label>
+            <input
+              type="checkbox"
+              defaultChecked={showPasses}
+              className="checkbox-generic"
+              onChange={() => {
+                setShowPasses(!showPasses);
+              }}
             />
           </div>
-        ))}
+          <div className="flex gap-1 mt-2">
+            <label className="text-sm text-base-content">Show Attacks</label>
+            <input
+              type="checkbox"
+              defaultChecked={showAttacks}
+              className="checkbox-generic"
+              onChange={() => {
+                setShowAttacks(!showAttacks);
+              }}
+            />
+          </div>
+        </div>
+        <div className="flex overflow-x-auto">
+          {/* {sortBy(currentStats(), "FBsideOutPC")
+          .filter((obj) => obj.frequency > 0.1) */}
+          {currentStats().map((statsItem, i) => (
+            <div
+              className="carousel-item w-80 h-80 my-2 cursor-pointer"
+              key={statsItem.Player.FirstName + statsItem.Player.LastName}
+              onClick={() => doPlayerVideo(statsItem)}
+            >
+              {/* <img src="https://placeimg.com/400/300/arch" alt="Burger" /> */}
+              <ServeReceive
+                matches={matches}
+                team={team}
+                stats={statsItem}
+                showPasses={showPasses}
+                showAttacks={showAttacks}
+              />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

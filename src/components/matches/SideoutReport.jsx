@@ -8,6 +8,10 @@ import {
   createStatsItem,
 } from "../utils/StatsItem";
 import { getMultiMatchesStatsItems } from "../utils/Utils";
+import { WidthProvider, Responsive } from "react-grid-layout";
+import SideoutChart from "./SideoutChart";
+
+const ResponsiveReactGridLayout = WidthProvider(Responsive);
 
 function SideoutReport({
   matches,
@@ -29,6 +33,12 @@ function SideoutReport({
     "#f1c40f",
     "#c0392b",
   ];
+
+  const layouts = {
+    className: "layout",
+    cols: { lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 },
+    rowHeight: 30,
+  };
 
   useEffect(() => {
     var sis = null;
@@ -133,84 +143,113 @@ function SideoutReport({
   };
 
   return (
-    <div>
-      <div className="drawer drawer-mobile">
-        <input id="my-drawer-5" type="checkbox" className="drawer-toggle" />
-        <div className="drawer-content">
-          <div className="flex space-x-2 justify-end"></div>
-          <div className="h-full">
-            <p className="mt-3"></p>
-            <p className="text-3xl font-bold">{teamname}</p>
-            <Sideout
-              matches={matches}
-              team={team}
-              selectedGame={selectedGame}
-              selectedTeam={selectedTeam}
-              selectedRows={selectedRows}
-              onRowSelected={(row) => doSelectRow(row)}
-            />
-          </div>
+    <>
+      <ResponsiveReactGridLayout
+        className="layout"
+        // cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
+        cols={{ lg: 12, md: 12, sm: 6, xs: 4, xxs: 2 }}
+        rowHeight={30}
+        // layouts={layouts}
+        // onLayoutChange={(layout, layouts) =>
+        //   this.onLayoutChange(layout, layouts)
+        // }
+      >
+        <div key="1" data-grid={{ w: 2, h:14, x: 0, y: 0, static: true, minW: 2, minH: 3 }}>
+          <SideoutChart sideoutData={sideoutData} rowString={rowString} selectedGame={selectedGame} />
         </div>
-        <div className="drawer-side w-80">
-          <label htmlFor="my-drawer-5" className="drawer-overlay"></label>
-          <div className="h-80">
-            <p className="mt-3"></p>
-            <p className="text-3xl font-bold">
-              {selectedGame === 0 ? "MATCH" : "SET " + selectedGame}
-            </p>
-            <p className="text-xl font-bold">{rowString}</p>
-            <ResponsiveContainer width="100%" height="85%">
-              <PieChart width={400} height={400}>
-                <Pie
-                  data={sideoutData}
-                  isAnimationActive={false}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label
-                  outerRadius={100}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {sideoutData.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={COLORS[index % COLORS.length]}
-                    />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-              <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-                <table className="min-w-full divide-y divide-gray-300">
-                  <tbody className="bg-white">
-                    {sideoutData.map((sod, row) => (
-                      <tr key={row}>
-                        <td
-                          style={{ backgroundColor: sod.colour }}
-                          className={`whitespace-nowrap py-1 pl-4 pr-3 text-sm text-white font-medium sm:pl-6`}
-                        >
-                          {sod.name}
-                        </td>
-                        <td
-                          style={{ backgroundColor: sod.colour }}
-                          className="whitespace-nowrap px-3 py-1 bg-[${sod.colour}] text-sm text-white"
-                        >
-                          {sod.value}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
+        <div key="2" data-grid={{ w: 8, h: 3, x: 4, y: 0, static: true, minW: 2, minH: 3 }}>
+          <Sideout
+            matches={matches}
+            team={team}
+            selectedGame={selectedGame}
+            selectedTeam={selectedTeam}
+            selectedRows={selectedRows}
+            onRowSelected={(row) => doSelectRow(row)}
+          />
         </div>
-      </div>
-    </div>
+      </ResponsiveReactGridLayout>
+    </>
   );
+
+  // return (
+  //   <div>
+  //     <div className="drawer drawer-mobile">
+  //       <input id="my-drawer-5" type="checkbox" className="drawer-toggle" />
+  //       <div className="drawer-content">
+  //         <div className="flex space-x-2 justify-end"></div>
+  //         <div className="h-full">
+  //           <p className="mt-3"></p>
+  //           <p className="text-3xl font-bold">{teamname}</p>
+  //           <Sideout
+  //             matches={matches}
+  //             team={team}
+  //             selectedGame={selectedGame}
+  //             selectedTeam={selectedTeam}
+  //             selectedRows={selectedRows}
+  //             onRowSelected={(row) => doSelectRow(row)}
+  //           />
+  //         </div>
+  //       </div>
+  //       <div className="drawer-side w-80">
+  //         <label htmlFor="my-drawer-5" className="drawer-overlay"></label>
+  //         <div className="h-80">
+  //           <p className="mt-3"></p>
+  //           <p className="text-3xl font-bold">
+  //             {selectedGame === 0 ? "MATCH" : "SET " + selectedGame}
+  //           </p>
+  //           <p className="text-xl font-bold">{rowString}</p>
+  //           <ResponsiveContainer width="100%" height="85%">
+  //             <PieChart width={400} height={400}>
+  //               <Pie
+  //                 data={sideoutData}
+  //                 isAnimationActive={false}
+  //                 cx="50%"
+  //                 cy="50%"
+  //                 labelLine={false}
+  //                 label
+  //                 outerRadius={100}
+  //                 fill="#8884d8"
+  //                 dataKey="value"
+  //               >
+  //                 {sideoutData.map((entry, index) => (
+  //                   <Cell
+  //                     key={`cell-${index}`}
+  //                     fill={COLORS[index % COLORS.length]}
+  //                   />
+  //                 ))}
+  //               </Pie>
+  //               <Tooltip />
+  //             </PieChart>
+  //           </ResponsiveContainer>
+  //           <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+  //             <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+  //               <table className="min-w-full divide-y divide-gray-300">
+  //                 <tbody className="bg-white">
+  //                   {sideoutData.map((sod, row) => (
+  //                     <tr key={row}>
+  //                       <td
+  //                         style={{ backgroundColor: sod.colour }}
+  //                         className={`whitespace-nowrap py-1 pl-4 pr-3 text-sm text-white font-medium sm:pl-6`}
+  //                       >
+  //                         {sod.name}
+  //                       </td>
+  //                       <td
+  //                         style={{ backgroundColor: sod.colour }}
+  //                         className="whitespace-nowrap px-3 py-1 bg-[${sod.colour}] text-sm text-white"
+  //                       >
+  //                         {sod.value}
+  //                       </td>
+  //                     </tr>
+  //                   ))}
+  //                 </tbody>
+  //               </table>
+  //             </div>
+  //           </div>
+  //         </div>
+  //       </div>
+  //     </div>
+  //   </div>
+  // );
 }
 
 export default SideoutReport;

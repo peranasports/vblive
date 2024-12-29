@@ -92,8 +92,9 @@ function SignIn() {
 
       if (userCredential.user) {
         // navigate("/input");
-        const st = { liveMatches: [], userEmail: email };
-        navigate("/matcheslist", { state: st });    
+        // const st = { liveMatches: [], userEmail: email };
+        // navigate("/matcheslist", { state: st });    
+        navigate("/mainpage");
       }
     } catch (error) {
       toast.error("Error Signing In\n" + error.message);

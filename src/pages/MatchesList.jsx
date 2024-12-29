@@ -6,29 +6,34 @@ import {
   ArrowUpIcon,
   ShareIcon,
   TrashIcon,
+  CheckIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import selectnone from "../components/assets/selectnone.png";
 import selectall from "../components/assets/selectall.png";
 import { myunzip, myzip } from "../components/utils/zip";
 import Select from "react-select";
-import axios from "axios";
+import axios, { all } from "axios";
 import Spinner from "../components/layout/Spinner";
 import { shareSession } from "../context/VBLiveAPI/VBLiveAPIAction";
 import Share from "../components/matches/Share";
 import VBLiveAPIContext from "../context/VBLiveAPI/VBLiveAPIContext";
 import {
+  classNames,
   dayTimeCode,
   decodeHtml,
   functionTabSecondary,
   unzipBuffer,
 } from "../components/utils/Utils";
 import { confirmAlert } from "react-confirm-alert";
+import { useAuthStatus } from "../components/hooks/useAuthStatus";
 import "react-confirm-alert/src/react-confirm-alert.css";
 
-function MatchesList() {
+function MatchesList({ liveMatches, userEmail }) {
   const navigate = useNavigate();
+  const { firebaseUser } = useAuthStatus();
   const location = useLocation();
-  const { liveMatches, userEmail } = location.state;
+  // const { liveMatches, userEmail } = location.state;
   // const { currentUser } = useContext(VBLiveAPIContext)
   // const { currentUser } = location.state;
   const [allMatches, setAllMatches] = useState([]);
@@ -50,12 +55,13 @@ function MatchesList() {
 
   const fetchAllMyMatches = async () => {
     setLoading(true);
+    const uemail = firebaseUser.email;
     let config = {
       method: "get",
       maxBodyLength: Infinity,
       url:
         process.env.REACT_APP_VBLIVE_API_URL +
-        `/Session/GetSessionInfoInServerForApp?serverName=${userEmail}&appName=VBLive`,
+        `/Session/GetSessionInfoInServerForApp?serverName=${uemail}&appName=VBLive`,
       headers: {},
     };
 
@@ -371,8 +377,9 @@ function MatchesList() {
   };
 
   const onTeamChanged = (e) => {
-    setSelectedTeamOption(e);
-    const team = e.value;
+    const team =
+      e.target.selectedIndex > 0 ? allTeams[e.target.selectedIndex - 1] : null;
+    setSelectedTeamOption(team && team.name);
     setSearchText("");
     localStorage.setItem("SearchText", "");
     if (!team) {
@@ -382,7 +389,7 @@ function MatchesList() {
       setFilteredMatches(allMatches);
     } else {
       localStorage.setItem("selectedTeamName", team.name);
-      setSelectedTeamName(e.label);
+      setSelectedTeamName(team.name);
       setSelectedTeam(team);
       const fms = allMatches.filter(
         (m) => m.teamA === team.name || m.teamB === team.name
@@ -420,7 +427,7 @@ function MatchesList() {
       setAllLiveMatches(ms);
       setSelectedScreen(2);
       setLoading(false);
-    } else {
+    } else if (firebaseUser) {
       ms =
         selectedScreen === 0
           ? await fetchAllMyMatches()
@@ -447,7 +454,8 @@ function MatchesList() {
     setAllTeams(aps);
     var apops = [{ value: null, label: "All Teams" }];
     for (var p of aps) {
-      apops.push({ value: p, label: p.name });
+      // apops.push({ value: p, label: p.name });
+      apops.push(p);
     }
     setAllTeamOptions(apops);
     doSort(ms, sortColumn, sortAscending);
@@ -463,10 +471,10 @@ function MatchesList() {
           m.tournament.toLowerCase().includes(search)
       );
       setFilteredMatches(fms);
-    } else {
+    } else if (firebaseUser) {
       const teamname = localStorage.getItem("selectedTeamName");
       if (teamname && teamname.length > 0) {
-        const poption = apops.find((p) => p.value && p.value.name === teamname);
+        const poption = apops.find((p) => p.name === teamname);
         setSelectedTeamOption(poption);
         const team = aps.find((p) => p.name === teamname);
         if (team) {
@@ -489,12 +497,12 @@ function MatchesList() {
 
   useEffect(() => {
     doInit();
-  }, [selectedScreen]);
+  }, [selectedScreen, firebaseUser]);
 
   const makeDate = (seconds) => {
     const dt = new Date(seconds * 1000);
     return dt.toLocaleDateString();
-  }
+  };
 
   const getSharedColour = (match) => {
     if (match.shareStatus === undefined || match.shareStatus === null) {
@@ -532,43 +540,112 @@ function MatchesList() {
     setSelectedScreen(screen);
   };
 
+  const customStyles = {
+    control: (baseStyles, state) => ({
+      ...baseStyles,
+      // minHeight: '32px',
+      // height: '32px',
+      borderRadius: 4,
+      color: "blue",
+      backgroundColor: "rgba(255, 255, 255, 0.05)",
+      borderColor: state.isFocused ? "oklch(var(--p))" : "transparent",
+      ":hover": {
+        borderColor: "transparent",
+      },
+    }),
+    valueContainer: (baseStyles, state) => ({
+      ...baseStyles,
+      padding: "0 8px",
+      // backgroundColor: "oklch(var(--p))",
+      backgroundColor: "rgba(255, 255, 255, 0.05)",
+    }),
+    // input: (baseStyles, state) => ({
+    //   ...baseStyles,
+    //   color: "oklch(var(--bc))",
+    // }),
+    // singleValueLabel: (baseStyles, state) => ({
+    //   ...baseStyles,
+    //   color: "oklch(var(--bc))",
+    // }),
+    // multiValue: (baseStyles, state) => ({
+    //   ...baseStyles,
+    //   backgroundColor: "oklch(var(--b2))",
+    // }),
+    // multiValueLabel: (baseStyles, state) => ({
+    //   ...baseStyles,
+    //   color: "oklch(var(--bc))",
+    // }),
+    // multiValueRemove: (baseStyles, state) => ({
+    //   ...baseStyles,
+    //   color: "oklch(var(--bc))",
+    //   ":hover": {
+    //     backgroundColor: "rgba(255, 255, 255, 0.2)",
+    //     color: "oklch(var(--bc))",
+    //   },
+    // }),
+  };
+
+  const tabs = [
+    { name: "My Matches", index: 0, current: true },
+    { name: "Shared Matches", index: 1, current: false },
+  ];
+
   return (
     <>
       <div className="flex-col h-[88vh] mt-4">
-        <div className="flex justify-between">
-          <div className="flex gap-2">
-            <div className="tooltip" data-tip="Select All">
-              <div
-                className="bg-info p-1 cursor-pointer"
-                onClick={doSelect(true)}
+        {/* <div className="flex gap-2 my-2 text-sm">
+          {functionTabSecondary(
+            selectedScreen === 0,
+            0,
+            "My Matches",
+            onMatchesScreenChanged
+          )}
+          {functionTabSecondary(
+            selectedScreen === 1,
+            1,
+            "Shared Matches",
+            onMatchesScreenChanged
+          )}
+          {allLiveMatches ? (
+            <>
+              {functionTabSecondary(
+                selectedScreen === 2,
+                1,
+                "Live Matches",
+                onMatchesScreenChanged
+              )}
+            </>
+          ) : (
+            <></>
+          )}
+        </div> */}
+        <div className="border-b border-gray-200 mb-4">
+          <nav aria-label="Tabs" className="-mb-px flex space-x-8">
+            {tabs.map((tab) => (
+              <a
+                key={tab.name}
+                onClick={() => onMatchesScreenChanged(tab.index)}
+                aria-current={tab.index === selectedScreen ? "page" : undefined}
+                className={classNames(
+                  tab.index === selectedScreen
+                    ? "border-primary/80 text-primary/80"
+                    : "border-transparent text-base-content hover:border-base-content/30 hover:text-base-content/70",
+                  "whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium"
+                )}
               >
-                <img src={selectall} alt="Select All" className="w-6 h-6" />
-              </div>
-            </div>
-            <div className="tooltip" data-tip="Unselect All">
-              <div
-                className="bg-info p-1 cursor-pointer"
-                onClick={doSelect(false)}
-              >
-                <img src={selectnone} alt="Select None" className="w-6 h-6" />
-              </div>
-            </div>
-            <div className="flex gap-2 w-72 -mt-0.5">
-              {/* <div className="mt-1.5 text-sm text-base-content">Team:</div> */}
-              <Select
-                value={selectedTeamOption}
-                options={allTeamOptions}
-                onChange={onTeamChanged}
-                formatOptionLabel={formatOptionLabel}
-                className="w-72 h-[10px] text-sm"
-              />
-            </div>
+                {tab.name}
+              </a>
+            ))}
+          </nav>
+        </div>
 
+        <div className="grid grid-cols-6 gap-x-2 gap-y-2">
+          <div className="col-span-3">
             <input
               type="text"
               value={searchText}
-              className="input input-bordered input-sm rounded-none"
-              placeholder="Search..."
+              className="input-generic"
+              placeholder="Search team..."
               onChange={(e) => {
                 const search = e.target.value.toLowerCase();
                 setSearchText(search);
@@ -587,83 +664,63 @@ function MatchesList() {
               }}
             />
           </div>
+          <div className="col-span-3">
+            <select
+              className="select-generic"
+              onChange={onTeamChanged}
+              value={selectedTeamName}
+            >
+              <option value="all">All Teams</option>
+              {allTeams.map((team, i) => (
+                <option key={i} value={team.name}>
+                  {team.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="flex justify-between mt-2">
+          <div className="flex gap-2">
+            <div className="tooltip" data-tip="Select All">
+              <div className="btn-in-form w-10" onClick={doSelect(true)}>
+                <CheckIcon
+                  className="w-6 h-6"
+                  style={{ color: "oklch(var(--bc))" }}
+                />
+
+                {/* <img src={selectall} alt="Select All" className="w-6 h-6" /> */}
+              </div>
+            </div>
+            <div className="tooltip" data-tip="Unselect All">
+              <div className="btn-in-form w-10" onClick={doSelect(false)}>
+                <XMarkIcon
+                  className="w-6 h-6"
+                  style={{ color: "oklch(var(--bc))" }}
+                />
+              </div>
+            </div>
+          </div>
           <div className="flex gap-2">
             <button
-              className="btn btn-sm btn-error rounded-none"
-              onClick={() => navigate("/live")}
-            >
-              Live
-            </button>
-            <button
-              className="btn btn-sm btn-info rounded-none"
-              onClick={() => navigate("/input")}
-            >
-              Import
-            </button>
-            <button
               disabled={selectedMatches().length < 2}
-              className="btn btn-sm btn-info rounded-none"
+              className="btn-in-form"
               onClick={() => doMultiMatchReports()}
             >
               Multi Match Reports
             </button>
           </div>
-
-          {/* <div className="flex gap-2">
-            <button
-              className="btn btn-sm btn-primary rounded-none"
-              onClick={() => {
-                navigate("/newmatch");
-              }}
-            >
-              New
-            </button>
-            <button
-              className="btn btn-sm btn-info rounded-none"
-              onClick={() => {
-                navigate("/import-psts");
-              }}
-            >
-              Import
-            </button>
-          </div> */}
         </div>
         {loading ? (
           <Spinner />
         ) : (
           <>
-            <div className="flex-col">
-              <div className="flex gap-2 my-2">
-                {functionTabSecondary(
-                  selectedScreen === 0,
-                  0,
-                  "My Matches",
-                  onMatchesScreenChanged
-                )}
-                {functionTabSecondary(
-                  selectedScreen === 1,
-                  1,
-                  "Shared Matches",
-                  onMatchesScreenChanged
-                )}
-                {allLiveMatches ? (
-                  <>
-                    {functionTabSecondary(
-                      selectedScreen === 2,
-                      1,
-                      "Live Matches",
-                      onMatchesScreenChanged
-                    )}
-                  </>
-                ) : (
-                  <></>
-                )}
-              </div>
-              <div className="overflow-x-auto">
-                <div className="inline-block min-w-full py-2 align-middle">
-                  <div className="table-div">
-                    <table className="min-w-full divide-y divide-gray-300 text-sm">
-                      <thead className="table-header">
+            <div className="flex-col mt-2 rounded-md">
+              <div className="overflow-auto h-[70vh]">
+                <div className="inline-block min-w-full align-middle">
+                  <div className="">
+                    <table className="table-generic">
+                      <thead className="thead-generic">
                         <tr>
                           <th
                             scope="col"
@@ -694,12 +751,16 @@ function MatchesList() {
                           ></th>
                         </tr>
                       </thead>
-                      <tbody className="table-body">
+                      <tbody className="tbody-generic">
                         {filteredMatches &&
                           filteredMatches.map((match, i) => (
                             <tr
                               key={i}
-                              className={i % 2 ? "bg-base-100" : "bg-base-200"}
+                              className={
+                                i % 2 === 0
+                                  ? "bg-transparent"
+                                  : "bg-base-300/10"
+                              }
                             >
                               <td className="table-cell">
                                 <input
@@ -712,15 +773,21 @@ function MatchesList() {
                                 />
                               </td>
                               <td className="table-cell">
-                                <div className="flex gap-1">
+                                <div
+                                  className="flex gap-1 cursor-pointer"
+                                  onClick={() => doMatch(match)}
+                                >
                                   {/* {getFlag(match.player1CountryCode, 7, 5)} */}
-                                  <div className="">{match.teamA}</div>
+                                  <div className="underline">{match.teamA}</div>
                                 </div>
                               </td>
                               <td className="table-cell">
-                                <div className="flex gap-1">
+                                <div
+                                  className="flex gap-1 cursor-pointer"
+                                  onClick={() => doMatch(match)}
+                                >
                                   {/* {getFlag(match.player2CountryCode, 7, 5)} */}
-                                  <div className="">{match.teamB}</div>
+                                  <div className="underline">{match.teamB}</div>
                                 </div>
                               </td>
                               <td className="table-cell">{match.tournament}</td>

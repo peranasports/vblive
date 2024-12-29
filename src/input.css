@@ -1,251 +1,301 @@
 @tailwind base;
 @font-face {
-    font-family: "inter_black";
-    src: url("./InterWeb/Inter-Black.woff") format("woff"), url("./InterWeb/Inter-Black.woff2") format("woff2");
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
-  }
-  
-  @font-face {
-    font-family: "inter_black_italic";
-    src: url("./InterWeb/Inter-BlackItalic.woff") format("woff"), url("./InterWeb/Inter-BlackItalic.woff2")
-        format("woff2");
-    font-weight: normal;
-    font-style: italic;
-    font-display: swap;
-  }
-  
-  @font-face {
-    font-family: "inter_bold";
-    src: url("./InterWeb/Inter-Bold.woff") format("woff"), url("./InterWeb/Inter-Bold.woff2") format("woff2");
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
-  }
-  
-  @font-face {
-    font-family: "inter_bold_italic";
-    src: url("./InterWeb/Inter-BoldItalic.woff") format("woff"), url("./InterWeb/Inter-BoldItalic.woff2")
-        format("woff2");
-    font-weight: normal;
-    font-style: italic;
-    font-display: swap;
-  }
-  
-  @font-face {
-    font-family: "inter_extrabold";
-    src: url("./InterWeb/Inter-ExtraBold.woff") format("woff"), url("./InterWeb/Inter-ExtraBold.woff2")
-        format("woff2");
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
-  }
-  
-  @font-face {
-    font-family: "inter_extrabold_italic";
-    src: url("./InterWeb/Inter-ExtraBoldItalic.woff") format("woff"), url("./InterWeb/Inter-ExtraBoldItalic.woff2")
-        format("woff2");
-    font-weight: normal;
-    font-style: italic;
-    font-display: swap;
-  }
-  
-  @font-face {
-    font-family: "inter_extralight";
-    src: url("./InterWeb/Inter-ExtraLight.woff") format("woff"), url("./InterWeb/Inter-ExtraLight.woff2")
-        format("woff2");
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
-  }
-  
-  @font-face {
-    font-family: "inter_extralight_italic";
-    src: url("./InterWeb/Inter-ExtraLightItalic.woff") format("woff"), url("./InterWeb/Inter-ExtraLightItalic.woff2")
-        format("woff2");
-    font-weight: normal;
-    font-style: italic;
-    font-display: swap;
-  }
-  
-  @font-face {
-    font-family: "inter_italic";
-    src: url("./InterWeb/Inter-Italic.woff") format("woff"), url("./InterWeb/Inter-Italic.woff2") format("woff2");
-    font-weight: normal;
-    font-style: italic;
-    font-display: swap;
-  }
-  
-  @font-face {
-    font-family: "inter_light";
-    src: url("./InterWeb/Inter-Light.woff") format("woff"), url("./InterWeb/Inter-Light.woff2") format("woff2");
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
-  }
-  
-  @font-face {
-    font-family: "inter_light_italic";
-    src: url("./InterWeb/Inter-LightItalic.woff") format("woff"), url("./InterWeb/Inter-LightItalic.woff2")
-        format("woff2");
-    font-weight: normal;
-    font-style: italic;
-    font-display: swap;
-  }
-  
-  @font-face {
-    font-family: "inter_medium";
-    src: url("./InterWeb/Inter-Medium.woff") format("woff"), url("./InterWeb/Inter-Medium.woff2") format("woff2");
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
-  }
-  
-  @font-face {
-    font-family: "inter_medium_italic";
-    src: url("./InterWeb/Inter-MediumItalic.woff") format("woff"), url("./InterWeb/Inter-MediumItalic.woff2")
-        format("woff2");
-    font-weight: normal;
-    font-style: italic;
-    font-display: swap;
-  }
-  
-  @font-face {
-    font-family: "inter_regular";
-    src: url("./InterWeb/Inter-Regular.woff") format("woff"), url("./InterWeb/Inter-Regular.woff2")
-        format("woff2");
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
-  }
-  
-  @font-face {
-    font-family: "inter_semibold";
-    src: url("./InterWeb/Inter-SemiBold.woff") format("woff"), url("./InterWeb/Inter-SemiBold.woff2")
-        format("woff2");
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
-  }
-  
-  @font-face {
-    font-family: "inter_semibold_italic";
-    src: url("./InterWeb/Inter-SemiBoldItalic.woff") format("woff"), url("./InterWeb/Inter-SemiBoldItalic.woff2")
-        format("woff2");
-    font-weight: normal;
-    font-style: italic;
-    font-display: swap;
-  }
-  
-  @font-face {
-    font-family: "inter_thin";
-    src: url("./InterWeb/Inter-Thin.woff") format("woff"), url("./InterWeb/Inter-Thin.woff2") format("woff2");
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
-  }
-  
-  @font-face {
-    font-family: "inter_thin_italic";
-    src: url("./InterWeb/Inter-ThinItalic.woff") format("woff"), url("./InterWeb/Inter-ThinItalic.woff2")
-        format("woff2");
-    font-weight: normal;
-    font-style: italic;
-    font-display: swap;
-  }
-  
+  font-family: "inter_black";
+  src: url("./InterWeb/Inter-Black.woff") format("woff"),
+    url("./InterWeb/Inter-Black.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "inter_black_italic";
+  src: url("./InterWeb/Inter-BlackItalic.woff") format("woff"),
+    url("./InterWeb/Inter-BlackItalic.woff2") format("woff2");
+  font-weight: normal;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "inter_bold";
+  src: url("./InterWeb/Inter-Bold.woff") format("woff"),
+    url("./InterWeb/Inter-Bold.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "inter_bold_italic";
+  src: url("./InterWeb/Inter-BoldItalic.woff") format("woff"),
+    url("./InterWeb/Inter-BoldItalic.woff2") format("woff2");
+  font-weight: normal;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "inter_extrabold";
+  src: url("./InterWeb/Inter-ExtraBold.woff") format("woff"),
+    url("./InterWeb/Inter-ExtraBold.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "inter_extrabold_italic";
+  src: url("./InterWeb/Inter-ExtraBoldItalic.woff") format("woff"),
+    url("./InterWeb/Inter-ExtraBoldItalic.woff2") format("woff2");
+  font-weight: normal;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "inter_extralight";
+  src: url("./InterWeb/Inter-ExtraLight.woff") format("woff"),
+    url("./InterWeb/Inter-ExtraLight.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "inter_extralight_italic";
+  src: url("./InterWeb/Inter-ExtraLightItalic.woff") format("woff"),
+    url("./InterWeb/Inter-ExtraLightItalic.woff2") format("woff2");
+  font-weight: normal;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "inter_italic";
+  src: url("./InterWeb/Inter-Italic.woff") format("woff"),
+    url("./InterWeb/Inter-Italic.woff2") format("woff2");
+  font-weight: normal;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "inter_light";
+  src: url("./InterWeb/Inter-Light.woff") format("woff"),
+    url("./InterWeb/Inter-Light.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "inter_light_italic";
+  src: url("./InterWeb/Inter-LightItalic.woff") format("woff"),
+    url("./InterWeb/Inter-LightItalic.woff2") format("woff2");
+  font-weight: normal;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "inter_medium";
+  src: url("./InterWeb/Inter-Medium.woff") format("woff"),
+    url("./InterWeb/Inter-Medium.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "inter_medium_italic";
+  src: url("./InterWeb/Inter-MediumItalic.woff") format("woff"),
+    url("./InterWeb/Inter-MediumItalic.woff2") format("woff2");
+  font-weight: normal;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "inter_regular";
+  src: url("./InterWeb/Inter-Regular.woff") format("woff"),
+    url("./InterWeb/Inter-Regular.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "inter_semibold";
+  src: url("./InterWeb/Inter-SemiBold.woff") format("woff"),
+    url("./InterWeb/Inter-SemiBold.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "inter_semibold_italic";
+  src: url("./InterWeb/Inter-SemiBoldItalic.woff") format("woff"),
+    url("./InterWeb/Inter-SemiBoldItalic.woff2") format("woff2");
+  font-weight: normal;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "inter_thin";
+  src: url("./InterWeb/Inter-Thin.woff") format("woff"),
+    url("./InterWeb/Inter-Thin.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "inter_thin_italic";
+  src: url("./InterWeb/Inter-ThinItalic.woff") format("woff"),
+    url("./InterWeb/Inter-ThinItalic.woff2") format("woff2");
+  font-weight: normal;
+  font-style: italic;
+  font-display: swap;
+}
+
 @tailwind components;
 @tailwind utilities;
 
 @layer components {
-    .underline-input {
-      @apply px-1 py-1 bg-base-200 text-base-content border-b-2 border-neutral-700 rounded-none w-full;
-    }
-    .btn-ps-primary {
-        @apply btn btn-sm btn-primary text-primary-content rounded-none hover:bg-[#00000030]
-    }
-    .btn-ps-secondary {
-        @apply btn btn-sm btn-secondary text-secondary-content rounded-none hover:bg-[#00000020]
-    }
-    .select-base-200 {
-        @apply px-1 py-1 bg-base-200 text-base-content text-sm border-b-2 border-neutral-700 rounded-none w-full
-    }
-    .table-div {
-        @apply overflow-hidden rounded-none border-2 border-neutral
-    }
-    .table-header {
-        @apply bg-neutral text-neutral-content
-    }
-    .table-column-header {
-        @apply py-2 pl-4 pr-3 text-left text-sm
-    }
-    .table-column-header-centre {
-        @apply py-2 pl-4 pr-3 text-center text-sm
-    }
-    .table-body {
-        @apply bg-base-100 text-base-content
-    }
-    .table-cell {
-        @apply whitespace-nowrap px-3 py-2.5 text-sm
-    }
-    .check-primary {
-        @apply checkbox checkbox-primary w-7 h-7 rounded-none
-    }
-    .check-secondary {
-      @apply checkbox checked:checkbox-success w-7 h-7 rounded-none
+  .underline-input {
+    @apply px-1 py-1 bg-base-200 text-base-content border-b-2 border-neutral-700 rounded-none w-full;
+  }
+  .btn-ps-primary {
+    @apply btn btn-sm btn-primary text-primary-content rounded-none hover:bg-[#00000030];
+  }
+  .btn-ps-secondary {
+    @apply btn btn-sm btn-secondary text-secondary-content rounded-none hover:bg-[#00000020];
+  }
+  .select-base-200 {
+    @apply px-1 py-1 bg-base-200 text-base-content text-sm border-b-2 border-neutral-700 rounded-none w-full;
+  }
+  .table-div {
+    @apply overflow-hidden rounded-none border-2 border-neutral;
+  }
+  .table-header {
+    @apply bg-neutral text-neutral-content;
+  }
+  .table-column-header {
+    @apply py-2 pl-4 pr-3 text-left text-sm;
+  }
+  .table-column-header-centre {
+    @apply py-2 pl-4 pr-3 text-center text-sm;
+  }
+  .table-body {
+    @apply bg-base-100 text-base-content;
+  }
+  .table-cell {
+    @apply whitespace-nowrap px-3 py-2.5 text-sm;
+  }
+  .check-primary {
+    @apply checkbox checkbox-primary w-7 h-7 rounded-none;
+  }
+  .check-secondary {
+    @apply checkbox checked:checkbox-success w-7 h-7 rounded-none;
   }
   .primary-bg {
-      background-color: theme('colors.primary');
-    }
-    .events-list-height {      
-      height: calc(100vh - theme('spacing.80'));
-    }
-    details>summary {
-      list-style-type: none;
-      outline: none;
-      cursor: pointer;
-      /* border: 1px solid #eee; */
-      padding: 5px;
-      border-radius: 0px;
-    }
-    
-    details>summary::-webkit-details-marker {
-      display: none;
-    }
-    
-    details>summary::before {
-      content: '+ ';
-    }
-    
-    details[open]>summary::before {
-      content: '-';
-    }
-    
-    details[open]>summary {
-      margin-bottom: 0.5rem;
-    }  
-  
-    div.is-disabled
-    {
-      pointer-events: none;
-      opacity: 0.5;
-    }
-
-    .checkbox-red {
-      @include custom-checkbox(1 83% 50%);
-    }
-    
-    .checkbox-green {
-      @include custom-checkbox(120 97% 34%);
-    }
-    
-    .checkbox-pink {
-      @include custom-checkbox(311 100% 61%);
-    }
-    
-    .checkbox-blue {
-      @include custom-checkbox(198 100% 42%);
-    }
-    
+    background-color: theme("colors.primary");
   }
+  .events-list-height {
+    height: calc(100vh - theme("spacing.80"));
+  }
+  details > summary {
+    list-style-type: none;
+    outline: none;
+    cursor: pointer;
+    /* border: 1px solid #eee; */
+    padding: 5px;
+    border-radius: 0px;
+  }
+
+  details > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  details > summary::before {
+    content: "+ ";
+  }
+
+  details[open] > summary::before {
+    content: "-";
+  }
+
+  details[open] > summary {
+    margin-bottom: 0.5rem;
+  }
+
+  div.is-disabled {
+    pointer-events: none;
+    opacity: 0.5;
+  }
+
+  .checkbox-red {
+    @include custom-checkbox(1 83% 50%);
+  }
+
+  .checkbox-green {
+    @include custom-checkbox(120 97% 34%);
+  }
+
+  .checkbox-pink {
+    @include custom-checkbox(311 100% 61%);
+  }
+
+  .checkbox-blue {
+    @include custom-checkbox(198 100% 42%);
+  }
+
+  .btn-in-form {
+    @apply btn btn-sm rounded-md bg-primary/10 px-3 text-sm/6 font-semibold text-base-content shadow-sm hover:bg-primary/20 cursor-pointer;
+  }
+  .btn-confirm {
+    @apply btn btn-sm rounded-md bg-info/30 px-3 text-sm/6 font-semibold text-base-content shadow-sm hover:bg-info/40 cursor-pointer;
+  }
+  .btn-back {
+    @apply btn btn-sm rounded-md bg-info/30 px-3 text-sm/6 font-semibold text-base-content shadow-sm hover:bg-info/40 cursor-pointer;
+  }
+  .table-generic {
+    @apply min-w-full divide-y divide-base-content/10 bg-white/10 shadow-lg rounded-lg;
+  }
+  .thead-generic {
+    @apply bg-neutral/50 text-neutral-content;
+  }
+  .tbody-generic {
+    @apply divide-y divide-base-content/10;
+  }
+  .td-generic {
+    @apply whitespace-nowrap py-2 pl-4 pr-3 text-sm font-medium text-base-content sm:pl-0;
+  }
+  .th-generic {
+    @apply px-3 py-3.5 text-left text-sm font-semibold text-base-content;
+  }
+  .input-generic {
+    @apply block w-full rounded-md bg-white/5 px-3 py-1.5 text-sm text-base-content outline outline-1 -outline-offset-1 outline-base-content/10 placeholder:text-gray-500 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-primary sm:text-sm/6;
+  }
+  .textarea-generic {
+    @apply block w-full rounded-md bg-white/5 px-3 py-1.5 text-base-content outline outline-1 -outline-offset-1 outline-base-content/10 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-primary sm:max-w-2xl sm:text-sm/6;
+  }
+  .select-generic {
+    @apply col-start-1 row-start-1 w-full appearance-auto h-9 rounded-md bg-white/5 pt-1.5 pb-1.5 px-3 text-base-content outline outline-1 -outline-offset-1 outline-base-content/10 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-primary text-sm/6;
+  }
+  .multi-select-generic {
+    @apply block w-full rounded-md text-base-content border-red-500 outline outline-1 -outline-offset-1 outline-base-content/10 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-primary;
+  }
+  .checkbox-custom {
+    @apply checkbox checkbox-sm [--chkbg:oklch(var(--in))] [--chkfg:oklch(var(--pc))] rounded-md;
+  }
+  .checkbox-generic {
+    @apply checkbox checkbox-sm rounded-md;
+  }
+  .btn-toolbar {
+    @apply w-8 h-8 p-1 rounded-md bg-primary/10 text-sm/6 font-semibold text-base-content/50 shadow-sm hover:bg-primary/20 cursor-pointer;
+  }
+}

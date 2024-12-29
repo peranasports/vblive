@@ -70,16 +70,15 @@ function Live() {
           session.isLive = false;
           if (session.utcLastUpdate) {
             var now = new Date();
-            var utc_timestamp =
-              Date.UTC(
-                now.getUTCFullYear(),
-                now.getUTCMonth(),
-                now.getUTCDate(),
-                now.getUTCHours(),
-                now.getUTCMinutes(),
-                now.getUTCSeconds(),
-                now.getUTCMilliseconds()
-              );
+            var utc_timestamp = Date.UTC(
+              now.getUTCFullYear(),
+              now.getUTCMonth(),
+              now.getUTCDate(),
+              now.getUTCHours(),
+              now.getUTCMinutes(),
+              now.getUTCSeconds(),
+              now.getUTCMilliseconds()
+            );
             session.isLive = utc_timestamp / 1000 - session.utcLastUpdate < 300;
           }
           sss.push(session);
@@ -167,10 +166,10 @@ function Live() {
             <p className="text-sm mt-4">Broadcast Server</p>
             <form onSubmit={handleSubmit}>
               <div className="form-control pt-1">
-                <div className="relative">
+                <div className="relative flex gap-2">
                   <input
                     type="text"
-                    className="w-80 pr-10 bg-base-300 input input-sm text-base-content rounded-none"
+                    className="input-generic"
                     placeholder="Enter DVMateLive Server Name"
                     value={serverName}
                     onChange={handleChange}
@@ -178,9 +177,9 @@ function Live() {
                   <button
                     disabled={serverName.length === 0}
                     type="submit"
-                    className="ml-2 rounded-none w-24 btn btn-sm"
+                    className="btn-in-form"
                   >
-                    Go
+                    Load
                   </button>
                 </div>
               </div>
@@ -189,9 +188,9 @@ function Live() {
 
           <div className="overflow-auto h-[80vh]">
             <div className="inline-block min-w-full py-2 align-middle">
-              <div className="table-div">
-                <table className="min-w-full divide-y divide-gray-300 text-sm">
-                  <thead className="table-header">
+              <div className="table-generic">
+                <table className="table-generic">
+                  <thead className="thead-generic">
                     <tr>
                       {columnHeader(0, "Description")}
                       {columnHeader(1, "Date")}
@@ -201,16 +200,26 @@ function Live() {
                       ></th>
                     </tr>
                   </thead>
-                  <tbody className="table-body">
+                  <tbody className="tbody-generic">
                     {sortedSessions &&
                       sortedSessions.map((session, i) => (
                         <tr
                           key={i}
-                          className={i % 2 ? "bg-base-100" : "bg-base-200"}
-                        >
+                          className={i % 2 === 0 ? "bg-transparent" : "bg-base-300/10"}
+                          >
                           <td className="table-cell">
-                            <div className="flex gap-1">
-                              <div className="">{session.description}</div>
+                            <div className="flex gap-2">
+                              {session.isLive ? (
+                                <div className="bg-red-600 text-sm font-bold text-white px-2 cursor-pointer" onClick={() => doMatch(session)}>
+                                  LIVE
+                                </div>
+                              ) : (
+                                <></>
+                              )}
+
+                              <div className="flex gap-1">
+                                <div className="">{session.description}</div>
+                              </div>
                             </div>
                           </td>
                           <td className="table-cell">
@@ -218,11 +227,11 @@ function Live() {
                               <div className="">
                                 {session.sessionDateString}
                               </div>
-                              {session.isLive ? (
+                              {/* {session.isLive ? (
                                 <div className="bg-red-600 text-sm font-bold text-white px-2">LIVE</div>
                               ) : (
                                 <></>
-                              )}
+                              )} */}
                             </div>
                           </td>
                           <td className="table-cell">

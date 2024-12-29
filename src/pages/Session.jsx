@@ -53,6 +53,7 @@ import { toast } from "react-toastify";
 import {
   ArrowPathIcon,
   CheckCircleIcon,
+  ChevronDownIcon,
   XCircleIcon,
 } from "@heroicons/react/24/outline";
 import { unzip } from "lodash";
@@ -79,6 +80,7 @@ function Session() {
   const [isLiveSession, setIsLiveSession] = useState(false);
   const [inDatabase, setInDatabase] = useState(false);
   const [lastUtcLastUpdate, setLastUtcLastUpdate] = useState(null);
+  const [scrollPosition, setScrollPosition] = useState(0);
 
   const getLatest = useCallback(async () => {
     dispatch({ type: "SET_LOADING" });
@@ -200,12 +202,33 @@ function Session() {
       // setIsLiveSession(true);
       getLatest();
     }
+
+    const handleScroll = () => {
+      const position = window.scrollY;
+      console.log(position);
+      setScrollPosition(position);
+    };
+    
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+        window.removeEventListener('scroll', handleScroll);
+    };
+
   }, [getLatest, selectedGame, selectedTeam]);
 
   useEffect(() => {
     const timerId = schedule();
     return () => clearTimeout(timerId);
   }, [counter]);
+
+  useEffect(() => {
+    if (match && currentReport !== 6) {
+      localStorage.setItem(
+        "currentReportForMatch",
+        currentReport + "_" + match.TrainingDate.toLocaleString()
+      );
+    }
+  }, [currentReport]);
 
   const schedule = () => {
     const timerId = setTimeout(() => {
@@ -228,10 +251,6 @@ function Session() {
   }
 
   const renderReport = () => {
-    localStorage.setItem(
-      "currentReportForMatch",
-      currentReport + "_" + match.TrainingDate.toLocaleString()
-    );
     if (currentReport === 0) {
       return (
         <Dashboard
@@ -278,17 +297,36 @@ function Session() {
         />
       );
     } else if (currentReport === 5) {
+      // const st = {
+      //   matches: [match],
+      //   team: selectedTeam === 0 ? match.teamA.Name : match.teamB.Name,
+      //   selectedGame: selectedGame,
+      //   selectedTeam: selectedTeam,
+      // };
+      // navigate("/hittingchartreport", { state: st });
       return (
         <HittingChartReport
           matches={[match]}
           team={selectedTeam === 0 ? match.teamA.Name : match.teamB.Name}
           selectedGame={selectedGame}
           selectedTeam={selectedTeam}
+          verticalScroll={isLiveSession ? scrollPosition - 44 : scrollPosition}
         />
       );
     } else if (currentReport === 6) {
-      return <VideoAnalysis match={match} selectedGame={selectedGame} />;
+      doVideoAnalysis();
+      // return <VideoAnalysis match={match} selectedGame={selectedGame} />;
     }
+  };
+
+  const doHittingChart = () => {
+    const st = {
+      matches: [match],
+      team: selectedTeam === 0 ? match.teamA.Name : match.teamB.Name,
+      selectedGame: selectedGame,
+      selectedTeam: selectedTeam,
+    };
+    navigate("/hittingchartreport", { state: st });
   };
 
   const doVideoAnalysis = () => {
@@ -310,6 +348,20 @@ function Session() {
     }
   };
 
+  const tabs = [
+    { name: "Summary", index: 0, current: false },
+    { name: "Box Score", index: 1, current: false },
+    { name: "Side-outs Report", index: 2, current: false },
+    { name: "Serve Receives", index: 3, current: false },
+    { name: "Attack Zones", index: 4, current: false },
+    { name: "Hitting Charts", index: 5, current: false },
+    { name: "Video Analysis", index: 6, current: false },
+  ];
+
+  function classNames(...classes) {
+    return classes.filter(Boolean).join(" ");
+  }
+
   return (
     match && (
       <>
@@ -327,74 +379,69 @@ function Session() {
                 onTeamSelected={(tmn) => setSelectedTeam(tmn)}
                 onSaveToDatabase={() => doUpload()}
                 inDatabase={inDatabase}
+                isLive={isLiveSession}
               ></MatchSummary>
             </div>
           )}
-          <div className="tabs tabs-boxed p-2 rounded-none">
-            <a
-              className={
-                currentReport == 0
-                  ? "tab tab-active bg-secondary rounded-none"
-                  : "tab rounded-none"
-              }
-              onClick={() => {
-                setCurrentReport(0);
-              }}
-            >
-              Summary
-            </a>
-            <a
-              className={currentReport == 1 ? "tab  tab-active" : "tab "}
-              onClick={() => {
-                setCurrentReport(1);
-              }}
-            >
-              Box Score
-            </a>
-            <a
-              className={currentReport == 2 ? "tab  tab-active" : "tab "}
-              onClick={() => {
-                setCurrentReport(2);
-              }}
-            >
-              Sideout Report
-            </a>
-            <a
-              className={currentReport == 3 ? "tab  tab-active" : "tab "}
-              onClick={() => {
-                setCurrentReport(3);
-              }}
-            >
-              Serve Receives
-            </a>
-            <a
-              className={currentReport == 4 ? "tab  tab-active" : "tab "}
-              onClick={() => {
-                setCurrentReport(4);
-              }}
-            >
-              Attack Zones
-            </a>
-            <a
-              className={currentReport == 5 ? "tab  tab-active" : "tab "}
-              onClick={() => {
-                setCurrentReport(5);
-              }}
-            >
-              Hitting Chart
-            </a>
-            <a
-              className={currentReport == 6 ? "tab  tab-active" : "tab "}
-              onClick={() => {
-                doVideoAnalysis();
-              }}
-            >
-              Video Analysis
-            </a>
+          <div>
+            <div className="grid grid-cols-1 sm:hidden">
+              <div className="grid grid-cols-6">
+                <div className="col-span-1">
+                  <label className="text-sm pt-1">Report</label>
+                </div>
+                <div className="col-span-5">
+                  <div className="flex gap-1">
+                    <select
+                      onChange={(e) =>
+                        setCurrentReport(
+                          tabs.find((tab) => tab.name === e.target.value).index
+                        )
+                      }
+                      value={
+                        tabs.find((tab) => tab.index === currentReport).name
+                      }
+                      aria-label="Select a tab"
+                      className="select-generic text-sm"
+                    >
+                      {tabs.map((tab) => (
+                        <option key={tab.name}>{tab.name}</option>
+                      ))}
+                    </select>
+                    {/* <ChevronDownIcon
+                      aria-hidden="true"
+                      className="pointer-events-none col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end fill-gray-500"
+                    /> */}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="hidden sm:block">
+              <div className="border-b border-gray-200">
+                <nav aria-label="Tabs" className="-mb-px flex space-x-8">
+                  {tabs.map((tab) => (
+                    <a
+                      key={tab.name}
+                      onClick={() => setCurrentReport(tab.index)}
+                      aria-current={
+                        tab.index === currentReport ? "page" : undefined
+                      }
+                      className={classNames(
+                        tab.index === currentReport
+                          ? "border-primary/80 text-primary/80"
+                          : "border-transparent text-base-content hover:border-base-content/30 hover:text-base-content/70",
+                        "whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium"
+                      )}
+                    >
+                      {tab.name}
+                    </a>
+                  ))}
+                </nav>
+              </div>
+            </div>
           </div>
           <div className="flex-col">
             {isLiveSession ? (
-              <div className="flex gap-2">
+              <div className="flex gap-2 mt-2 p-2 h-9 bg-gray-500/20">
                 <div className="text-sm font-bold text-white bg-red-700 px-2 h-5">
                   LIVE
                 </div>
@@ -435,7 +482,7 @@ function Session() {
             ) : (
               <></>
             )}
-            <div className="">{renderReport()}</div>
+            <div className="mt-4">{renderReport()}</div>
           </div>
         </div>
       </>

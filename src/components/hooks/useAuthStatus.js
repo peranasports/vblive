@@ -9,6 +9,7 @@ import { db } from "../../firebase.config"
 export const useAuthStatus = () => {
   const [loggedIn, setLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState(null)
+  const [firebaseUser, setFirebaseUser] = useState(null);
   const [checkingStatus, setCheckingStatus] = useState(true);
   const [currentTheme, setCurrentTheme] = useState(
     localStorage.getItem("theme") ?? "garden"
@@ -69,6 +70,7 @@ export const useAuthStatus = () => {
         if (user) {
           setLoggedIn(true);
           setCurrentUser(user)
+          setFirebaseUser(user);
           // fetchUser(user);
         }
         else
@@ -85,7 +87,7 @@ export const useAuthStatus = () => {
     }
   }, [isMounted]);
 
-  return { loggedIn, currentUser, checkingStatus, currentTheme };
+  return { loggedIn, currentUser, firebaseUser, checkingStatus, currentTheme };
 };
 
 // Protected routes in V6

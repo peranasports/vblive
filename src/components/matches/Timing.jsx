@@ -66,7 +66,7 @@ function Timing({ onClose }) {
         id={lbl}
         value={val}
         onChange={onMutate}
-        className="px-1 py-1 w-full bg-base-200"
+        className="input-generic"
       />
     );
   };
@@ -95,9 +95,9 @@ function Timing({ onClose }) {
         <div className="flex flex-col">
           <div className="overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div className="inline-block min-w-full align-middle md:px-6 lg:px-8">
-              <div className="table-div">
-                <table className="min-w-full divide-y divide-gray-300 rounded-none">
-                  <thead className="table-header">
+              <div className="">
+                <table className="table-generic">
+                  <thead className="thead-generic">
                     <tr>
                       <th scope="col" className="table-header-column">
                         Skill
@@ -111,11 +111,11 @@ function Timing({ onClose }) {
                       <th scope="col" className="table-header-column"></th>
                     </tr>
                   </thead>
-                  <tbody className="table-body">
+                  <tbody className="tbody-generic">
                     {skilllabels.map((sk, i) => (
                       <tr
                         key={i}
-                        className={i % 2 ? "bg-base-100" : "bg-base-200"}
+                        // className={i % 2 ? "bg-base-100" : "bg-base-200"}
                       >
                         <td className="table-cell">{sk}</td>
                         <td className="table-cell">
@@ -133,10 +133,10 @@ function Timing({ onClose }) {
           </div>
 
           <div className="flex justify-end mt-4">
-            <button className="btn btn-sm" onClick={() => doClose(false)}>
+            <button className="btn-in-form" onClick={() => doClose(false)}>
               Cancel
             </button>
-            <button className="btn btn-sm ml-4" onClick={() => doClose(true)}>
+            <button className="btn-in-form ml-4" onClick={() => doClose(true)}>
               Apply
             </button>
           </div>
