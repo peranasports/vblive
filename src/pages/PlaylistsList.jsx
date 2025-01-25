@@ -52,9 +52,11 @@ function PlaylistsList({ userEmail }) {
     let config = {
       method: "get",
       maxBodyLength: Infinity,
-      url:
-        process.env.REACT_APP_VBLIVE_API_URL +
-        `/Session/GetPlaylistInfoInServerForApp?serverName=${userEmail}&appName=VBLive`,
+      url: process.env.REACT_APP_VBLIVE_API_URL.includes("vercel")
+        ? process.env.REACT_APP_VBLIVE_API_URL +
+          `/Session/GetPlaylistInfoInServerForApp/${userEmail}/VBLive`
+        : process.env.REACT_APP_VBLIVE_API_URL +
+          `/Session/GetPlaylistInfoInServerForApp?serverName=${userEmail}&appName=VBLive`,
       headers: {},
     };
 
@@ -81,9 +83,11 @@ function PlaylistsList({ userEmail }) {
     let config = {
       method: "get",
       maxBodyLength: Infinity,
-      url:
-        process.env.REACT_APP_VBLIVE_API_URL +
-        `/Session/GetSharedPlaylistsForServer?serverName=${userEmail}&appName=VBLive`,
+      url: process.env.REACT_APP_VBLIVE_API_URL.includes("vercel")
+        ? process.env.REACT_APP_VBLIVE_API_URL +
+          `/Session/GetSharedPlaylistsForServer/${userEmail}/VBLive`
+        : process.env.REACT_APP_VBLIVE_API_URL +
+          `/Session/GetSharedPlaylistsForServer?serverName=${userEmail}&appName=VBLive`,
       headers: {},
     };
 
@@ -117,9 +121,11 @@ function PlaylistsList({ userEmail }) {
             let config = {
               method: "get",
               maxBodyLength: Infinity,
-              url:
-                process.env.REACT_APP_VBLIVE_API_URL +
-                `/Session/DeletePlaylist?sessionId=${playlist.id}`,
+              url: process.env.REACT_APP_VBLIVE_API_URL.includes("vercel")
+                ? process.env.REACT_APP_VBLIVE_API_URL +
+                  `/Session/DeletePlaylist/${playlist.id}`
+                : process.env.REACT_APP_VBLIVE_API_URL +
+                  `/Session/DeletePlaylist?sessionId=${playlist.id}`,
               headers: {},
             };
 
@@ -211,9 +217,11 @@ function PlaylistsList({ userEmail }) {
     let config = {
       method: "get",
       maxBodyLength: Infinity,
-      url:
-        process.env.REACT_APP_VBLIVE_API_URL +
-        `/Session/GetPlaylistById?playlistId=${playlistId}`,
+      url: process.env.REACT_APP_VBLIVE_API_URL.includes("vercel")
+        ? process.env.REACT_APP_VBLIVE_API_URL +
+          `/Session/GetPlaylistById/${playlistId}`
+        : process.env.REACT_APP_VBLIVE_API_URL +
+          `/Session/GetPlaylistById?playlistId=${playlistId}`,
       headers: {},
     };
 

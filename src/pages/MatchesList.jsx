@@ -59,9 +59,11 @@ function MatchesList({ liveMatches, userEmail }) {
     let config = {
       method: "get",
       maxBodyLength: Infinity,
-      url:
-        process.env.REACT_APP_VBLIVE_API_URL +
-        `/Session/GetSessionInfoInServerForApp?serverName=${uemail}&appName=VBLive`,
+      url: process.env.REACT_APP_VBLIVE_API_URL.includes("vercel")
+        ? process.env.REACT_APP_VBLIVE_API_URL +
+          `/Session/GetSessionInfoInServerForApp/${uemail}/VBLive`
+        : process.env.REACT_APP_VBLIVE_API_URL +
+          `/Session/GetSessionInfoInServerForApp?serverName=${uemail}?appName=VBLive`,
       headers: {},
     };
 
@@ -91,9 +93,11 @@ function MatchesList({ liveMatches, userEmail }) {
     let config = {
       method: "get",
       maxBodyLength: Infinity,
-      url:
-        process.env.REACT_APP_VBLIVE_API_URL +
-        `/Session/GetSharedSessionsForServer?serverName=${userEmail}&appName=VBLive`,
+      url: process.env.REACT_APP_VBLIVE_API_URL.includes("vercel")
+        ? process.env.REACT_APP_VBLIVE_API_URL +
+          `/Session/GetSharedSessionsForServer/${userEmail}/VBLive`
+        : process.env.REACT_APP_VBLIVE_API_URL +
+          `/Session/GetSharedSessionsForServer?serverName=${userEmail}&appName=VBLive`,
       headers: {},
     };
 
@@ -131,9 +135,11 @@ function MatchesList({ liveMatches, userEmail }) {
             let config = {
               method: "get",
               maxBodyLength: Infinity,
-              url:
-                process.env.REACT_APP_VBLIVE_API_URL +
-                `/Session/DeleteSession?sessionId=${match.id}`,
+              url: process.env.REACT_APP_VBLIVE_API_URL.includes("vercel")
+                ? process.env.REACT_APP_VBLIVE_API_URL +
+                  `/Session/DeleteSession/${match.id}`
+                : process.env.REACT_APP_VBLIVE_API_URL +
+                  `/Session/DeleteSession?sessionId=${match.id}`,
               headers: {},
             };
 
@@ -263,9 +269,11 @@ function MatchesList({ liveMatches, userEmail }) {
     let config = {
       method: "get",
       maxBodyLength: Infinity,
-      url:
-        process.env.REACT_APP_VBLIVE_API_URL +
-        `/Session/GetSessionsById?sessionId=${sessionId}`,
+      url: process.env.REACT_APP_VBLIVE_API_URL.includes("vercel")
+        ? process.env.REACT_APP_VBLIVE_API_URL +
+          `/Session/GetSessionById/${sessionId}`
+        : process.env.REACT_APP_VBLIVE_API_URL +
+          `/Session/GetSessionsById?sessionId=${sessionId}`,
       headers: {},
     };
 

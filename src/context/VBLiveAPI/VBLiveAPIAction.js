@@ -85,7 +85,7 @@ export const storeSession = async (match, currentUser) => {
   var seconds = 0;
   var dt = match.TrainingDate;
   try {
-    seconds = match.TrainingDate.getTime() / 1000;    
+    seconds = match.TrainingDate.getTime() / 1000;
   } catch (error) {
     dt = new Date(match.TrainingDate);
     seconds = dt.getTime() / 1000;
@@ -118,7 +118,7 @@ export const storeSession = async (match, currentUser) => {
     sessionDateString: dt.toLocaleDateString(),
     description: desc,
     stats: buffer,
-  }
+  };
   let data = qs.stringify(dataobj);
 
   let config = {
@@ -156,7 +156,9 @@ export const shareSession = async (match) => {
   let config = {
     method: "post",
     maxBodyLength: Infinity,
-    url: `${VBLIVE_API_URL}/Session/ShareSession?matchId=${match.id}`,
+    url: VBLIVE_API_URL.includes("vercel")
+      ? `${VBLIVE_API_URL}/Session/ShareSession/${match.id}`
+      : `${VBLIVE_API_URL}/Session/ShareSession?matchId=${match.id}`,
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
     },
@@ -193,7 +195,9 @@ export const storePlaylist = async (playlist) => {
   let config = {
     method: "post",
     maxBodyLength: Infinity,
-    url: `${VBLIVE_API_URL}/Session/StorePlayList?plId=${playlist.id}`,
+    url: VBLIVE_API_URL.includes("vercel")
+      ? `${VBLIVE_API_URL}/Session/StorePlayList/${playlist.id}`
+      : `${VBLIVE_API_URL}/Session/StorePlayList?plId=${playlist.id}`,
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
     },
@@ -210,7 +214,7 @@ export const storePlaylist = async (playlist) => {
     .catch((error) => {
       console.log(error);
     });
-  return newplId;
+  return newplId[0].id ? newplId[0].id : newplId;
 };
 
 export const sharePlaylist = async (playlist) => {
@@ -224,7 +228,9 @@ export const sharePlaylist = async (playlist) => {
   let config = {
     method: "post",
     maxBodyLength: Infinity,
-    url: `${VBLIVE_API_URL}/Session/SharePlaylist?playlistId=${playlist.id}`,
+    url: VBLIVE_API_URL.includes("vercel")
+      ? `${VBLIVE_API_URL}/Session/SharePlaylist/${playlist.id}`
+      : `${VBLIVE_API_URL}/Session/SharePlaylist?playlistId=${playlist.id}`,
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
     },

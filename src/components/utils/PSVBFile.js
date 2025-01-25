@@ -189,25 +189,25 @@ export function generateMatch(str) {
 
   line++;
   json = a[line].split("~");
-  if (json[1].includes("null") === false) {
+  if (json[1].includes(":null") === false && json[1].includes(": null") === false) {
     match.tournament = JSON.parse(json[1]);
   }
 
   line++;
   json = a[line].split("~");
-  if (json[1].includes("null") === false) {
+  if (json[1].includes(":null") === false && json[1].includes(": null") === false) {
     match.venue = JSON.parse(json[1]);
   }
 
   line++;
   json = a[line].split("~");
-  if (json[1].includes("null") === false) {
+  if (json[1].includes(":null") === false && json[1].includes(": null") === false) {
     match.teamA = JSON.parse(json[1]);
   }
 
   line++;
   json = a[line].split("~");
-  if (json[1].includes("null") === false) {
+  if (json[1].includes(":null") === false && json[1].includes(": null") === false) {
     match.teamB = JSON.parse(json[1]);
   }
 

@@ -62,7 +62,7 @@ function Session() {
   const { session, appName, loading, dispatch } = useContext(VBLiveAPIContext);
   const location = useLocation();
   const { sessionId, dvwFileData, psvbFileData, filename, msession } =
-    location.state;
+    location?.state;
   const { currentUser } = useAuthStatus();
   const params = useParams();
   const [match, setMatch] = useState(null);

@@ -196,10 +196,18 @@ export function generateMatch(str) {
                   month = temp;
                 }
                 const year = Number.parseInt(tk1s[2]);
-                const tk2s = matchtime.split(".");
-                const hour = Number.parseInt(tk2s[0]);
-                const minute = Number.parseInt(tk2s[1]);
-                const second = Number.parseInt(tk2s[2]);
+                let hour = 0;
+                let minute = 0;
+                let second = 0;
+                let tk2s = matchtime.split(".");
+                if (tk2s.length == 1) {
+                  tk2s = matchtime.split(":");
+                }
+                if (tk2s.length >= 3) {
+                  hour = Number.parseInt(tk2s[0]);
+                  minute = Number.parseInt(tk2s[1]);
+                  second = Number.parseInt(tk2s[2]);
+                }
                 const dd = new Date(year, month - 1, day, hour, minute, second);
                 match.TrainingDate = dd;
               }

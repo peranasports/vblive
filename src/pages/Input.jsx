@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import SessionSearch from "../components/sessions/SessionSearch";
 import SessionResults from "../components/sessions/SessionResults";
@@ -16,12 +16,13 @@ function Input() {
   const plRef = useRef();
   const [playlistFileName, setPlaylistFileName] = useState(null);
   const [playlistFileData, setPlaylistFileData] = useState(null);
+  const [shiftJIS, setShiftJIS] = useState(false);
 
   const handleDVWFile = (event) => {
     var url = URL.createObjectURL(event.target.files[0]);
     setDvwFileName(event.target.files[0].name);
     const fileReader = new FileReader();
-    fileReader.readAsText(event.target.files[0], "UTF-8");
+    fileReader.readAsText(event.target.files[0], shiftJIS ? "SHIFT-JIS" : "ISO-8859-1");//"UTF-8");
     fileReader.onload = (e) => {
       setDvwFileData(e.target.result);
       const st = {
@@ -64,6 +65,18 @@ function Input() {
     };
   };
 
+  const toggleShiftJIS = () => {
+    setShiftJIS((prev) => !prev);
+    localStorage.setItem("shiftJIS", !shiftJIS);
+  };
+
+  useEffect(() => {
+    const sj = localStorage.getItem("shiftJIS");
+    if (sj) {
+      setShiftJIS(sj);
+    }
+  }, []);
+
   return (
     <div className="flex min-h-full justify-center px-4 py-12">
       <div className="flex-col">
@@ -92,6 +105,10 @@ function Input() {
                 : dvwFileName}
             </span>
           </label>
+          <label className="label label-text ml-4">
+            Shift-JIS
+          </label>
+          <input type="checkbox" checked={shiftJIS} className="checkbox checkbox-sm mt-2 ml-2 rounded-md" onChange={() => toggleShiftJIS()}/>
         </div>
 
         <div className="flex my-4">
