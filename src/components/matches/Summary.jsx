@@ -11,6 +11,7 @@ function Summary({ matches, team, selectedGame, selectedTeam }) {
   };
 
   useEffect(() => {}, []);
+  
 
   return (
     <>

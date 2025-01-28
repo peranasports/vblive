@@ -16,6 +16,7 @@ function SummaryChartHeader({ match }) {
   const [matchScores, setMatchScores] = useState(null);
   const [setScores, setSetScores] = useState(null);
   const [,forceUpdate] = useState(0);
+  
 
   const fetchLogo = async (name) => {
     const qs = require("qs");
