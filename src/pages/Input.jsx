@@ -22,7 +22,10 @@ function Input() {
     var url = URL.createObjectURL(event.target.files[0]);
     setDvwFileName(event.target.files[0].name);
     const fileReader = new FileReader();
-    fileReader.readAsText(event.target.files[0], shiftJIS ? "SHIFT-JIS" : "ISO-8859-1");//"UTF-8");
+    fileReader.readAsText(
+      event.target.files[0],
+      shiftJIS ? "SHIFT-JIS" : "ISO-8859-1"
+    ); //"UTF-8");
     fileReader.onload = (e) => {
       setDvwFileData(e.target.result);
       const st = {
@@ -37,7 +40,10 @@ function Input() {
     var url = URL.createObjectURL(event.target.files[0]);
     setPsvbFileName(event.target.files[0].name);
     const fileReader = new FileReader();
-    fileReader.readAsText(event.target.files[0], "UTF-8");
+    fileReader.readAsText(
+      event.target.files[0],
+      shiftJIS ? "SHIFT-JIS" : "ISO-8859-1"
+    ); //"UTF-8");
     fileReader.onload = (e) => {
       setPsvbFileData(e.target.result);
       const st = {
@@ -52,7 +58,10 @@ function Input() {
     var url = URL.createObjectURL(event.target.files[0]);
     setPlaylistFileName(event.target.files[0].name);
     const fileReader = new FileReader();
-    fileReader.readAsText(event.target.files[0], "UTF-8");
+    fileReader.readAsText(
+      event.target.files[0],
+      shiftJIS ? "SHIFT-JIS" : "ISO-8859-1"
+    ); //"UTF-8");
     fileReader.onload = (e) => {
       setPlaylistFileData(e.target.result);
       const st = {
@@ -105,10 +114,6 @@ function Input() {
                 : dvwFileName}
             </span>
           </label>
-          <label className="label label-text ml-4">
-            Shift-JIS
-          </label>
-          <input type="checkbox" checked={shiftJIS} className="checkbox checkbox-sm mt-2 ml-2 rounded-md" onChange={() => toggleShiftJIS()}/>
         </div>
 
         <div className="flex my-4">
@@ -164,7 +169,15 @@ function Input() {
             </span>
           </label>
         </div>
-
+        <div className="flex gap-2">
+          <label className="label label-text ml-4">Use Shift-JIS Encoder</label>
+          <input
+            type="checkbox"
+            checked={shiftJIS}
+            className="checkbox checkbox-sm mt-2 ml-2 rounded-md"
+            onChange={() => toggleShiftJIS()}
+          />
+        </div>
         {/* <SessionResults /> */}
       </div>
     </div>

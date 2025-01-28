@@ -18,6 +18,7 @@ import Spinner from "../components/layout/Spinner";
 import BoxScore from "../components/matches/BoxScore";
 import Sideout from "../components/matches/Sideout";
 import Dashboard from "../components/matches/Dashboard";
+import Summary from "../components/matches/Summary";
 import MatchSummary from "../components/matches/MatchSummary";
 import VBLiveAPIContext from "../context/VBLiveAPI/VBLiveAPIContext";
 import {
@@ -208,17 +209,18 @@ function Session() {
       console.log(position);
       setScrollPosition(position);
     };
-    
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => {
-        window.removeEventListener('scroll', handleScroll);
-    };
 
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, [getLatest, selectedGame, selectedTeam]);
 
   useEffect(() => {
-    const timerId = schedule();
-    return () => clearTimeout(timerId);
+    if (isLiveSession) {
+      const timerId = schedule();
+      return () => clearTimeout(timerId);
+    }
   }, [counter]);
 
   useEffect(() => {
@@ -253,7 +255,7 @@ function Session() {
   const renderReport = () => {
     if (currentReport === 0) {
       return (
-        <Dashboard
+        <Summary
           matches={[match]}
           selectedGame={selectedGame}
           selectedTeam={selectedTeam}
