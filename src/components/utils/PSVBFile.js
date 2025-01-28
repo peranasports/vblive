@@ -211,6 +211,7 @@ export function generateMatch(str) {
     match.teamB = JSON.parse(json[1]);
   }
 
+  
   line++;
   match.HomePlayers = [];
   match.AwayPlayers = [];
