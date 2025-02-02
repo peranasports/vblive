@@ -114,6 +114,21 @@ export function doEvent(e, si) {
           default:
             break;
         }
+
+        switch (e.DVGrade) {
+          case "#":
+            si.PassPerfect++;
+            break;
+          case "+":
+            si.PassPositive++;
+            break;
+          case "=":
+            si.PassError++;
+            break;
+          default:
+            si.PassNegative++;
+            break;
+        }
       }
       break;
     case kSkillSet:
@@ -244,6 +259,10 @@ export function createStatsItem(player, set) {
   si.Pass1 = 0;
   si.Pass2 = 0;
   si.Pass3 = 0;
+  si.PassPerfect = 0;
+  si.PassPositive = 0;
+  si.PassNegative = 0;
+  si.PassError = 0;
   si.PassTotal = 0;
   si.PassTotalPoints = 0;
   si.Serve0 = 0;
@@ -311,6 +330,10 @@ export function addStatsItem(ssSource, ssDestination) {
   ssDestination.Pass1 += ssSource.Pass1;
   ssDestination.Pass2 += ssSource.Pass2;
   ssDestination.Pass3 += ssSource.Pass3;
+  ssDestination.PassPerfect += ssSource.PassPerfect;
+  ssDestination.PassPositive += ssSource.PassPositive;
+  ssDestination.PassNegative += ssSource.PassNegative;
+  ssDestination.PassError += ssSource.PassError;
   ssDestination.PassTotal += ssSource.PassTotal;
   ssDestination.PassTotalPoints += ssSource.PassTotalPoints;
   ssDestination.Serve0 += ssSource.Serve0;

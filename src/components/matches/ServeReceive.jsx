@@ -402,8 +402,8 @@ function ServeReceive({ matches, team, stats, showPasses, showAttacks }) {
   useEffect(() => {
     const canvas = canvasRef.current;
     const context = canvas.getContext("2d");
-    canvas.style.width = "50%";
-    canvas.style.height = "50%";
+    canvas.style.width = "100%";
+    canvas.style.height = "100%";
     canvas.width = canvas.offsetWidth;
     canvas.height = canvas.offsetHeight;
     draw(context);

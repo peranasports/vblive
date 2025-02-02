@@ -541,7 +541,7 @@ function HittingChartReport({
   }, [selectedGame, selectedTeam]);
 
   useEffect(() => {
-    console.log("vs=", verticalScroll);
+    // console.log("vs=", verticalScroll);
     // forceUpdate((n) => !n);
   }, [events, verticalScroll]);
 

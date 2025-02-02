@@ -206,7 +206,6 @@ function Session() {
 
     const handleScroll = () => {
       const position = window.scrollY;
-      console.log(position);
       setScrollPosition(position);
     };
 

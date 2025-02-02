@@ -106,7 +106,7 @@ function SideoutReport({
   }, [selectedGame, selectedTeam, selectedRows, selectedRow]);
 
   useEffect(() => {
-    console.log("SideoutReport useEffect", sideoutData);
+    // console.log("SideoutReport useEffect", sideoutData);
   }, [sideoutData]);
 
   if (sideoutData === null) {
@@ -144,30 +144,59 @@ function SideoutReport({
 
   return (
     <>
-      <ResponsiveReactGridLayout
-        className="layout"
-        // cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
-        cols={{ lg: 12, md: 12, sm: 6, xs: 4, xxs: 2 }}
-        rowHeight={30}
-        // layouts={layouts}
-        // onLayoutChange={(layout, layouts) =>
-        //   this.onLayoutChange(layout, layouts)
-        // }
-      >
-        <div key="1" data-grid={{ w: 2, h:14, x: 0, y: 0, static: true, minW: 2, minH: 3 }}>
-          <SideoutChart sideoutData={sideoutData} rowString={rowString} selectedGame={selectedGame} />
-        </div>
-        <div key="2" data-grid={{ w: 8, h: 3, x: 4, y: 0, static: true, minW: 2, minH: 3 }}>
-          <Sideout
-            matches={matches}
-            team={team}
-            selectedGame={selectedGame}
-            selectedTeam={selectedTeam}
-            selectedRows={selectedRows}
-            onRowSelected={(row) => doSelectRow(row)}
-          />
-        </div>
-      </ResponsiveReactGridLayout>
+      <div className="bg-base-100">
+        <ResponsiveReactGridLayout
+          className="layout"
+          // cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
+          cols={{ lg: 12, md: 12, sm: 6, xs: 4, xxs: 2 }}
+          rowHeight={30}
+          // layouts={layouts}
+          // onLayoutChange={(layout, layouts) =>
+          //   this.onLayoutChange(layout, layouts)
+          // }
+        >
+          <div
+            key="1"
+            data-grid={{
+              w: 2,
+              h: 14,
+              x: 0,
+              y: 0,
+              static: true,
+              minW: 2,
+              minH: 3,
+            }}
+          >
+            <SideoutChart
+              sideoutData={sideoutData}
+              rowString={rowString}
+              selectedGame={selectedGame}
+            />
+          </div>
+          <div
+            className="bg-base-100"
+            key="2"
+            data-grid={{
+              w: 8,
+              h: 16,
+              x: 4,
+              y: 0,
+              static: true,
+              minW: 2,
+              minH: 3,
+            }}
+          >
+            <Sideout
+              matches={matches}
+              team={team}
+              selectedGame={selectedGame}
+              selectedTeam={selectedTeam}
+              selectedRows={selectedRows}
+              onRowSelected={(row) => doSelectRow(row)}
+            />
+          </div>
+        </ResponsiveReactGridLayout>
+      </div>
     </>
   );
 

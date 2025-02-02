@@ -160,7 +160,8 @@ export function writeText(info, style = {}) {
   } = style;
 
   ctx.beginPath();
-  ctx.font = "condensed " + fontSize + "px " + fontFamily;
+  // ctx.font = "condensed " + fontSize + "px " + fontFamily;
+  ctx.font = fontSize + "px " + fontFamily;
   ctx.textAlign = textAlign;
   ctx.textBaseline = textBaseline;
   ctx.fillStyle = color;

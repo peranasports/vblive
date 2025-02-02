@@ -15,8 +15,7 @@ function SummaryChartHeader({ match }) {
   const [selectedName, setSelectedName] = useState(null);
   const [matchScores, setMatchScores] = useState(null);
   const [setScores, setSetScores] = useState(null);
-  const [,forceUpdate] = useState(0);
-  
+  const [, forceUpdate] = useState(0);
 
   const fetchLogo = async (name) => {
     const qs = require("qs");
@@ -139,11 +138,11 @@ function SummaryChartHeader({ match }) {
   const doImageURLChange = async (url, name) => {
     document.getElementById("modal-logo-select").checked = false;
     if (name === match.teamA.Name) {
-        setTeamAlogo(url);
+      setTeamAlogo(url);
     } else if (name === match.teamB.Name) {
-        setTeamBlogo(url);
+      setTeamBlogo(url);
     } else if (name === match.tournamentName) {
-        setTournamentLogo(url);
+      setTournamentLogo(url);
     }
     forceUpdate((n) => !n);
     if (url) {
@@ -156,10 +155,10 @@ function SummaryChartHeader({ match }) {
     var teamBscore = 0;
     var ss = "";
     for (var mset of match.sets) {
-        teamAscore += mset.HomeScore > mset.AwayScore ? 1 : 0;
-        teamBscore += mset.HomeScore < mset.AwayScore ? 1 : 0;
-        if (ss.length > 0) ss += ", ";
-        ss += mset.HomeScore + "-" + mset.AwayScore;
+      teamAscore += mset.HomeScore > mset.AwayScore ? 1 : 0;
+      teamBscore += mset.HomeScore < mset.AwayScore ? 1 : 0;
+      if (ss.length > 0) ss += ", ";
+      ss += mset.HomeScore + "-" + mset.AwayScore;
     }
     setMatchScores(teamAscore + "-" + teamBscore);
     setSetScores(ss);
@@ -170,12 +169,12 @@ function SummaryChartHeader({ match }) {
 
   return (
     <>
-      <div className="flex">
-        <div className="w-1/3 flex-col bg-white">
-          <div className="flex h-32 mt-4 justify-center">
+      <div className="flex text-gray-600">
+        <div className="w-1/4 flex-col bg-white px-4">
+          <div className="flex h-24 mt-4 justify-center">
             <div className="tooltip" data-tip="Click to select team logo">
               <img
-                className="h-32 cursor-pointer"
+                className="max-h-24 cursor-pointer"
                 src={teamAlogo}
                 alt={match.teamA.Name}
                 onClick={() => selectLogo(match.teamA.Name)}
@@ -183,38 +182,39 @@ function SummaryChartHeader({ match }) {
             </div>
           </div>
           <div className="text-center px-2 pb-2">
-            <label className="font-medium text-sm">
+            <div className="font-medium text-sm" style={{ lineHeight: "1.2" }}>
               {match.teamA.Name.toUpperCase()}
-            </label>
+            </div>
           </div>
         </div>
-        <div className="w-1/3">
-          <div className="flex h-20 mt-4 justify-center">
+        <div className="w-1/2 bg-white">
+          <div className="flex h-16 mt-4 justify-center">
             <div className="tooltip" data-tip="Click to select tournament logo">
               <img
-                className="h-20 cursor-pointer"
+                className="max-h-16 cursor-pointer"
                 src={tournamentLogo}
                 alt="tournament logo"
                 onClick={() => selectLogo(match.tournamentName)}
               />
             </div>
           </div>
-          <div className="text-center px-2 mt-8">
-            <label className="font-inter_black text-xl">
-              {matchScores}
-            </label>
+          <div className="text-center px-2 mt-2">
+            <div className="font-light text-xs" style={{ lineHeight: "1.2" }}>
+              {match.tournamentName}
+            </div>
+          </div>
+          <div className="text-center px-2 mt-2">
+            <label className="font-inter_black text-3xl">{matchScores}</label>
           </div>
           <div className="text-center px-2 pb-2">
-            <label className="font-medium text-xs">
-              {setScores}
-            </label>
+            <label className="font-medium text-xs">{setScores}</label>
           </div>
         </div>
-        <div className="w-1/3">
-          <div className="flex h-32 mt-4 justify-center">
+        <div className="w-1/4 bg-white px-4">
+          <div className="flex h-24 mt-4 justify-center">
             <div className="tooltip" data-tip="Click to select team logo">
               <img
-                className="h-32 cursor-pointer"
+                className="max-h-24 cursor-pointer"
                 src={teamBlogo}
                 alt={match.teamB.Name}
                 onClick={() => selectLogo(match.teamB.Name)}
@@ -222,9 +222,9 @@ function SummaryChartHeader({ match }) {
             </div>
           </div>
           <div className="text-center px-2 pb-2">
-            <label className="font-medium text-sm">
+            <div className="font-medium text-sm" style={{ lineHeight: "1.2" }}>
               {match.teamB.Name.toUpperCase()}
-            </label>
+            </div>
           </div>
         </div>
       </div>
