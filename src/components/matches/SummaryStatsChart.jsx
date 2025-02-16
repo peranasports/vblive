@@ -1,12 +1,13 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { writeText, colourForEfficiency } from "../utils/Utils";
-import { max } from "lodash";
+// import { ColourSchemes } from "../utils/ColourSchemes";
 
-function SummaryStatsChart({ match, teamAstats, teamBstats, width, phrases }) {
+function SummaryStatsChart({ match, teamAstats, teamBstats, width, phrases, colourScheme}) {
   const canvasRef = useRef(null);
   const ref = useRef(null);
-  const colour1 = "#3498db";
-  const colour2 = "#e74c3c";
+  const [schemecolours, setSchemeColours] = useState(["#3498db", "#e74c3c", "#2ecc71", "#f1c40f", "#9b59b6", "#34495e"]);
+  const colour1 = schemecolours[0]; //"#3498db";
+  const colour2 = schemecolours[1]; //"#e74c3c";
 
   const tr = (text) => {
     if (phrases) {
@@ -145,7 +146,7 @@ function SummaryStatsChart({ match, teamAstats, teamBstats, width, phrases }) {
   };
 
   const drawSetStatsForTeam = (ctx, x, y, width, team, maxpoints) => {
-    var colours = ["#3498db", "#e74c3c", "#f39c12", "#2ecc71"];
+    var colours = [schemecolours[2], schemecolours[3], schemecolours[4], schemecolours[5]];
     var h = 100;
     var yb = y + h;
     var dh = h / maxpoints;
@@ -208,7 +209,7 @@ function SummaryStatsChart({ match, teamAstats, teamBstats, width, phrases }) {
     var fontsize = 12;
 
     var labels = [tr("OPP. ERRORS"), tr("BLOCKS"), tr("ATTACKS"), tr("ACES")];
-    var colours = ["#3498db", "#e74c3c", "#f39c12", "#2ecc71"];
+    var colours = [schemecolours[2], schemecolours[3], schemecolours[4], schemecolours[5]];
 
     var x1 = x + ws;
     var yt = y;
@@ -463,6 +464,11 @@ function SummaryStatsChart({ match, teamAstats, teamBstats, width, phrases }) {
   };
 
   useEffect(() => {
+    var scs = [];
+    if (colourScheme) {
+      scs = colourScheme.colours;
+      setSchemeColours(scs);
+    }
     const canvas = canvasRef.current;
     const context = canvas.getContext("2d");
     const ratio = window.devicePixelRatio;
@@ -473,7 +479,7 @@ function SummaryStatsChart({ match, teamAstats, teamBstats, width, phrases }) {
     canvas.style.height = height + "px";
     canvas.getContext("2d").scale(ratio, ratio);
     draw(context);
-  }, [draw]);
+  }, [draw, colourScheme]);
 
   return (
     <div ref={ref} className="cursor-pointer">

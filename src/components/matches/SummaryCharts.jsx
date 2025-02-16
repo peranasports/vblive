@@ -11,6 +11,8 @@ import { useReactToPrint } from "react-to-print";
 import Translation from "../layout/Translation";
 import { summaryPhrases } from "../utils/SummaryPhrases";
 import { fetchAllTranslations, fetchTranslation } from "../utils/dbutils";
+import ColourSchemePicker from "../layout/ColourSchemePicker";
+import { ColourSchemes } from "../utils/ColourSchemes";
 
 function SummaryCharts({ match }) {
   const wref = useRef();
@@ -25,6 +27,8 @@ function SummaryCharts({ match }) {
   const [allTranslations, setAllTranslations] = React.useState([]);
   const [allLanguages, setAllLanguages] = React.useState([]);
   const [selectedPhrases, setSelectedPhrases] = React.useState([]);
+  const [colourScheme, setColourScheme] = React.useState(null);
+  const [,forceUpdate] = React.useState(0);
 
   const marginTop = "2.5cm";
   const marginRight = "1.5cm";
@@ -84,6 +88,16 @@ function SummaryCharts({ match }) {
     console.log(ps);
   };
 
+  const doColourSchemeChange = (cs) => {
+    document.getElementById("modal-colour-scheme").checked = false;
+    localStorage.setItem("colourScheme", JSON.stringify(cs));
+    setColourScheme(cs);
+  };
+
+  const doColourScheme = () => {
+    document.getElementById("modal-colour-scheme").checked = true;
+  };
+
   useLayoutEffect(() => {
     if (wref.current) {
       const ch = wref.current.offsetWidth;
@@ -109,6 +123,16 @@ function SummaryCharts({ match }) {
   }, []);
 
   const doInit = async () => {
+    var clsch = null;
+    const cs = localStorage.getItem("colourScheme");
+    if (cs && cs !== "null") {
+      clsch = JSON.parse(cs);
+    } else {
+      clsch = ColourSchemes[0];
+      localStorage.setItem(clsch);
+    }
+    setColourScheme(clsch);
+
     const trs = await fetchAllTranslations();
     setAllTranslations(trs);
     var langs = ["Add Language", "English"];
@@ -139,12 +163,21 @@ function SummaryCharts({ match }) {
     doInit();
   }, []);
 
-  useEffect(() => {}, [windowWidth, selectedPhrases, editLanguage, editPhrases]);
+  useEffect(() => {}, [
+    windowWidth,
+    selectedPhrases,
+    editLanguage,
+    editPhrases,
+    colourScheme,
+  ]);
 
   return (
     <>
       <div className="flex-col  max-w-2xl min-x-2xl">
         <div className="flex justify-end mb-2">
+          <button className="btn-in-form ml-2" onClick={() => doColourScheme()}>
+            Colours
+          </button>
           <div className="dropdown">
             <div tabIndex={0} role="button" className="btn-in-form">
               Language
@@ -193,6 +226,7 @@ function SummaryCharts({ match }) {
               teamBstats={teamBstats}
               width={windowWidth}
               phrases={selectedPhrases}
+              colourScheme={colourScheme}
             />
           </div>
         </div>
@@ -217,6 +251,30 @@ function SummaryCharts({ match }) {
                 onSaveTranslation={(ps) => doSaveTranslation(ps)}
               />
             </div>
+          </div>
+        </div>
+      </div>
+
+      <input
+        type="checkbox"
+        id="modal-colour-scheme"
+        className="modal-toggle"
+      />
+      <div className="modal">
+        <div className="modal-box w-full max-w-xl h-[96vh]">
+          <div className="flex justify-between mb-4">
+            <h3 className="font-bold">Select colour scheme for charts</h3>
+            <div className="modal-action -mt-1">
+              <label htmlFor="modal-colour-scheme">
+                <XMarkIcon className="w-6 h-6 cursor-pointer" />
+              </label>
+            </div>
+          </div>
+          <div className="flex flex-col">
+            <ColourSchemePicker
+              updated = {n => !n}
+              onColourSchemeChange={(cs) => doColourSchemeChange(cs)}
+            />
           </div>
         </div>
       </div>

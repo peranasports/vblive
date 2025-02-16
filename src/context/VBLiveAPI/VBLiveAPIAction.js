@@ -23,54 +23,143 @@ export const getSessions = async (appName, serverName) => {
 };
 
 export const getSessionsForServer = async (serverName) => {
-  const params = new URLSearchParams({
-    serverName: serverName,
-  });
+  // const params = new URLSearchParams({
+  //   serverName: serverName,
+  // });
 
-  vbliveapi.defaults.withCredentials = true;
+  // vbliveapi.defaults.withCredentials = true;
 
-  const response = await vbliveapi.get(
-    `Session/GetSessionsForServer?${params}`
-  );
-  var sessionData = { sessions: response.data, serveName: serverName };
+  // const response = await vbliveapi.get(
+  //   `Session/GetSessionsForServer?${params}`
+  // );
+  // var sessionData = { sessions: response.data, serveName: serverName };
+  // return sessionData;
+
+  const qs = require("qs");
+  let data = qs.stringify({});
+
+  let config = {
+    method: "get",
+    maxBodyLength: Infinity,
+    url: `http://localhost:3001/api/Session/GetSessionsForServer/${serverName}`,
+    headers: {},
+    data: data,
+  };
+
+  var sessionData = { sessions: [], serverName: serverName };
+  await axios
+    .request(config)
+    .then((response) => {
+      console.log(JSON.stringify(response.data));
+      sessionData = { sessions: response.data, serverName: serverName };
+    })
+    .catch((error) => {
+      console.log(error);
+    });
   return sessionData;
 };
 
 export const getSessionInfoForServer = async (serverName) => {
-  const params = new URLSearchParams({
-    serverName: serverName,
-  });
+  // const params = new URLSearchParams({
+  //   serverName: serverName,
+  // });
 
-  vbliveapi.defaults.withCredentials = true;
+  // vbliveapi.defaults.withCredentials = true;
 
-  const response = await vbliveapi.get(
-    `Session/GetSessionInfoForServer?${params}`
-  );
-  var sessionData = { sessions: response.data };
+  // const response = await vbliveapi.get(
+  //   `Session/GetSessionInfoForServer?${params}`
+  // );
+  // var sessionData = { sessions: response.data };
+  // return sessionData;
+  const qs = require("qs");
+  let data = qs.stringify({});
+
+  let config = {
+    method: "get",
+    maxBodyLength: Infinity,
+    url: `http://localhost:3001/api/Session/GetSessionInfoForServer/${serverName}`,
+    headers: {},
+    data: data,
+  };
+
+  var sessionData = { sessions: [], serverName: serverName };
+  await axios
+    .request(config)
+    .then((response) => {
+      console.log(JSON.stringify(response.data));
+      sessionData = { sessions: response.data, serverName: serverName };
+    })
+    .catch((error) => {
+      console.log(error);
+    });
   return sessionData;
 };
 
 export const getSession = async (sessionId) => {
-  const params = new URLSearchParams({
-    sessionId: sessionId,
-  });
+  // const params = new URLSearchParams({
+  //   sessionId: sessionId,
+  // });
 
-  vbliveapi.defaults.withCredentials = true;
+  // vbliveapi.defaults.withCredentials = true;
 
-  const response = await vbliveapi.get(`Session/GetSessionsById?${params}`);
-  return response.data[0];
+  // const response = await vbliveapi.get(`Session/GetSessionsById?${params}`);
+  // return response.data[0];
+  const qs = require("qs");
+  let data = qs.stringify({});
+
+  let config = {
+    method: "get",
+    maxBodyLength: Infinity,
+    url: `http://localhost:3001/api/Session/GetSessionsById/${sessionId}`,
+    headers: {},
+    data: data,
+  };
+
+  var sessionData = {};
+  await axios
+    .request(config)
+    .then((response) => {
+      console.log(JSON.stringify(response.data));
+      sessionData = response.data[0];
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+  return sessionData;
 };
 
 export const getLatestStats = async (sessionId, lastTime) => {
-  const params = new URLSearchParams({
-    sessionId: sessionId,
-    lastTime: lastTime,
-  });
+  // const params = new URLSearchParams({
+  //   sessionId: sessionId,
+  //   lastTime: lastTime,
+  // });
 
-  vbliveapi.defaults.withCredentials = true;
+  // vbliveapi.defaults.withCredentials = true;
 
-  const response = await vbliveapi.get(`Session/GetLatestStats?${params}`);
-  return response.data;
+  // const response = await vbliveapi.get(`Session/GetLatestStats?${params}`);
+  // return response.data;
+  const qs = require("qs");
+  let data = qs.stringify({});
+
+  let config = {
+    method: "get",
+    maxBodyLength: Infinity,
+    url: `http://localhost:3001/api/Session/GetLatestStats/${sessionId}/${lastTime}`,
+    headers: {},
+    data: data,
+  };
+
+  var lateststats = null;
+  await axios
+    .request(config)
+    .then((response) => {
+      console.log(JSON.stringify(response.data));
+      lateststats = response.data;
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+  return lateststats;
 };
 
 export const storeSession = async (match, currentUser) => {
