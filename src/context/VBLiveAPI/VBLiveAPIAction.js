@@ -41,7 +41,7 @@ export const getSessionsForServer = async (serverName) => {
   let config = {
     method: "get",
     maxBodyLength: Infinity,
-    url: `http://localhost:3001/api/Session/GetSessionsForServer/${serverName}`,
+    url: `${VBLIVE_API_URL}/Session/GetSessionsForServer/${serverName}`,
     headers: {},
     data: data,
   };
@@ -77,7 +77,7 @@ export const getSessionInfoForServer = async (serverName) => {
   let config = {
     method: "get",
     maxBodyLength: Infinity,
-    url: `http://localhost:3001/api/Session/GetSessionInfoForServer/${serverName}`,
+    url: `${VBLIVE_API_URL}/Session/GetSessionInfoForServer/${serverName}`,
     headers: {},
     data: data,
   };
@@ -110,7 +110,7 @@ export const getSession = async (sessionId) => {
   let config = {
     method: "get",
     maxBodyLength: Infinity,
-    url: `http://localhost:3001/api/Session/GetSessionsById/${sessionId}`,
+    url: `${VBLIVE_API_URL}/Session/GetSessionsById/${sessionId}`,
     headers: {},
     data: data,
   };
@@ -144,7 +144,7 @@ export const getLatestStats = async (sessionId, lastTime) => {
   let config = {
     method: "get",
     maxBodyLength: Infinity,
-    url: `http://localhost:3001/api/Session/GetLatestStats/${sessionId}/${lastTime}`,
+    url: `${VBLIVE_API_URL}/Session/GetLatestStats/${sessionId}/${lastTime}`,
     headers: {},
     data: data,
   };
