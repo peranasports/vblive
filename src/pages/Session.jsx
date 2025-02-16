@@ -101,6 +101,7 @@ function Session() {
         now.getUTCSeconds(),
         now.getUTCMilliseconds()
       );
+      const diff = utc_timestamp / 1000 - sessionData.utcLastUpdate;
       setIsLiveSession(utc_timestamp / 1000 - sessionData.utcLastUpdate < 300);
       setLastUtcLastUpdate(sessionData.utcLastUpdate);
     }
@@ -220,7 +221,7 @@ function Session() {
       const timerId = schedule();
       return () => clearTimeout(timerId);
     }
-  }, [counter]);
+  }, [counter, isLiveSession]);
 
   useEffect(() => {
     if (match && currentReport !== 6) {
