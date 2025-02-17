@@ -79,7 +79,7 @@ export function initWithDVWCompressedBuffer(buf) {
   }
   // console.log(buffer)
   if (!buffer) {
-    toast.error("Invalid DataVolley data.");
+    // toast.error("Invalid DataVolley data.");
     return;
   } else {
     return generateMatch(buffer);

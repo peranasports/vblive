@@ -135,11 +135,13 @@ function Session() {
       appname = "DVMate";
       mx = calculateDVWStats(m);
     }
-    mx.app = appname;
-    mx = calculateSideoutStats(mx, sessionData.appName);
-    // console.log('sessionId, match=', params.sessionId, mx)
-    mx.buffer = unzipBuffer(sessionData.stats);
-    setMatch(mx);
+    if (mx) {
+      mx.app = appname;
+      mx = calculateSideoutStats(mx, sessionData.appName);
+      // console.log('sessionId, match=', params.sessionId, mx)
+      mx.buffer = unzipBuffer(sessionData.stats);
+      setMatch(mx);
+    }
     setCounter(0);
   }, [sessionId, selectedTeam]);
 
@@ -364,6 +366,55 @@ function Session() {
     return classes.filter(Boolean).join(" ");
   }
 
+  if (!match) {
+    return (
+      <div className="flex-col">
+        {isLiveSession ? (
+          <div className="flex gap-2 mt-2 p-2 h-9 bg-gray-500/20">
+            <div className="text-sm font-bold text-white bg-red-700 px-2 h-5">
+              Match has not started
+            </div>
+            {autoRefresh ? (
+              <label className="text-sm">
+                Auto-refresh in {refreshInterval - counter}s
+              </label>
+            ) : (
+              <label className="text-sm">Auto-refresh is off</label>
+            )}
+
+            {autoRefresh ? (
+              <div className="">
+                <div className="tooltip" data-tip="Turn Auto-refresh Off">
+                  <XCircleIcon
+                    className="w-5 h-5 ml-2 text-base-content cursor-pointer"
+                    onClick={() => setAutoRefresh(false)}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="">
+                <div className="tooltip" data-tip="Turn Auto-refresh On">
+                  <CheckCircleIcon
+                    className="w-5 h-5 ml-2 text-base-content cursor-pointer"
+                    onClick={() => setAutoRefresh(true)}
+                  />
+                </div>
+              </div>
+            )}
+            <div className="tooltip" data-tip="Refresh Now">
+              <ArrowPathIcon
+                className="w-5 h-5 ml-2 text-base-content cursor-pointer"
+                onClick={() => getLatest()}
+              />
+            </div>
+          </div>
+        ) : (
+          <></>
+        )}
+      </div>
+    );
+  }
+
   return (
     match && (
       <>
@@ -409,10 +460,6 @@ function Session() {
                         <option key={tab.name}>{tab.name}</option>
                       ))}
                     </select>
-                    {/* <ChevronDownIcon
-                      aria-hidden="true"
-                      className="pointer-events-none col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end fill-gray-500"
-                    /> */}
                   </div>
                 </div>
               </div>
