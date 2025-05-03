@@ -1,13 +1,13 @@
-import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
 import {
   EyeIcon,
   EyeSlashIcon,
 } from "@heroicons/react/24/outline";
-import VBLiveLogo from "../components/assets/VBLive_Logo.png";
-import PSLogo from "../components/assets/PeranaSportsLogo.png";
-import { signInWithEmailAndPassword, getAuth } from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import PSLogo from "../components/assets/PeranaSportsLogo.png";
+import VBLiveLogo from "../components/assets/VBLive_Logo.png";
 
 function SignIn() {
   const [showPassword, setShowPassword] = useState(false);
@@ -40,7 +40,13 @@ function SignIn() {
       );
 
       if (userCredential.user) {
-        navigate("/mainpage");
+        const st = { currentContent: 0};
+        navigate("/mainpage", {
+          state: {
+            st: st,
+          },
+        });
+        // toast.success("Sign In Successful");
       }
     } catch (error) {
       toast.error("Error Signing In\n" + error.message);

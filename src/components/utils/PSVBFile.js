@@ -4,10 +4,8 @@ import {
   createStatsItem,
   addStatsItem,
   calculateAllStats,
-  kSkillPass,
-  kSkillSpike,
 } from "./StatsItem.js";
-import { kSkillSettersCall } from "./StatsItem";
+import { kSkillPass, kSkillSpike, kSkillSettersCall } from "./Constants.js";
 import { myzip, myunzip } from "./zip";
 
 var currentGame = null;
@@ -189,29 +187,40 @@ export function generateMatch(str) {
 
   line++;
   json = a[line].split("~");
-  if (json[1].includes(":null") === false && json[1].includes("(null)") === false) {
+  if (
+    json[1].includes(":null") === false &&
+    json[1].includes("(null)") === false
+  ) {
     match.tournament = JSON.parse(json[1]);
   }
 
   line++;
   json = a[line].split("~");
-  if (json[1].includes(":null") === false && json[1].includes("(null)") === false) {
+  if (
+    json[1].includes(":null") === false &&
+    json[1].includes("(null)") === false
+  ) {
     match.venue = JSON.parse(json[1]);
   }
 
   line++;
   json = a[line].split("~");
-  if (json[1].includes(":null") === false && json[1].includes("(null)") === false) {
+  if (
+    json[1].includes(":null") === false &&
+    json[1].includes("(null)") === false
+  ) {
     match.teamA = JSON.parse(json[1]);
   }
 
   line++;
   json = a[line].split("~");
-  if (json[1].includes(":null") === false && json[1].includes("(null)") === false) {
+  if (
+    json[1].includes(":null") === false &&
+    json[1].includes("(null)") === false
+  ) {
     match.teamB = JSON.parse(json[1]);
   }
 
-  
   line++;
   match.HomePlayers = [];
   match.AwayPlayers = [];
@@ -427,7 +436,7 @@ export function psvbParseLatestStats(str, match) {
             }
             ev.TimeStamp = new Date(ev.TimeStamp);
             if (match.videoStartTime !== undefined) {
-              if (typeof match.videoStartTime !== 'string') {
+              if (typeof match.videoStartTime !== "string") {
                 const mvst = match.videoStartTime.getTime();
                 const ets = ev.TimeStamp.getTime();
                 ev.VideoPosition = (ets - mvst) / 1000;

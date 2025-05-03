@@ -1,63 +1,52 @@
 import {
-  useEffect,
-  useLayoutEffect,
-  useContext,
-  useState,
-  useCallback,
-  useRef,
-} from "react";
-import {
-  useParams,
-  useLocation,
-  useNavigate,
-  Link,
-  useLoaderData,
-} from "react-router-dom";
-import axios from "axios";
-import Spinner from "../components/layout/Spinner";
-import BoxScore from "../components/matches/BoxScore";
-import Sideout from "../components/matches/Sideout";
-import Dashboard from "../components/matches/Dashboard";
-import Summary from "../components/matches/Summary";
-import MatchSummary from "../components/matches/MatchSummary";
-import VBLiveAPIContext from "../context/VBLiveAPI/VBLiveAPIContext";
-import {
-  getSession,
-  getLatestStats,
-  storeSession,
-} from "../context/VBLiveAPI/VBLiveAPIAction";
-import {
-  initWithPSVBCompressedBuffer,
-  parseLatestPSVBStats,
-  calculatePSVBStats,
-} from "../components/utils/PSVBFile";
-import {
-  initWithDVWCompressedBuffer,
-  parseLatestDVWStats,
-  calculateDVWStats,
-  generateMatch,
-} from "../components/utils/DVWFile";
-import { calculateSideoutStats } from "../components/utils/StatsItem";
-import SideoutReport from "../components/matches/SideoutReport";
-import AttackZones from "../components/matches/AttackZones";
-import HittingChartReport from "../components/matches/HittingChartReport";
-import ServeReceiveReport from "../components/matches/ServeReceiveReport";
-import VideoAnalysis from "../components/matches/VideoAnalysis";
-import {
-  convertSecondsToMMSS,
-  generateUUID,
-  unzipBuffer,
-} from "../components/utils/Utils";
-import { useAuthStatus } from "../components/hooks/useAuthStatus";
-import { myunzip, myzip } from "../components/utils/zip";
-import { toast } from "react-toastify";
-import {
   ArrowPathIcon,
   CheckCircleIcon,
-  ChevronDownIcon,
-  XCircleIcon,
+  XCircleIcon
 } from "@heroicons/react/24/outline";
-import { unzip } from "lodash";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState
+} from "react";
+import {
+  useLocation,
+  useNavigate,
+  useParams
+} from "react-router-dom";
+import { toast } from "react-toastify";
+import { useAuthStatus } from "../components/hooks/useAuthStatus";
+import Spinner from "../components/layout/Spinner";
+import AttackZones from "../components/matches/AttackZones";
+import BoxScore from "../components/matches/BoxScore";
+import HittingChartReport from "../components/matches/HittingChartReport";
+import MatchSummary from "../components/matches/MatchSummary";
+import ServeReceiveReport from "../components/matches/ServeReceiveReport";
+import SideoutReport from "../components/matches/SideoutReport";
+import Summary from "../components/matches/Summary";
+import {
+  calculateDVWStats,
+  generateMatch,
+  initWithDVWCompressedBuffer,
+  parseLatestDVWStats,
+} from "../components/utils/DVWFile";
+import {
+  calculatePSVBStats,
+  initWithPSVBCompressedBuffer,
+  parseLatestPSVBStats,
+} from "../components/utils/PSVBFile";
+import { calculateSideoutStats } from "../components/utils/StatsItem";
+import {
+  generateUUID,
+  unzipBuffer
+} from "../components/utils/Utils";
+import {
+  getLatestStats,
+  getSession,
+  storeSession,
+} from "../context/VBLiveAPI/VBLiveAPIAction";
+import VBLiveAPIContext from "../context/VBLiveAPI/VBLiveAPIContext";
 
 function Session() {
   const { session, appName, loading, dispatch } = useContext(VBLiveAPIContext);
@@ -87,6 +76,9 @@ function Session() {
     dispatch({ type: "SET_LOADING" });
 
     const sessionData = await getSession(sessionId);
+    if (!sessionData) {
+      return;
+    }
     dispatch({ type: "GET_SESSION", payload: sessionData });
     var m = null;
     var appname = null;
@@ -157,6 +149,12 @@ function Session() {
       mx.videoOnlineUrl = msession && msession.videoOnlineUrl;
       mx.videoStartTimeSeconds = msession && msession.videoStartTimeSeconds;
       mx.videoOffset = msession && msession.videoOffset;
+      if (mx.videoOffset && mx.videoOnlineUrl !== -1) {
+        const firstev = mx.events[0];
+        for (var ev of mx.events) {
+          ev.VideoPosition = ev.TimeStamp.getTime() / 1000 - firstev.TimeStamp.getTime() / 1000 + mx.videoOffset;
+        }
+      }
       setInDatabase(indb);
       if (!mx.guid) {
         mx.guid = generateUUID();

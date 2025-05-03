@@ -298,4 +298,16 @@
   .btn-toolbar {
     @apply w-8 h-8 p-1 rounded-md bg-primary/10 text-sm/6 font-semibold text-base-content/50 shadow-sm hover:bg-primary/20 cursor-pointer;
   }
+  .btn-toolbar-disabled {
+    @apply w-8 h-8 p-1 rounded-md bg-base-200/10 text-sm/6 font-semibold text-base-content/30 shadow-sm;
+  }
+  .noselect {
+    cursor: default;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
 }

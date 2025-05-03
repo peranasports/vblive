@@ -266,11 +266,11 @@ function SummaryStatsChart({ match, teamAstats, teamBstats, width, phrases, colo
       { textAlign: "center", fontSize: fontsize, fontFamily: "Trebuchet MS" }
     );
     writeText(
-      { ctx: ctx, text: "?", x: x1 + w, y: yt },
+      { ctx: ctx, text: stats1.BreakPoints[0] > stats2.BreakPoints[0] ? stats1.BreakPoints[0] - stats2.BreakPoints[0] : "", x: x1 + w, y: yt },
       { textAlign: "center", fontSize: fontsize, fontFamily: "Trebuchet MS" }
     );
     writeText(
-      { ctx: ctx, text: "?", x: x1 + w * 5, y: yt },
+      { ctx: ctx, text: stats2.BreakPoints[0] > stats1.BreakPoints[0] ? stats2.BreakPoints[0] - stats1.BreakPoints[0] : "", x: x1 + w * 5, y: yt },
       { textAlign: "center", fontSize: fontsize, fontFamily: "Trebuchet MS" }
     );
     yt = yt + dh;
@@ -279,11 +279,11 @@ function SummaryStatsChart({ match, teamAstats, teamBstats, width, phrases, colo
       { textAlign: "center", fontSize: fontsize, fontFamily: "Trebuchet MS" }
     );
     writeText(
-      { ctx: ctx, text: "?", x: x1 + w, y: yt },
+      { ctx: ctx, text: stats1.BlckSolo > stats2.BlckSolo ? stats1.BlckSolo - stats2.BlckSolo : "", x: x1 + w, y: yt },
       { textAlign: "center", fontSize: fontsize, fontFamily: "Trebuchet MS" }
     );
     writeText(
-      { ctx: ctx, text: "?", x: x1 + w * 5, y: yt },
+      { ctx: ctx, text: stats2.BlckSolo > stats1.BlckSolo ? stats2.BlckSolo - stats1.BlckSolo : "", x: x1 + w * 5, y: yt },
       { textAlign: "center", fontSize: fontsize, fontFamily: "Trebuchet MS" }
     );
     yt = yt + dh;
@@ -301,7 +301,7 @@ function SummaryStatsChart({ match, teamAstats, teamBstats, width, phrases, colo
     );
     yt = yt + dh;
     writeText(
-      { ctx: ctx, text: tr("DEFEAT").toUpperCase(), x: x1 + (w * 6) / 2, y: yt },
+      { ctx: ctx, text: tr("DIFFERENCE").toUpperCase(), x: x1 + (w * 6) / 2, y: yt },
       { textAlign: "center", fontSize: 12, fontFamily: "Trebuchet MS" }
     );
   };

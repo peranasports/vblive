@@ -22,6 +22,7 @@ import { Analytics } from "@vercel/analytics/react";
 import MatchesList from "./pages/MatchesList";
 import MultiSessions from "./pages/MultiSessions";
 import PlaylistsList from "./pages/PlaylistsList";
+import CodingPage from "./pages/CodingPage";
 import Live from "./pages/Live";
 import MainPage from "./pages/MainPage";
 import { useState } from "react";
@@ -51,6 +52,7 @@ function App() {
                     <Route path="/live" element={<Live />} />
                     <Route path="/mainpage" element={<MainPage />} />
                     <Route path="/matcheslist" element={<MatchesList />} />
+                    <Route path="/codingpage" element={<CodingPage />} />
                     <Route path="/playlistslist" element={<PlaylistsList />} />
                     <Route
                       path="/forgotpassword"

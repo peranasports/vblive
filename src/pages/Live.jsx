@@ -1,23 +1,18 @@
-import React, { useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import VBLiveAPIContext from "../context/VBLiveAPI/VBLiveAPIContext";
 import {
-  getSession,
-  getSessionInfoForServer,
-  getSessions,
-  getSessionsForServer,
-} from "../context/VBLiveAPI/VBLiveAPIAction";
-import { toast } from "react-toastify";
-import {
-  VideoCameraIcon,
   ArrowDownIcon,
   ArrowUpIcon,
-  ShareIcon,
-  TrashIcon,
+  VideoCameraIcon
 } from "@heroicons/react/24/outline";
+import React, { useContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import Spinner from "../components/layout/Spinner";
-import { initWithPSVBCompressedBuffer } from "../components/utils/PSVBFile";
 import { initWithDVWCompressedBuffer } from "../components/utils/DVWFile";
+import { initWithPSVBCompressedBuffer } from "../components/utils/PSVBFile";
+import {
+  getSessionsForServer
+} from "../context/VBLiveAPI/VBLiveAPIAction";
+import VBLiveAPIContext from "../context/VBLiveAPI/VBLiveAPIContext";
 
 function Live() {
   const navigate = useNavigate();
@@ -102,6 +97,10 @@ function Live() {
     }
 
     setSortedSessions(xx);
+    localStorage.setItem(
+      "liveSessions",
+      JSON.stringify({ serverName: serverName, sessions: xx })
+    );
     setSortColumn(sc);
     setSortAscending(sa);
     forceUpdate((n) => !n);
@@ -150,9 +149,11 @@ function Live() {
   };
 
   useEffect(() => {
-    const sn = localStorage.getItem("serverName");
+    const sn = localStorage.getItem("liveSessions");
     if (sn) {
-      setServerName(sn);
+      const ls = JSON.parse(sn);
+      setServerName(ls.serverName);
+      setSortedSessions(ls.sessions);
     }
   }, []);
 

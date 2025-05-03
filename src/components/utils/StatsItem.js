@@ -1,14 +1,17 @@
 import { pad, replaceItemInArray } from "./Utils";
 
-export const kSkillServe = 1;
-export const kSkillPass = 2;
-export const kSkillSet = 3;
-export const kSkillSpike = 4;
-export const kSkillBlock = 5;
-export const kSkillDefense = 6;
-export const kSkillFreeball = 7;
-export const kSkillCover = 7;
-export const kSkillCoachTag = 8;
+import {
+  kSkillServe,
+  kSkillPass,
+  kSkillSet,
+  kSkillSpike,
+  kSkillBlock,
+  kSkillDefense,
+  kSkillFreeball,
+  kSkillCover,
+  kSkillCoachTag,
+} from "./Constants";
+
 const kSkillEndOfSet = 9;
 const kSkillTransitionSO = 10;
 const kSkillTransitionPovar = 11;

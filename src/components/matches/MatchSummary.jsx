@@ -1,7 +1,13 @@
-import { useEffect, useState } from "react";
+import {
+  Bars4Icon,
+  FolderArrowDownIcon,
+  FolderIcon,
+  TvIcon,
+  WifiIcon
+} from "@heroicons/react/24/outline";
 import { sortBy } from "lodash";
 import Moment from "moment";
-import { ChevronDownIcon, HomeIcon } from "@heroicons/react/24/outline";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 function MatchSummary({
@@ -20,6 +26,21 @@ function MatchSummary({
   const [currentTeam, setCurrentTeam] = useState(0);
   const [teamTabs, setTeamTabs] = useState([]);
   const [gameTabs, setGameTabs] = useState([]);
+
+  const navigation = [
+    { name: "Matches", index: 0, icon: FolderIcon, link: "/matcheslist" },
+    { name: "Live", index: 1, icon: WifiIcon, link: "/live" },
+    { name: "Import", index: 2, icon: FolderArrowDownIcon, link: "/input" },
+    { name: "Play Lists", index: 3, icon: TvIcon, link: "/playlistslist" },
+    // { name: "New Match", index: 4, icon: PencilSquareIcon, link: "/codingpage" },
+  ];
+
+  const doSelectMenu = (index) => {
+    const st = { currentContent: index};
+    navigate("/mainpage", {
+      state: st,
+    });
+  };
 
   const doSelectGame = (sgn) => {
     setCurrentGame(sgn);
@@ -70,7 +91,7 @@ function MatchSummary({
 
   const doHome = () => {
     navigate("/");
-  }
+  };
 
   return (
     matches && (
@@ -81,6 +102,32 @@ function MatchSummary({
               <>
                 <div className="flex-col">
                   <div className="flex gap-2">
+                    <div className="dropdown dropdown-start">
+                      <Bars4Icon
+                        tabIndex={0}
+                        className="mt-0.5 size-6 cursor-pointer text-base-content/50 hover:text-base-content/80"
+                      />
+                      <ul
+                        tabIndex={0}
+                        className="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm"
+                      >
+                        {navigation.map((item, index) => (
+                          <li key={item.name}>
+                            <a
+                              onClick={() => {
+                                doSelectMenu(index);
+                              }}
+                            >
+                              <item.icon
+                                className="mr-2 h-5 w-5 text-base-content/50 hover:text-base-content/80"
+                                aria-hidden="true"
+                              />
+                              {item.name}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>{" "}
                     <p className="mt-1 text-sm text-base-700">
                       {Moment(matches[0].TrainingDate).format("DD-MMM-yyyy")}
                     </p>
@@ -92,7 +139,6 @@ function MatchSummary({
                       <></>
                     )}
                   </div>
-                  {/* <div className="w-full divider divide-y divide-base-content"></div> */}
                 </div>
               </>
             ) : (
@@ -117,10 +163,10 @@ function MatchSummary({
                 <></>
               )}
             </>
-            <HomeIcon
+            {/* <HomeIcon
               className="mt-1 size-6 cursor-pointer text-base-content/50 hover:text-base-content/80"
               onClick={() => doHome()}
-            />
+            /> */}
           </div>
         </div>
         <div className="">
@@ -149,10 +195,6 @@ function MatchSummary({
                         <option key={tab.name}>{tab.name}</option>
                       ))}
                     </select>
-                    {/* <ChevronDownIcon
-                      aria-hidden="true"
-                      className="pointer-events-none col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end fill-gray-500"
-                    /> */}
                   </div>
                 </div>
               </div>

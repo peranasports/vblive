@@ -1,25 +1,26 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { makePlaylist, zoneFromString } from "../utils/Utils";
-import AllFiltersPanel from "./AllFiltersPanel";
-import HittingChart from "./HittingChart";
-import AttackZoneChart from "./AttackZoneChart";
-import { allFilters } from "./AllFilters";
-import { kSkillSpike, kSkillSet, kSkillSettersCall } from "../utils/StatsItem";
-import { toast } from "react-toastify";
-import { useAuthStatus } from "../hooks/useAuthStatus";
-import {
-  ArrowPathIcon,
-  VideoCameraIcon,
-  XMarkIcon,
-  Bars3Icon,
-} from "@heroicons/react/24/outline";
 import {
   Dialog,
   DialogBackdrop,
   DialogPanel,
   TransitionChild,
 } from "@headlessui/react";
+import {
+  ArrowPathIcon,
+  Bars3Icon,
+  VideoCameraIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { useAuthStatus } from "../hooks/useAuthStatus";
+import {
+  kSkillSpike
+} from "../utils/Constants";
+import { makePlaylist, zoneFromString } from "../utils/Utils";
+import { allFilters } from "./AllFilters";
+import AllFiltersPanel from "./AllFiltersPanel";
+import HittingChart from "./HittingChart";
 
 function HittingChartReport({
   matches,
@@ -313,7 +314,8 @@ function HittingChartReport({
           ) {
             continue;
           }
-          if (checkFilter("Attackers", e.Player.LastName) === false) {
+          var plname = e.Player.shirtNumber + ". " + e.Player.NickName;
+          if (checkFilter("Attackers", plname) === false) {
             continue;
           }
           if (checkFilter("Results", egs[e.EventGrade]) === false) {
@@ -341,7 +343,8 @@ function HittingChartReport({
           if (checkFilter("Sets", e.Drill.GameNumber.toString()) === false) {
             continue;
           }
-          if (checkFilter("Attackers", e.Player.LastName) === false) {
+          var plname = e.Player.shirtNumber + ". " + e.Player.NickName;
+          if (checkFilter("Attackers", plname) === false) {
             continue;
           }
           if (e.setter !== null && checkFilter("Setters", e.setter) === false) {
@@ -431,11 +434,12 @@ function HittingChartReport({
           for (var ne = 0; ne < xevents.length; ne++) {
             var evx = xevents[ne];
             var pl = evx.Player;
+            var plname = pl.shirtNumber + ". " + pl.NickName;
             if (
-              option.items.filter((obj) => obj.name == pl.NickName).length === 0
+              option.items.filter((obj) => obj.name == plname).length === 0
             ) {
               option.items.push({
-                name: pl.NickName,
+                name: plname,
                 selected: true,
                 amount: 0,
               });
@@ -470,14 +474,15 @@ function HittingChartReport({
                   ? match.teamA
                   : match.teamB
                 : team === match.teamA.Name
-                ? match.teamB
-                : match.teamA;
+                ? match.teamA
+                : match.teamB;
             var pls = tm.players;
             for (var np = 0; np < pls.length; np++) {
               var pl = pls[np];
               if (pl.shirtNumber === setters[nn]) {
+                var plname = pl.shirtNumber + ". " + pl.NickName;
                 option.items.push({
-                  name: pl.NickName,
+                  name: plname,
                   number: pl.shirtNumber,
                   selected: true,
                   amount: 0,
@@ -617,8 +622,7 @@ function HittingChartReport({
     } else {
       if (matches.length === 1) {
         return matches[0].teamB.Name.toUpperCase();
-      }
-      else {
+      } else {
         return "OPPONENTS (" + matches.length + ")";
       }
     }

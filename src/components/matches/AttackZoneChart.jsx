@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { writeText, colourForEfficiency } from "../utils/Utils";
+import { colourForEfficiency, writeText } from "../utils/Utils";
 
 function AttackZoneChart({ matches, team, events, row, onEventsSelected }) {
   const canvasRef = useRef(null);
@@ -201,7 +201,7 @@ function AttackZoneChart({ matches, team, events, row, onEventsSelected }) {
           writeText(
             {
               ctx: ctx,
-              text: pl.NickName.toUpperCase(),
+              text: pl.shirtNumber + ". " + pl.NickName.toUpperCase(),
               x: tx + 2,
               y: ty,
               width: w3 - tw,

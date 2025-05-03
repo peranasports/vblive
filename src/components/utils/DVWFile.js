@@ -1,19 +1,18 @@
+import moment from "moment";
 import {
-  unzipBuffer,
-  generateUUID,
-  pad,
-  stringToPoint,
-  inside,
-  tryParseDateFromString,
-} from "./Utils";
-import {
-  doEvent,
-  createStatsItem,
   addStatsItem,
   calculateAllStats,
+  createStatsItem,
+  doEvent,
 } from "./StatsItem.js";
-import moment from "moment";
-import { toast } from "react-toastify";
+import {
+  generateUUID,
+  inside,
+  pad,
+  stringToPoint,
+  tryParseDateFromString,
+  unzipBuffer,
+} from "./Utils";
 import { myunzip } from "./zip.js";
 
 const kSkillServe = 1;
@@ -187,9 +186,9 @@ export function generateMatch(str) {
             if (match.TrainingDate === undefined) {
               match.TrainingDate = tryParseDateFromString(datestr, "ymd");
               if (match.TrainingDate === undefined) {
-                const tk1s = matchdate.split("/");
-                const day = Number.parseInt(tk1s[0]);
-                const month = Number.parseInt(tk1s[1]);
+                let tk1s = matchdate.split("/");
+                let day = Number.parseInt(tk1s[0]);
+                let month = Number.parseInt(tk1s[1]);
                 if (month > 12) {
                   const temp = day;
                   day = month;

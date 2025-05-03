@@ -1,9 +1,3 @@
-import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { Theme } from "react-daisyui";
-import { useAuthStatus } from "../components/hooks/useAuthStatus";
-import AppLogo from "../components/assets/VBLive_Logo.png";
-import PeranaLogo from "../components/assets/logo512.png";
 import {
   Dialog,
   DialogBackdrop,
@@ -15,38 +9,37 @@ import {
   TransitionChild,
 } from "@headlessui/react";
 import {
+  ChevronDownIcon
+} from "@heroicons/react/20/solid";
+import {
   Bars3Icon,
-  BellIcon,
-  CalendarIcon,
-  UserCircleIcon,
-  ChartPieIcon,
   Cog6ToothIcon,
-  DocumentDuplicateIcon,
-  FolderIcon,
-  HomeIcon,
-  UsersIcon,
-  XMarkIcon,
   FolderArrowDownIcon,
+  FolderIcon,
   TvIcon,
   WifiIcon,
+  XMarkIcon
 } from "@heroicons/react/24/outline";
-import {
-  ChevronDownIcon,
-  MagnifyingGlassIcon,
-} from "@heroicons/react/20/solid";
-import Settings from "./Settings";
-import Input from "./Input";
-import PlaylistsList from "./PlaylistsList";
-import MatchesList from "./MatchesList";
-import Live from "./Live";
-import ThemePicker from "../components/layout/ThemePicker";
 import { getAuth } from "firebase/auth";
+import { useEffect, useState } from "react";
+import { Theme } from "react-daisyui";
+import { useLocation, useNavigate } from "react-router-dom";
+import AppLogo from "../components/assets/VBLive_Logo.png";
+import PeranaLogo from "../components/assets/logo512.png";
+import { useAuthStatus } from "../components/hooks/useAuthStatus";
+import ThemePicker from "../components/layout/ThemePicker";
+import CodeMatch from "./CodeMatch";
+import Input from "./Input";
+import Live from "./Live";
+import MatchesList from "./MatchesList";
+import PlaylistsList from "./PlaylistsList";
 
 const navigation = [
   { name: "Matches", index: 0, icon: FolderIcon, current: true },
-  { name: "Live", index: 1, icon: WifiIcon, current: true },
+  { name: "Live", index: 1, icon: WifiIcon, current: false },
   { name: "Import", index: 2, icon: FolderArrowDownIcon, current: false },
   { name: "Play Lists", index: 3, icon: TvIcon, current: false },
+  // { name: "New Match", index: 4, icon: PencilSquareIcon, current: false },
 ];
 const teams = [
   //   { id: 1, name: "Heroicons", index: 10, initial: "H", current: false },
@@ -64,7 +57,6 @@ function classNames(...classes) {
 
 export default function MainPage() {
   const { firebaseUser } = useAuthStatus();
-  const [currentContent, setCurrentContent] = useState(0);
   const [lastContent, setLastContent] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [, forceUpdate] = useState(0);
@@ -73,7 +65,8 @@ export default function MainPage() {
   );
   const navigate = useNavigate();
   const location = useLocation();
-  const coach = location.state;
+  const content = location.state?.currentContent;
+  const [currentContent, setCurrentContent] = useState(content? content : 0);
 
   const showContents = () => {
     if (!firebaseUser) {
@@ -88,7 +81,8 @@ export default function MainPage() {
     else if (currentContent === 2) return <Input />;
     else if (currentContent === 3)
       return <PlaylistsList userEmail={firebaseUser.email} />;
-    else if (currentContent === 4) return <h1>Calendar</h1>;
+    else if (currentContent === 4)
+      return <CodeMatch userEmail={firebaseUser.email} match={null} />;
     else if (currentContent === 5) return <h1>Documents</h1>;
     else if (currentContent === 6) return <h1>Reports</h1>;
     else if (currentContent === 10) return <h1>Heroicons</h1>;
@@ -139,6 +133,9 @@ export default function MainPage() {
   };
 
   useEffect(() => {
+    for (let i = 0; i < navigation.length; i++) {
+      navigation[i].current = i === currentContent;
+    }
     console.log("Current Content: ", currentContent, currentTheme);
     forceUpdate((n) => !n);
   }, [currentContent, currentTheme]);
@@ -195,8 +192,8 @@ export default function MainPage() {
                               <a
                                 className={classNames(
                                   item.current
-                                    ? "bg-gray-50 text-indigo-600"
-                                    : "text-base-content hover:bg-gray-50 hover:text-indigo-600",
+                                    ? "bg-primary/60 text-base-primary"
+                                    : "text-base-primary hover:bg-primary/20 hover:text-base-primary",
                                   "group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold"
                                 )}
                               >
@@ -204,8 +201,8 @@ export default function MainPage() {
                                   aria-hidden="true"
                                   className={classNames(
                                     item.current
-                                      ? "text-indigo-600"
-                                      : "text-gray-400 group-hover:text-indigo-600",
+                                      ? "text-base-primary"
+                                      : "text-base-primary group-hover:text-base-primary",
                                     "size-6 shrink-0"
                                   )}
                                 />
@@ -287,8 +284,8 @@ export default function MainPage() {
                           <a
                             className={classNames(
                               item.current
-                                ? "bg-gray-50 text-indigo-600"
-                                : "text-base-content hover:bg-gray-50 hover:text-indigo-600",
+                                ? "bg-primary/60 text-base-primary"
+                                : "text-base-primary hover:bg-primary/20 hover:text-base-primary",
                               "group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold"
                             )}
                           >
@@ -296,8 +293,8 @@ export default function MainPage() {
                               aria-hidden="true"
                               className={classNames(
                                 item.current
-                                  ? "text-indigo-600"
-                                  : "text-gray-400 group-hover:text-indigo-600",
+                                  ? "text-base-primary"
+                                  : "text-base-primary group-hover:text-base-primary",
                                 "size-6 shrink-0"
                               )}
                             />

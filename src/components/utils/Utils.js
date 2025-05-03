@@ -1,12 +1,20 @@
 import { PercentColours } from "../utils/PercentColours";
 import { getEventDescription } from "../utils/PSVBFile";
 import {
-  kSkillBlock,
+  kSkillServe,
   kSkillPass,
+  kSkillSet,
+  kSkillSpike,
+  kSkillBlock,
   kSkillDefense,
+  kSkillFreeball,
+  kSkillCover,
+  kSkillCoachTag,
+} from "./Constants";
+
+import {
   kSubstitution,
   kSkillCommentary,
-  kSkillCoachTag,
   kOppositionScore,
   kOppositionHitKill,
   kOppositionServeAce,
@@ -434,6 +442,27 @@ export function getEventStringColor(e) {
   return s;
 }
 
+export function getEventResult(e) {
+  var res = 0;
+  if (e.DVGrade && e.DVGrade === "=") {
+    res = -1;
+  } else if (e.DVGrade && e.DVGrade === "#") {
+    if (e.EventType === 1 || e.EventType === 4 || e.EventType === 5) {
+      res = 1;
+    } else {
+    }
+  } else if (
+    e.DVGrade && e.DVGrade === "#" &&
+    e.EventGrade.EventType !== 2 &&
+    e.EventGrade.EventType !== 3 &&
+    e.EventGrade.EventType !== 20
+  ) {
+    res = 1;
+  } else {
+  }
+  return res;
+}
+
 export function getMultiMatchesStatsItems(matches, team, selectedTeam) {
   var st = {
     teamAStatsItems: {},
@@ -620,3 +649,213 @@ export function makePlaylist(events) {
 export function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
+
+export function drawArrowHead(ctx, bs, be, ahl, ahar, col, scolor) {
+  ctx.lineWidth = 1.0;
+  ctx.strokeStyle = scolor;
+  ctx.fillStyle = col;
+
+  var arrowOrigin = {};
+  var arrowTip = {};
+  var arrowHeadBase = {};
+  var arrowHeadWing1 = {};
+  var arrowHeadWing2 = {};
+  var arrowHeadBase2 = {};
+  var arrowHeadWing21 = {};
+  var arrowHeadWing22 = {};
+  var deltaX = 0.0;
+  var deltaY = 0.0;
+
+  var deltaXBase = 0.0;
+  var deltaYBase = 0.0;
+
+  var headToShaftRatio = 0.0;
+  var deltaXWing = 0.0;
+  var deltaYWing = 0.0;
+
+  var mArrowLength;
+
+  // The arrow origin will be at the center of the view
+  arrowOrigin.x = bs.x;
+  arrowOrigin.y = bs.y;
+
+  // Create the path that will contain the arrow drawing instructions
+  // and begin drawing.
+  ctx.beginPath();
+  //	CGPathMoveToPoint(arrowPath, NULL, arrowOrigin.x, arrowOrigin.y);
+
+  // Calculate the arrow tip location from the polar coordinates
+  deltaX = be.x - bs.x;
+  deltaY = be.y - bs.y;
+  arrowTip.x = be.x;
+  arrowTip.y = be.y;
+
+  mArrowLength = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+  //	mArrowAngle = deltaY === 0 ? 0 : atan(-deltaX / deltaY);
+  //	mArrowAngle = (mArrowAngle * 180) / PI;
+
+  var mArrowHeadLength = ahl;
+  var mArrowHeadAspectRatio = ahar;
+
+  // Define the arrow shaft
+  //	CGPathAddLineToPoint(arrowPath, NULL, arrowTip.x, arrowTip.y);
+
+  headToShaftRatio = mArrowHeadLength / mArrowLength;
+  deltaXBase = headToShaftRatio * deltaX;
+  deltaYBase = headToShaftRatio * deltaY;
+  // Calculate the location of the base of the arrow head
+  arrowHeadBase.x = arrowTip.x - deltaXBase;
+  arrowHeadBase.y = arrowTip.y - deltaYBase;
+
+  arrowHeadBase2.x = arrowTip.x - deltaXBase / 2;
+  arrowHeadBase2.y = arrowTip.y - deltaYBase / 2;
+
+  // Calculate the wing tips of the arrow head
+  deltaXWing = mArrowHeadAspectRatio * deltaXBase;
+  deltaYWing = mArrowHeadAspectRatio * deltaYBase;
+  arrowHeadWing1.x = arrowHeadBase.x - deltaYWing;
+  arrowHeadWing1.y = arrowHeadBase.y + deltaXWing;
+  arrowHeadWing2.x = arrowHeadBase.x + deltaYWing;
+  arrowHeadWing2.y = arrowHeadBase.y - deltaXWing;
+
+  arrowHeadWing21.x = arrowHeadBase2.x - deltaYWing / 2;
+  arrowHeadWing21.y = arrowHeadBase2.y + deltaXWing / 2;
+  arrowHeadWing22.x = arrowHeadBase2.x + deltaYWing / 2;
+  arrowHeadWing22.y = arrowHeadBase2.y - deltaXWing / 2;
+
+  // Define the arrow head wings
+  ctx.moveTo(arrowTip.x, arrowTip.y);
+  ctx.lineTo(arrowHeadWing1.x, arrowHeadWing1.y);
+  ctx.lineTo(arrowHeadWing2.x, arrowHeadWing2.y);
+  ctx.lineTo(arrowTip.x, arrowTip.y);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+}
+
+export function getArrowHeadPoints(bs, be, ahl, ahar) {
+  var arrowOrigin = {};
+  var arrowTip = {};
+  var arrowHeadBase = {};
+  var arrowHeadWing1 = {};
+  var arrowHeadWing2 = {};
+  var arrowHeadBase2 = {};
+  var arrowHeadWing21 = {};
+  var arrowHeadWing22 = {};
+  var deltaX = 0.0;
+  var deltaY = 0.0;
+
+  var deltaXBase = 0.0;
+  var deltaYBase = 0.0;
+
+  var headToShaftRatio = 0.0;
+  var deltaXWing = 0.0;
+  var deltaYWing = 0.0;
+
+  var mArrowLength;
+
+  // The arrow origin will be at the center of the view
+  arrowOrigin.x = bs.x;
+  arrowOrigin.y = bs.y;
+
+  // Calculate the arrow tip location from the polar coordinates
+  deltaX = be.x - bs.x;
+  deltaY = be.y - bs.y;
+  arrowTip.x = be.x;
+  arrowTip.y = be.y;
+
+  mArrowLength = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+  var mArrowHeadLength = ahl;
+  var mArrowHeadAspectRatio = ahar;
+
+  headToShaftRatio = mArrowHeadLength / mArrowLength;
+  deltaXBase = headToShaftRatio * deltaX;
+  deltaYBase = headToShaftRatio * deltaY;
+  // Calculate the location of the base of the arrow head
+  arrowHeadBase.x = arrowTip.x - deltaXBase;
+  arrowHeadBase.y = arrowTip.y - deltaYBase;
+
+  arrowHeadBase2.x = arrowTip.x - deltaXBase / 2;
+  arrowHeadBase2.y = arrowTip.y - deltaYBase / 2;
+
+  // Calculate the wing tips of the arrow head
+  deltaXWing = mArrowHeadAspectRatio * deltaXBase;
+  deltaYWing = mArrowHeadAspectRatio * deltaYBase;
+  arrowHeadWing1.x = arrowHeadBase.x - deltaYWing;
+  arrowHeadWing1.y = arrowHeadBase.y + deltaXWing;
+  arrowHeadWing2.x = arrowHeadBase.x + deltaYWing;
+  arrowHeadWing2.y = arrowHeadBase.y - deltaXWing;
+
+  arrowHeadWing21.x = arrowHeadBase2.x - deltaYWing / 2;
+  arrowHeadWing21.y = arrowHeadBase2.y + deltaXWing / 2;
+  arrowHeadWing22.x = arrowHeadBase2.x + deltaYWing / 2;
+  arrowHeadWing22.y = arrowHeadBase2.y - deltaXWing / 2;
+
+  const pts = [
+    arrowTip,
+    arrowHeadWing1,
+    arrowHeadWing2,
+    arrowTip,
+  ];
+  return pts;
+}
+
+export function playerInitialAndName(ev) {
+  if (ev.player.FirstName === undefined) {
+    return "";
+  }
+  const number = ev.player.ShirtNumber ? ev.player.ShirtNumber + ". " : "";
+  const initial =
+    ev.player.FirstName.length === 0
+      ? ""
+      : ev.player.FirstName.substring(0, 1) + ".";
+  const playerLastName =
+    ev.player.LastName !== null ? ev.player.LastName.toUpperCase() : "";
+  return number + initial + " " + playerLastName;
+}
+
+export function realGameScores(e) {
+  const gs = ["00", "15", "30", "40", "A"];
+  const p1s = e.scores.player1GameScore < 4 ? gs[e.scores.player1GameScore] : e.scores.player1GameScore <= e.scores.player2GameScore ? "40" : "A";
+  const p2s = e.scores.player2GameScore < 4 ? gs[e.scores.player2GameScore] : e.scores.player2GameScore <= e.scores.player1GameScore ? "40" : "A";
+  return p1s + "-" + p2s;
+}
+
+export function eventString(e) {
+  return eventString(e);
+}
+
+export function getOperatingSystem(window) {
+  let operatingSystem = 'Not known';
+  if (window.navigator.appVersion.indexOf('Win') !== -1) { operatingSystem = 'Windows OS'; }
+  if (window.navigator.appVersion.indexOf('Mac') !== -1) { operatingSystem = 'MacOS'; }
+  if (window.navigator.appVersion.indexOf('X11') !== -1) { operatingSystem = 'UNIX OS'; }
+  if (window.navigator.appVersion.indexOf('Linux') !== -1) { operatingSystem = 'Linux OS'; }
+
+  // return operatingSystem;
+return window.navigator.appVersion;
+}
+
+export function getBrowser(window) {
+  let currentBrowser = 'Not known';
+  if (window.navigator.userAgent.indexOf('Chrome') !== -1) { currentBrowser = 'Google Chrome'; }
+  else if (window.navigator.userAgent.indexOf('Firefox') !== -1) { currentBrowser = 'Mozilla Firefox'; }
+  else if (window.navigator.userAgent.indexOf('MSIE') !== -1) { currentBrowser = 'Internet Exployer'; }
+  else if (window.navigator.userAgent.indexOf('Edge') !== -1) { currentBrowser = 'Edge'; }
+  else if (window.navigator.userAgent.indexOf('Safari') !== -1) { currentBrowser = 'Safari'; }
+  else if (window.navigator.userAgent.indexOf('Opera') !== -1) { currentBrowser = 'Opera'; }
+  else if (window.navigator.userAgent.indexOf('Opera') !== -1) { currentBrowser = 'YaBrowser'; }
+  else { console.log('Others'); }
+
+  return currentBrowser;
+}
+
+export function rotateTeam(team) {
+  team.rotation = team.rotation === 6 ? 1 : team.rotation + 1;
+  for (var i = 0; i < team.currentLineup.length; i++) {
+    const pos = team.currentLineup[i].currentPosition;
+    const newpos = pos === "1" ? "6" : (pos - 1).toString();
+    team.currentLineup[i].currentPosition = newpos;
+  }
+};

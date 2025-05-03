@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import EventItem from "./EventItem";
 
 function EventsList({
@@ -33,7 +33,7 @@ function EventsList({
       for (var match of matches) {
         const tm = team === match.teamA.Name ? match.teamA : match.teamB;
         for (var pl of tm.players) {
-          const plname = pl.FirstName + " " + pl.LastName.toUpperCase();
+          const plname = pl.shirtNumber + ". " + pl.FirstName + " " + pl.LastName.toUpperCase();
           if (plnames.includes(plname) === false) {
             plnames.push(plname);
           }
@@ -51,7 +51,7 @@ function EventsList({
       for (var match of matches) {
         const tm = team === match.teamA.Name ? match.teamB : match.teamA;
         for (var pl of tm.players) {
-          const plname = pl.FirstName + " " + pl.LastName.toUpperCase();
+          const plname = pl.shirtNumber + ". " + pl.FirstName + " " + pl.LastName.toUpperCase();
           if (plnames.includes(plname) === false) {
             plnames.push(plname);
           }
@@ -164,7 +164,7 @@ function EventsList({
           if (
             e.Player &&
             plnames.includes(
-              e.Player.FirstName + " " + e.Player.LastName.toUpperCase()
+              e.Player.shirtNumber + ". " + e.Player.FirstName + " " + e.Player.LastName.toUpperCase()
             ) === false
           )
             continue;

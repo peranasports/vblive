@@ -1,49 +1,46 @@
-import { useEffect, useState, useRef, useLayoutEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { useCookies } from "react-cookie";
-import { sortBy, sortedIndex } from "lodash";
-import playlistIcon from "../assets/passing_001.svg";
-import {
-  Bars3Icon,
-  FunnelIcon,
-  ListBulletIcon,
-  VideoCameraIcon,
-  ChevronDoubleDownIcon,
-  ChevronDoubleUpIcon,
-  SignalIcon,
-  XMarkIcon,
-  ClockIcon,
-  MagnifyingGlassIcon,
-  CloudArrowUpIcon,
-  FilmIcon,
-  PlayIcon,
-  ArrowPathRoundedSquareIcon,
-} from "@heroicons/react/24/outline";
-import Select from "react-select";
-import ReactPlayer from "react-player/lazy";
-import EventsList from "./EventsList";
-import Timing from "./Timing";
-import { toast } from "react-toastify";
-import {
-  getEventInfo,
-  getTimingForEvent,
-  makeFilename,
-  saveToPC,
-  getEventStringColor,
-} from "../utils/Utils";
-import { myzip, myunzip } from "../utils/zip";
-import { DVEventString } from "../utils/DVWFile";
-import { storeSession } from "../../context/VBLiveAPI/VBLiveAPIAction";
-import { useAuthStatus } from "../hooks/useAuthStatus";
-import VideoFilters from "./VideoFilters";
-import { Tooltip } from "react-tooltip";
-import "react-tooltip/dist/react-tooltip.css";
 import {
   Dialog,
   DialogBackdrop,
   DialogPanel,
   TransitionChild,
 } from "@headlessui/react";
+import {
+  ArrowPathRoundedSquareIcon,
+  Bars3Icon,
+  ChevronDoubleDownIcon,
+  ChevronDoubleUpIcon,
+  ClockIcon,
+  CloudArrowUpIcon,
+  FilmIcon,
+  FunnelIcon,
+  ListBulletIcon,
+  PlayIcon,
+  SignalIcon,
+  VideoCameraIcon,
+  XMarkIcon
+} from "@heroicons/react/24/outline";
+import { sortBy } from "lodash";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCookies } from "react-cookie";
+import ReactPlayer from "react-player/lazy";
+import { useLocation, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { Tooltip } from "react-tooltip";
+import "react-tooltip/dist/react-tooltip.css";
+import { storeSession } from "../../context/VBLiveAPI/VBLiveAPIAction";
+import { useAuthStatus } from "../hooks/useAuthStatus";
+import { DVEventString } from "../utils/DVWFile";
+import {
+  getEventInfo,
+  getEventStringColor,
+  getTimingForEvent,
+  makeFilename,
+  saveToPC,
+} from "../utils/Utils";
+import { myzip } from "../utils/zip";
+import EventsList from "./EventsList";
+import Timing from "./Timing";
+import VideoFilters from "./VideoFilters";
 
 function VideoAnalysis() {
   // function VideoAnalysis({ match, selectedGame }) {
@@ -551,10 +548,21 @@ function VideoAnalysis() {
         ? selectedEvent.Drill.match.Guid
         : selectedEvent.Drill.match.dvstring;
     const obj = localStorage.getItem(prefix + "_videoInfo");
-    if (vobj !== null) {
-      var vobj = JSON.parse(obj);
+    var vobj = null;
+    if (obj && obj !== 'undefined') {
+      vobj = JSON.parse(obj);
       vobj.videoOffset = voffset;
       vobj.startVideoTimeSeconds = secondsSinceEpoch;
+    }
+    else {
+      vobj = {
+        matchDVString: matches[0].dvstring,
+        videoOnlineUrl: videoOnlineUrl,
+        videoFileName: null,
+        videoFileObject: null,
+        videoOffset: voffset,
+        startVideoTimeSeconds: secondsSinceEpoch,
+      };
     }
     localStorage.setItem(prefix + "_videoInfo", JSON.stringify(vobj));
     matches[0].videoOffset = voffset;
@@ -564,6 +572,9 @@ function VideoAnalysis() {
     //   videoFileName + "_startVideoTime",
     //   secondsSinceEpoch.toString()
     // );
+    for (var ev of matches[0].events) {
+      ev.VideoPosition = ev.TimeStamp.getTime() / 1000 - selectedEvent.TimeStamp.getTime() / 1000 + voffset;
+    }
     toast.success("Video synched with events!");
   };
 
@@ -668,6 +679,7 @@ function VideoAnalysis() {
     setVideoFileObject(vfo);
     const vfp = URL.createObjectURL(event.target.files[0]);
     setVideoFilePath(vfp);
+    matches[0].videoOnlineUrl = vfp;
     const vfn = event.target.files[0].name;
     setVideoFileName(vfn);
     setVideoOnlineUrl("");
@@ -985,10 +997,10 @@ function VideoAnalysis() {
         const prefix =
           matches[0].app === "VBStats" ? matches[0].Guid : matches[0].dvstring;
         const vobj = localStorage.getItem(prefix + "_videoInfo");
-        if (vobj !== null) {
+        if (!vobj) {
           const vinfo = JSON.parse(vobj);
           setVideoInfo(vobj);
-          if (vinfo.matchDVString === matches[0].dvstring) {
+          if (vinfo?.matchDVString === matches[0].dvstring) {
             setVideoOffset(vinfo.videoOffset);
             setStartVideoTimeSeconds(vinfo.startVideoTimeSeconds);
             if (vinfo.videoOnlineUrl !== null) {
@@ -1034,7 +1046,7 @@ function VideoAnalysis() {
               xpl.FirstName + "_" + xpl.LastName
           ).length === 0
         ) {
-          const plname = xpl.FirstName + " " + xpl.LastName.toUpperCase();
+          const plname = xpl.shirtNumber + ". " + xpl.FirstName + " " + xpl.LastName.toUpperCase();
           plas.push({ value: plas.length, label: plname, guid: plname });
         }
       }
@@ -1046,7 +1058,7 @@ function VideoAnalysis() {
               xpl.FirstName + "_" + xpl.LastName
           ).length === 0
         ) {
-          const plname = xpl.FirstName + " " + xpl.LastName.toUpperCase();
+          const plname = xpl.shirtNumber + ". " + xpl.FirstName + " " + xpl.LastName.toUpperCase();
           plbs.push({ value: plas.length, label: plname, guid: plname });
         }
       }
