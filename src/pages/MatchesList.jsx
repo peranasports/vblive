@@ -680,8 +680,11 @@ function MatchesList({ liveMatches, userEmail }) {
                     </option>
                   ))}
                 </select>
-                <button className="btn-in-form" onClick={() => doNewMatch()}>
+                {/* <button className="btn-in-form" onClick={() => doNewMatch()}>
                   New
+                </button> */}
+                <button className="btn-in-form" onClick={() => doInit()}>
+                  Refresh
                 </button>
               </div>
             </div>
