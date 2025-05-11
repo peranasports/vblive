@@ -1,12 +1,10 @@
+import { orderBy } from "lodash";
 import { useEffect, useRef, useState } from "react";
 import {
-  writeText,
   colourForEfficiency,
   stringToPoint,
-  zoneFromString,
+  writeText
 } from "../utils/Utils";
-import { orderBy } from "lodash";
-import { CartesianAxis } from "recharts";
 
 const zoneorders = [4, 3, 2, 7, 8, 9, 5, 6, 1];
 
@@ -509,7 +507,7 @@ function HittingChart({ matches, events, rows, drawMode, onEventsSelected }) {
     canvas.height = xh;
     // console.log('canvas width, height', canvas.width, canvas.height)
     canvas.style.width = `${window.innerWidth}px`;
-    canvas.style.height = `${window.innerHeight2}px`;
+    canvas.style.height = `${window.innerHeight}px`;
 
     var topmargin = 60;
     var bottommargin = 60;

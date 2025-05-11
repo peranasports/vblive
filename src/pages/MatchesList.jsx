@@ -308,6 +308,7 @@ function MatchesList({ liveMatches, userEmail }) {
         sortAscending: sortAscending,
         searchText: "",
         selectedScreen: selectedScreen,
+        userEmail: firebaseUser?.email,
       })
     );
     forceUpdate((n) => !n);
@@ -343,6 +344,7 @@ function MatchesList({ liveMatches, userEmail }) {
         sortAscending: sortAscending,
         searchText: search,
         selectedScreen: selectedScreen,
+        userEmail: firebaseUser?.email,
       })
     );
     forceUpdate((n) => !n);
@@ -399,7 +401,7 @@ function MatchesList({ liveMatches, userEmail }) {
     } else if (firebaseUser) {
       setLoading(true);
       ms =
-      selscreen === 0
+        selscreen === 0
           ? await fetchAllMyMatches(firebaseUser.email)
           : await fetchAllSharedMatches(firebaseUser.email);
       setLoading(false);
@@ -475,6 +477,7 @@ function MatchesList({ liveMatches, userEmail }) {
         sortAscending: sortAscending,
         searchText: searchText,
         selectedScreen: selscreen,
+        userEmail: firebaseUser?.email,
       })
     );
   };
@@ -483,30 +486,53 @@ function MatchesList({ liveMatches, userEmail }) {
     const storedlist = localStorage.getItem("liveMatches");
     if (storedlist) {
       const liveMatches = JSON.parse(storedlist);
-      // if (liveMatches.selectedScreen === selectedScreen) {
-      setFilteredMatches(liveMatches.filteredMatches);
-      setAllMatches(liveMatches.allMatches);
-      setAllTeams(liveMatches.allTeams);
-      setAllTeamOptions(liveMatches.allTeamOptions);
-      setSelectedTeamOption(liveMatches.selectedTeamOption);
-      setSelectedTeamName(liveMatches.selectedTeamName);
-      setSelectedTeam(liveMatches.selectedTeam);
-      setSortColumn(liveMatches.sortColumn);
-      setSortAscending(liveMatches.sortAscending);
-      setSearchText(liveMatches.searchText);
-      setSelectedScreen(liveMatches.selectedScreen);
-      setLoading(false);
-      forceUpdate((n) => !n);
-      // return;
-      // }
+      if (liveMatches.userEmail === firebaseUser?.email) {
+        setFilteredMatches(liveMatches.filteredMatches);
+        setAllMatches(liveMatches.allMatches);
+        setAllTeams(liveMatches.allTeams);
+        setAllTeamOptions(liveMatches.allTeamOptions);
+        setSelectedTeamOption(liveMatches.selectedTeamOption);
+        setSelectedTeamName(liveMatches.selectedTeamName);
+        setSelectedTeam(liveMatches.selectedTeam);
+        setSortColumn(liveMatches.sortColumn);
+        setSortAscending(liveMatches.sortAscending);
+        setSearchText(liveMatches.searchText);
+        setSelectedScreen(liveMatches.selectedScreen);
+        setLoading(false);
+        forceUpdate((n) => !n);
+      } else if (firebaseUser) {
+        doInit(selectedScreen);
+      }
     } else {
       doInit(selectedScreen);
     }
   }, []);
 
-  // useEffect(() => {
-  //   doInit();
-  // }, [selectedScreen, firebaseUser]);
+  useEffect(() => {
+    const storedlist = localStorage.getItem("liveMatches");
+    if (storedlist) {
+      const liveMatches = JSON.parse(storedlist);
+      if (liveMatches.userEmail === firebaseUser?.email) {
+        setFilteredMatches(liveMatches.filteredMatches);
+        setAllMatches(liveMatches.allMatches);
+        setAllTeams(liveMatches.allTeams);
+        setAllTeamOptions(liveMatches.allTeamOptions);
+        setSelectedTeamOption(liveMatches.selectedTeamOption);
+        setSelectedTeamName(liveMatches.selectedTeamName);
+        setSelectedTeam(liveMatches.selectedTeam);
+        setSortColumn(liveMatches.sortColumn);
+        setSortAscending(liveMatches.sortAscending);
+        setSearchText(liveMatches.searchText);
+        setSelectedScreen(liveMatches.selectedScreen);
+        setLoading(false);
+        forceUpdate((n) => !n);
+      } else if (firebaseUser) {
+        doInit(selectedScreen);
+      }
+    } else {
+      doInit(selectedScreen);
+    }
+  }, [firebaseUser]);
 
   const makeDate = (seconds) => {
     const dt = new Date(seconds * 1000);

@@ -1,32 +1,26 @@
 import { PercentColours } from "../utils/PercentColours";
 import { getEventDescription } from "../utils/PSVBFile";
 import {
-  kSkillServe,
-  kSkillPass,
-  kSkillSet,
-  kSkillSpike,
   kSkillBlock,
-  kSkillDefense,
-  kSkillFreeball,
-  kSkillCover,
   kSkillCoachTag,
+  kSkillDefense,
+  kSkillPass
 } from "./Constants";
 
 import {
-  kSubstitution,
-  kSkillCommentary,
-  kOppositionScore,
-  kOppositionHitKill,
-  kOppositionServeAce,
-  kSkillTimeout,
-  kSkillTechTimeout,
-  kSkillSettersCall,
-  kOppositionServeError,
-  kOppositionError,
-  kOppositionHitError,
-  createStatsItem,
   addStatsItem,
   calculateAllStats,
+  createStatsItem,
+  kOppositionError,
+  kOppositionHitError,
+  kOppositionHitKill,
+  kOppositionScore,
+  kOppositionServeAce,
+  kOppositionServeError,
+  kSkillCommentary,
+  kSkillTechTimeout,
+  kSkillTimeout,
+  kSubstitution
 } from "../utils/StatsItem";
 import { DVEventString } from "./DVWFile";
 

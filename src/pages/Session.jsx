@@ -152,7 +152,7 @@ function Session() {
       if (mx.videoOffset && mx.videoOnlineUrl !== -1) {
         const firstev = mx.events[0];
         for (var ev of mx.events) {
-          ev.VideoPosition = ev.TimeStamp.getTime() / 1000 - firstev.TimeStamp.getTime() / 1000 + mx.videoOffset;
+          ev.VideoPosition = ev.TimeStamp?.getTime() / 1000 - firstev.TimeStamp?.getTime() / 1000 + mx.videoOffset;
         }
       }
       setInDatabase(indb);
