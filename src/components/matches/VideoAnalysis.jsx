@@ -8,7 +8,11 @@ import {
   ArrowPathRoundedSquareIcon,
   Bars3Icon,
   ChevronDoubleDownIcon,
+  ChevronDoubleLeftIcon,
+  ChevronDoubleRightIcon,
   ChevronDoubleUpIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
   ClockIcon,
   CloudArrowUpIcon,
   FilmIcon,
@@ -17,7 +21,7 @@ import {
   PlayIcon,
   SignalIcon,
   VideoCameraIcon,
-  XMarkIcon
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { sortBy } from "lodash";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
@@ -94,6 +98,7 @@ function VideoAnalysis() {
   const [videoWidth, setVideoWidth] = useState(0);
   const [windowHeight, setWindowHeight] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [videoProgress, setVideoProgress] = useState(0);
 
   const eventTypes = [
     { value: 0, label: "All Types" },
@@ -486,10 +491,15 @@ function VideoAnalysis() {
       setSelectedEvent(ev);
       const tm = getTimingForEvent(ev);
       if (startVideoTimeSeconds !== null && videoOffset !== null) {
-        const secondsSinceEpoch = Math.round(ev.TimeStamp.getTime() / 1000);
-        const loc =
-          secondsSinceEpoch - startVideoTimeSeconds + videoOffset - tm.leadTime;
-        playerRef.current.seekTo(loc, "seconds");
+        if (ev.TimeStamp) {
+          const secondsSinceEpoch = Math.round(ev.TimeStamp?.getTime() / 1000);
+          const loc =
+            secondsSinceEpoch -
+            startVideoTimeSeconds +
+            videoOffset -
+            tm.leadTime;
+          playerRef.current.seekTo(loc, "seconds");
+        }
       } else {
         if (ev.VideoPosition !== undefined && ev.VideoPosition !== 0) {
           playerRef.current.seekTo(ev.VideoPosition - tm.leadTime, "seconds");
@@ -549,12 +559,11 @@ function VideoAnalysis() {
         : selectedEvent.Drill.match.dvstring;
     const obj = localStorage.getItem(prefix + "_videoInfo");
     var vobj = null;
-    if (obj && obj !== 'undefined') {
+    if (obj && obj !== "undefined") {
       vobj = JSON.parse(obj);
       vobj.videoOffset = voffset;
       vobj.startVideoTimeSeconds = secondsSinceEpoch;
-    }
-    else {
+    } else {
       vobj = {
         matchDVString: matches[0].dvstring,
         videoOnlineUrl: videoOnlineUrl,
@@ -573,7 +582,10 @@ function VideoAnalysis() {
     //   secondsSinceEpoch.toString()
     // );
     for (var ev of matches[0].events) {
-      ev.VideoPosition = ev.TimeStamp.getTime() / 1000 - selectedEvent.TimeStamp.getTime() / 1000 + voffset;
+      ev.VideoPosition =
+        ev.TimeStamp?.getTime() / 1000 -
+        selectedEvent.TimeStamp?.getTime() / 1000 +
+        voffset;
     }
     toast.success("Video synched with events!");
   };
@@ -1046,7 +1058,12 @@ function VideoAnalysis() {
               xpl.FirstName + "_" + xpl.LastName
           ).length === 0
         ) {
-          const plname = xpl.shirtNumber + ". " + xpl.FirstName + " " + xpl.LastName.toUpperCase();
+          const plname =
+            xpl.shirtNumber +
+            ". " +
+            xpl.FirstName +
+            " " +
+            xpl.LastName.toUpperCase();
           plas.push({ value: plas.length, label: plname, guid: plname });
         }
       }
@@ -1058,7 +1075,12 @@ function VideoAnalysis() {
               xpl.FirstName + "_" + xpl.LastName
           ).length === 0
         ) {
-          const plname = xpl.shirtNumber + ". " + xpl.FirstName + " " + xpl.LastName.toUpperCase();
+          const plname =
+            xpl.shirtNumber +
+            ". " +
+            xpl.FirstName +
+            " " +
+            xpl.LastName.toUpperCase();
           plbs.push({ value: plas.length, label: plname, guid: plname });
         }
       }
@@ -1417,9 +1439,7 @@ function VideoAnalysis() {
             )}
           </div>
         </div>
-        <div
-          className="overflow-y-auto h-[calc(100vh-40px)]"
-        >
+        <div className="overflow-y-auto h-[calc(100vh-40px)]">
           <div className="">
             <EventsList
               matches={matches}
@@ -1510,7 +1530,7 @@ function VideoAnalysis() {
                     <label className="label ml-4">
                       <span className="label-text text-base-content/50">
                         {videoFileName === null
-                          ? "local video not selected"
+                          ? "..."
                           : videoFileName}
                       </span>
                     </label>
@@ -1624,6 +1644,96 @@ function VideoAnalysis() {
             {matches.length === 1 ? (
               <div className="flex justify-between">
                 <div className="flex gap-2">
+                  <div
+                    id="video-controls"
+                    className="flex gap-1 h-10 w-full px-2 bg-base-100"
+                  >
+                    <a
+                      data-tooltip-id="tt-back10"
+                      data-tooltip-content="Rewind 10 seconds"
+                    >
+                      <ChevronDoubleLeftIcon
+                        className="btn-toolbar"
+                        onClick={() => {
+                          const newTime = videoProgress - 10;
+                          setVideoProgress(newTime);
+                          playerRef.current.seekTo(newTime);
+                        }}
+                      />
+                    </a>
+                    <Tooltip
+                      id="tt-back10"
+                      place={"bottom-start"}
+                      style={{
+                        backgroundColor: "oklch(var(--b3))",
+                        color: "oklch(var(--bc))",
+                      }}
+                    />
+                    <a
+                      data-tooltip-id="tt-back1"
+                      data-tooltip-content="Rewind 1 second"
+                    >
+                      <ChevronLeftIcon
+                        className="btn-toolbar"
+                        onClick={() => {
+                          const newTime = videoProgress - 1;
+                          setVideoProgress(newTime);
+                          playerRef.current.seekTo(newTime);
+                        }}
+                      />
+                    </a>
+                    <Tooltip
+                      id="tt-back1"
+                      place={"bottom-start"}
+                      style={{
+                        backgroundColor: "oklch(var(--b3))",
+                        color: "oklch(var(--bc))",
+                      }}
+                    />
+                    <a
+                      data-tooltip-id="tt-forward1"
+                      data-tooltip-content="Forward 1 second"
+                    >
+                      <ChevronRightIcon
+                        className="btn-toolbar"
+                        onClick={() => {
+                          const newTime = videoProgress + 1;
+                          setVideoProgress(newTime);
+                          playerRef.current.seekTo(newTime);
+                        }}
+                      />
+                    </a>
+                    <Tooltip
+                      id="tt-forward1"
+                      place={"bottom-start"}
+                      style={{
+                        backgroundColor: "oklch(var(--b3))",
+                        color: "oklch(var(--bc))",
+                      }}
+                    />
+                    <a
+                      data-tooltip-id="tt-forward10"
+                      data-tooltip-content="Forward 10 seconds"
+                    >
+                      <ChevronDoubleRightIcon
+                        className="btn-toolbar"
+                        onClick={() => {
+                          const newTime = videoProgress + 10;
+                          setVideoProgress(newTime);
+                          playerRef.current.seekTo(newTime);
+                        }}
+                      />
+                    </a>
+                    <Tooltip
+                      id="tt-forward10"
+                      place={"bottom-start"}
+                      style={{
+                        backgroundColor: "oklch(var(--b3))",
+                        color: "oklch(var(--bc))",
+                      }}
+                    />
+                  </div>
+
                   <a
                     data-tooltip-id="tt-timing"
                     data-tooltip-content="Set timing for events"
@@ -1635,13 +1745,14 @@ function VideoAnalysis() {
                   </a>
                   <Tooltip
                     id="tt-timing"
-                    place={"bottom-near"}
+                    place={"bottom-start"}
                     style={{
                       backgroundColor: "oklch(var(--b3))",
                       color: "oklch(var(--bc))",
                     }}
                   />
                 </div>
+
                 {videoOffset !== 0 ? (
                   <></>
                 ) : (

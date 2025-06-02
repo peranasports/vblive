@@ -1,4 +1,4 @@
-import { useState, useReducer, useEffect } from 'react'
+import { useEffect } from 'react'
 
 function MultiChoice({ filter, handleOptionChanged }) {
 
@@ -137,13 +137,13 @@ function MultiChoice({ filter, handleOptionChanged }) {
                                     <input
                                         key={Math.random()}
                                         type="checkbox"
-                                        id={`custom-checkbox-${index}`}
+                                        id={`custom-checkbox-${filter.title}-${item.name}`}
                                         name={item.name}
                                         value={item.name}
-                                        defaultChecked={item.selected}
+                                        checked={item.selected}
                                         onChange={() => toggleOptionSelect(item)}
                                     />
-                                    <label className='text-base-400 text-xs ml-2' htmlFor={`custom-checkbox-${index}`}>{item.name.toUpperCase()}</label>
+                                    <label className='text-base-content text-xs ml-2' htmlFor={`custom-checkbox-${filter.title}-${item.name}`}>{item.name.toUpperCase()}</label>
                                 </div>
                                 <div className="right-section text-red-700 text-xs">{item.amount > 0 ? item.amount : ""}</div>
                             </div>

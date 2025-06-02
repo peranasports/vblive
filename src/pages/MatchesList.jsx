@@ -7,7 +7,7 @@ import {
   VideoCameraIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { confirmAlert } from "react-confirm-alert";
 import "react-confirm-alert/src/react-confirm-alert.css";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -706,9 +706,9 @@ function MatchesList({ liveMatches, userEmail }) {
                     </option>
                   ))}
                 </select>
-                {/* <button className="btn-in-form" onClick={() => doNewMatch()}>
+                <button className="btn-in-form" onClick={() => doNewMatch()}>
                   New
-                </button> */}
+                </button>
                 <button className="btn-in-form" onClick={() => doInit()}>
                   Refresh
                 </button>
