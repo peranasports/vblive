@@ -52,7 +52,7 @@ function Session() {
   const { session, appName, loading, dispatch } = useContext(VBLiveAPIContext);
   const location = useLocation();
   const { sessionId, dvwFileData, psvbFileData, filename, msession } =
-    location?.state;
+    getSessionState(location?.state);
   const { currentUser } = useAuthStatus();
   const params = useParams();
   const [match, setMatch] = useState(null);
@@ -137,6 +137,23 @@ function Session() {
     setCounter(0);
   }, [sessionId, selectedTeam]);
 
+  function getLastState() {
+    const lst = localStorage.getItem("lastStateForSession");
+    if (lst) {
+      return JSON.parse(lst);
+    }
+    return {};
+  };
+
+  function getSessionState(st) {
+    if (st) {
+      localStorage.setItem("lastStateForSession", JSON.stringify(st));
+      return st;
+    } else {
+      return getLastState();
+    }
+  };
+
   useEffect(() => {
     const indb = msession && msession.id ? true : false;
     if (dvwFileData !== undefined && dvwFileData !== null) {
@@ -149,7 +166,7 @@ function Session() {
       mx.videoOnlineUrl = msession && msession.videoOnlineUrl;
       mx.videoStartTimeSeconds = msession && msession.videoStartTimeSeconds;
       mx.videoOffset = msession && msession.videoOffset;
-      if (mx.videoOffset && mx.videoOnlineUrl !== -1) {
+      if (mx.videoOffset && mx.videoOffset !== -1 && mx.videoOnlineUrl !== -1) {
         const firstev = mx.events[0];
         for (var ev of mx.events) {
           ev.VideoPosition = ev.TimeStamp?.getTime() / 1000 - firstev.TimeStamp?.getTime() / 1000 + mx.videoOffset;

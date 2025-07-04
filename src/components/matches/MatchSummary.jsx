@@ -2,6 +2,7 @@ import {
   Bars4Icon,
   FolderArrowDownIcon,
   FolderIcon,
+  PencilSquareIcon,
   TvIcon,
   WifiIcon
 } from "@heroicons/react/24/outline";
@@ -32,7 +33,7 @@ function MatchSummary({
     { name: "Live", index: 1, icon: WifiIcon, link: "/live" },
     { name: "Import", index: 2, icon: FolderArrowDownIcon, link: "/input" },
     { name: "Play Lists", index: 3, icon: TvIcon, link: "/playlistslist" },
-    // { name: "New Match", index: 4, icon: PencilSquareIcon, link: "/codingpage" },
+    { name: "New Match", index: 4, icon: PencilSquareIcon, link: "/codingpage" },
   ];
 
   const doSelectMenu = (index) => {

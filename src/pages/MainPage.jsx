@@ -16,6 +16,7 @@ import {
   Cog6ToothIcon,
   FolderArrowDownIcon,
   FolderIcon,
+  PencilSquareIcon,
   TvIcon,
   WifiIcon,
   XMarkIcon
@@ -39,7 +40,7 @@ const navigation = [
   { name: "Live", index: 1, icon: WifiIcon, current: false },
   { name: "Import", index: 2, icon: FolderArrowDownIcon, current: false },
   { name: "Play Lists", index: 3, icon: TvIcon, current: false },
-  // { name: "New Match", index: 4, icon: PencilSquareIcon, current: false },
+  { name: "New Match", index: 4, icon: PencilSquareIcon, current: false },
 ];
 const teams = [
   //   { id: 1, name: "Heroicons", index: 10, initial: "H", current: false },
