@@ -45,6 +45,7 @@ function MatchesList({ liveMatches, userEmail }) {
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [selectedTeamName, setSelectedTeamName] = useState("");
   const [selectedScreen, setSelectedScreen] = useState(0);
+  const [matchesList, setMatchesList] = useState(0);
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [searchText, setSearchText] = useState("");
   const [sortColumn, setSortColumn] = useState(4);
@@ -380,6 +381,11 @@ function MatchesList({ liveMatches, userEmail }) {
     //     return;
     //   // }
     // }
+    if (selscreen !== undefined && selscreen !== null) {
+      setMatchesList(selscreen);
+    } else {
+      selscreen = matchesList;
+    }
     var ms = [];
     if (liveMatches && liveMatches.length > 0) {
       for (var m of liveMatches) {
